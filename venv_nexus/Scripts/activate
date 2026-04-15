@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\51581906\OneDrive - SENAC PA - EDU\PISenac\nexus\venv_nexus"
+VIRTUAL_ENV="C:\nexus\venv_nexus"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
