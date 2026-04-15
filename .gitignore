@@ -1,0 +1,13 @@
+# Ambiente Virtual
+venv_nexus/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Banco de dados local
+db.sqlite3
+
+# Arquivos do sistema e IDE
+.vscode/
+.DS_Store
