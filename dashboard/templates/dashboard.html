@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0f172a;
+            color: #fff;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background: #020617;
+            position: fixed;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .sidebar li:hover {
+            background: #1e293b;
+        }
+
+        /* HEADER */
+        .header {
+            margin-left: 220px;
+            padding: 20px;
+            background: #020617;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info span {
+            font-weight: 500;
+            color: #10b981;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .profile-btn, .logout-btn {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid #10b981;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover, .logout-btn:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        /* MAIN */
+        .main {
+            margin-left: 220px;
+            padding: 20px;
+        }
+
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .card h3 {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .card p {
+            font-size: 22px;
+            margin-top: 10px;
+        }
+
+        /* GRID DASHBOARD */
+        .grid {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .box {
+            background: #020617;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* FAKE GRAPH */
+        .graph {
+            height: 150px;
+            background: linear-gradient(to top, #10b98155, transparent);
+            border-radius: 8px;
+        }
+
+        /* LIST */
+        .list {
+            margin-top: 10px;
+        }
+
+        .list div {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #1e293b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2>Nexus Shop</h2>
+        <ul>
+            <li>Painel</li>
+            <li>Pedidos</li>
+            <li>Clientes</li>
+            <li>Gerência</li>
+        </ul>
+    </div>
+
+    <div class="header">
+        <div>Dashboard</div>
+        <div class="user-info">
+            <span>Bem-vindo, {{ user.get_full_name|default:user.username }}!</span>
+            <div class="user-actions">
+                <a href="{% url 'profile' %}" class="profile-btn">Perfil</a>
+                <a href="{% url 'logout' %}" class="logout-btn">Sair</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="cards">
+            <div class="card">
+                <h3>Receita Total</h3>
+                <p>R$ {{ receita }}</p>
+            </div>
+            <div class="card">
+                <h3>Vendas do Mês</h3>
+                <p>{{ vendas }}</p>
+            </div>
+            <div class="card">
+                <h3>Novos Clientes</h3>
+                <p>{{ clientes }}</p>
+            </div>
+            <div class="card">
+                <h3>Avisos</h3>
+                <p>{{ avisos }} itens</p>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="box">
+                <h3>Desempenho de Vendas</h3>
+                <div class="graph"></div>
+            </div>
+
+            <div class="box">
+                <h3>Melhores Produtos</h3>
+                <div class="list">
+                    {% for produto in produtos %}
+                    <div>
+                        <span>{{ produto.nome }}</span>
+                        <span>{{ produto.quantidade }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

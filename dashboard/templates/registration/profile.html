@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil - Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .profile-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #10b981;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-role {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .info-section {
+            margin-bottom: 2rem;
+        }
+
+        .info-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #10b981;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .stats-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Nexus - Perfil</h1>
+        <nav class="nav-links">
+            <a href="{% url 'home' %}">Dashboard</a>
+            <a href="{% url 'logout' %}">Sair</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    {{ user.get_full_name|first|upper|default:user.username|first|upper }}
+                </div>
+                <h2 class="profile-name">{{ user.get_full_name|default:user.username }}</h2>
+                <p class="profile-role">Usuário do Sistema</p>
+            </div>
+
+            <div class="info-section">
+                <h3>Informações Pessoais</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Nome de Usuário</div>
+                        <div class="info-value">{{ user.username }}</div>
+                    </div>
+
+                    {% if user.first_name %}
+                    <div class="info-item">
+                        <div class="info-label">Primeiro Nome</div>
+                        <div class="info-value">{{ user.first_name }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if user.last_name %}
+                    <div class="info-item">
+                        <div class="info-label">Sobrenome</div>
+                        <div class="info-value">{{ user.last_name }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if user.email %}
+                    <div class="info-item">
+                        <div class="info-label">E-mail</div>
+                        <div class="info-value">{{ user.email }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Informações da Conta</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Data de Cadastro</div>
+                        <div class="info-value">{{ user.date_joined|date:"d/m/Y H:i" }}</div>
+                    </div>
+
+                    {% if user.last_login %}
+                    <div class="info-item">
+                        <div class="info-label">Último Acesso</div>
+                        <div class="info-value">{{ user.last_login|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="info-item">
+                        <div class="info-label">Status da Conta</div>
+                        <div class="info-value">
+                            {% if user.is_active %}
+                                <span style="color: #10b981;">Ativa</span>
+                            {% else %}
+                                <span style="color: #dc3545;">Inativa</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Superusuário</div>
+                        <div class="info-value">
+                            {% if user.is_superuser %}
+                                <span style="color: #10b981;">Sim</span>
+                            {% else %}
+                                <span style="color: #666;">Não</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h3>Estatísticas da Conta</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">{{ user.date_joined|timesince }}</div>
+                    <div class="stat-label">Tempo de Cadastro</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-number">{% if user.last_login %}{{ user.last_login|timesince }}{% else %}Nunca{% endif %}</div>
+                    <div class="stat-label">Último Login</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-number">{{ user.groups.count }}</div>
+                    <div class="stat-label">Grupos</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-number">{{ user.user_permissions.count }}</div>
+                    <div class="stat-label">Permissões</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
