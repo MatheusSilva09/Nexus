@@ -26,4 +26,5 @@ urlpatterns = [
     path('accounts/profile/', views.profile, name='profile'),
     path('nexus/', include('dashboard.urls')),
     path('', include('dashboard.urls')),
+    path('estoque/excluir/<int:produto_id>/', views.excluir_produto, name='excluir_produto'),
 ]

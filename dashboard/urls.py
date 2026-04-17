@@ -2,15 +2,13 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Rota principal do painel (Nexus Control)
     path('', views.home, name='home'),
-    
-    # Rota para a listagem de estoque
     path('estoque/', views.lista_estoque, name='lista_estoque'),
     
-    # Rota para atualizar a quantidade (recebe o ID do produto)
-    path('estoque/atualizar/<int:produto_id>/', views.atualizar_quantidade_estoque, name='atualizar_estoque'),
+    # Nova rota para o formulário manual que você criou
+    path('estoque/novo/', views.adicionar_produto, name='adicionar_produto'),
     
-    # Rota para o checkout (Nexus Shop)
+    path('estoque/atualizar/<int:produto_id>/', views.atualizar_quantidade_estoque, name='atualizar_estoque'),
     path('checkout/finalizar/', views.finalizar_pedido, name='finalizar_pedido'),
+    path('estoque/editar/<int:produto_id>/', views.editar_produto, name='editar_produto'),
 ]

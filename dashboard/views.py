@@ -125,3 +125,29 @@ def adicionar_produto(request):
         return redirect('lista_estoque')
 
     return render(request, 'produto_form.html')
+
+@login_required
+def excluir_produto(request, produto_id):
+    # Buscamos o produto garantindo que ele pertence ao usuário logado (segurança!)
+    produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
+    produto.delete()
+    return redirect('lista_estoque')
+
+@login_required
+def editar_produto(request, produto_id):
+    # 1. Busca o produto original no banco
+    produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
+
+    if request.method == 'POST':
+        # 2. Captura os novos dados do formulário
+        produto.nome = request.POST.get('nome')
+        produto.preco = request.POST.get('preco')
+        produto.estoque = request.POST.get('estoque')
+        produto.estoque_minimo = request.POST.get('estoque_minimo')
+        
+        # 3. Salva as alterações
+        produto.save()
+        return redirect('lista_estoque')
+
+    # 4. Se for GET, envia o produto para o formulário já vir preenchido
+    return render(request, 'produto_editar.html', {'produto': produto})

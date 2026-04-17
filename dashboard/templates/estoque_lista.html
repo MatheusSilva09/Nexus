@@ -22,7 +22,18 @@
                     <span style="color: green;">Normal</span>
                 {% endif %}
             </td>
+            <td>
+                <a href="{% url 'excluir_produto' produto.id %}" 
+                onclick="return confirm('Tem certeza que deseja excluir o produto {{ produto.nome }}?')" 
+                style="color: red; text-decoration: none; font-weight: bold;">
+                [Excluir]
+                <a href="{% url 'editar_produto' produto.id %}" style="color: blue; margin-right: 10px;">[Editar]</a>
+                </a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
+    <a href="{% url 'adicionar_produto' %}">
+        <button type="button">+ Cadastrar Novo Produto</button>
+    </a>
 </table>
