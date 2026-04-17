@@ -53,6 +53,10 @@ class Produto(models.Model):
     estoque = models.IntegerField(default=0)
     ativo = models.BooleanField(default=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
+    estoque_minimo = models.PositiveIntegerField(default=5)
+
+    def precisa_repor(self):
+        return self.estoque <= self.estoque_minimo
 
     def __str__(self):
         return self.nome

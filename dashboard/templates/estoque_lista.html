@@ -1,0 +1,28 @@
+<h2>Gerenciamento de Estoque - Nexus Control</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Produto</th>
+            <th>Preço</th>
+            <th>Estoque Atual</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for produto in produtos %}
+        <tr>
+            <td>{{ produto.nome }}</td>
+            <td>R$ {{ produto.preco }}</td>
+            <td>{{ produto.estoque }}</td>
+            <td>
+                {% if produto.estoque <= 5 %}
+                    <span style="color: red;">Repor Urgente</span>
+                {% else %}
+                    <span style="color: green;">Normal</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
