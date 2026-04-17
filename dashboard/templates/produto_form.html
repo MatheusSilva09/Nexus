@@ -1,26 +1,21 @@
-<h2>Cadastrar Novo Produto - Nexus</h2>
+{% extends 'base.html' %}
 
-<form method="POST">
-    {% csrf_token %} <div>
-        <label>Nome do Produto:</label>
-        <input type="text" name="nome" required>
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 card shadow p-4">
+        <h3 class="mb-4">Novo Produto</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Nome</label>
+                <input type="text" name="nome" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Preço</label>
+                <input type="number" step="0.01" name="preco" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Salvar</button>
+        </form>
     </div>
-
-    <div>
-        <label>Preço:</label>
-        <input type="number" step="0.01" name="preco" required>
-    </div>
-
-    <div>
-        <label>Quantidade em Estoque:</label>
-        <input type="number" name="estoque" required>
-    </div>
-
-    <div>
-        <label>Alerta de Estoque Mínimo:</label>
-        <input type="number" name="estoque_minimo" value="5">
-    </div>
-
-    <button type="submit">Salvar Produto</button>
-    <a href="{% url 'lista_estoque' %}">Cancelar</a>
-</form>
+</div>
+{% endblock %}

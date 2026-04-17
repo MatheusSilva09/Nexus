@@ -1,39 +1,44 @@
-<h2>Gerenciamento de Estoque - Nexus Control</h2>
+{% extends 'base.html' %}
 
-<table border="1">
-    <thead>
-        <tr>
-            <th>Produto</th>
-            <th>Preço</th>
-            <th>Estoque Atual</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for produto in produtos %}
-        <tr>
-            <td>{{ produto.nome }}</td>
-            <td>R$ {{ produto.preco }}</td>
-            <td>{{ produto.estoque }}</td>
-            <td>
-                {% if produto.estoque <= 5 %}
-                    <span style="color: red;">Repor Urgente</span>
-                {% else %}
-                    <span style="color: green;">Normal</span>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'excluir_produto' produto.id %}" 
-                onclick="return confirm('Tem certeza que deseja excluir o produto {{ produto.nome }}?')" 
-                style="color: red; text-decoration: none; font-weight: bold;">
-                [Excluir]
-                <a href="{% url 'editar_produto' produto.id %}" style="color: blue; margin-right: 10px;">[Editar]</a>
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-    <a href="{% url 'adicionar_produto' %}">
-        <button type="button">+ Cadastrar Novo Produto</button>
-    </a>
-</table>
+{% block title %}Estoque - Nexus{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gerenciamento de Estoque</h2>
+        <a href="{% url 'adicionar_produto' %}" class="btn btn-success">+ Novo Produto</a>
+    </div>
+
+    <table class="table table-striped table-hover shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>Produto</th>
+                <th>Preço</th>
+                <th>Estoque Atual</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr>
+                <td>{{ produto.nome }}</td>
+                <td>R$ {{ produto.preco }}</td>
+                <td>{{ produto.estoque }}</td>
+                <td>
+                    {% if produto.estoque <= produto.estoque_minimo %}
+                        <span class="badge bg-danger">Repor Urgente</span>
+                    {% else %}
+                        <span class="badge bg-success">Normal</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'editar_produto' produto.id %}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{% url 'excluir_produto' produto.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Excluir?')">Excluir</a>
+                    <a href="{% url 'realizar_venda' produto.id %}" class="btn btn-sm btn-outline-success">Vender</a>
+    </td>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Registrar Venda: {{ produto.nome }}</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Estoque atual:</strong> {{ produto.estoque }} unidades</p>
+                
+                {% if erro %}
+                    <div class="alert alert-danger">{{ erro }}</div>
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Quantidade vendida:</label>
+                        <input type="number" name="quantidade" class="form-control" value="1" min="1" max="{{ produto.estoque }}">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Confirmar Venda</button>
+                    <a href="{% url 'lista_estoque' %}" class="btn btn-outline-secondary w-100 mt-2">Voltar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

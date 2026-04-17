@@ -151,3 +151,50 @@ def editar_produto(request, produto_id):
 
     # 4. Se for GET, envia o produto para o formulário já vir preenchido
     return render(request, 'produto_editar.html', {'produto': produto})
+
+@login_required
+def realizar_venda(request, produto_id):
+    produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
+    
+    if request.method == 'POST':
+        quantidade_vendida = int(request.POST.get('quantidade', 1))
+        
+        if produto.estoque >= quantidade_vendida:
+            produto.estoque -= quantidade_vendida
+            produto.save()
+            # Aqui poderíamos criar um objeto "Venda" para o relatório depois
+            return redirect('lista_estoque')
+        else:
+            # Caso o vendedor tente vender mais do que tem
+            erro = "Estoque insuficiente!"
+            return render(request, 'venda_form.html', {'produto': produto, 'erro': erro})
+
+    return render(request, 'venda_form.html', {'produto': produto})
+
+from django.db.models import Sum, F
+
+@login_required
+def home(request):
+    # Pega apenas os produtos da loja do usuário logado
+    produtos_loja = Produto.objects.filter(loja__vendedor__usuario=request.user)
+
+    # 1. Valor Total em Estoque (Soma de Preço * Quantidade de cada item)
+    # Usamos aggregate para fazer o cálculo direto no banco de dados (mais rápido)
+    total_estoque = produtos_loja.aggregate(
+        total=Sum(F('preco') * F('estoque'))
+    )['total'] or 0
+
+    # 2. Itens com Estoque Baixo (Avisos)
+    avisos = produtos_loja.filter(estoque__lte=F('estoque_minimo')).count()
+
+    # 3. Quantidade total de itens cadastrados
+    total_itens = produtos_loja.count()
+
+    context = {
+        'receita': total_estoque, # Valor patrimonial em estoque
+        'vendas': total_itens,    # Quantidade de SKUs diferentes
+        'avisos': avisos,
+        'produtos': produtos_loja[:5], # Pega os 5 primeiros para a lista lateral
+    }
+
+    return render(request, 'dashboard.html', context)
