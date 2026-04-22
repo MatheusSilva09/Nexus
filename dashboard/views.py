@@ -2,21 +2,40 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Sum, F
+from django.contrib.auth.decorators import user_passes_test
 from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho
 
 # --- DASHBOARD ---
 
 @login_required
 def home(request):
-    produtos_loja = Produto.objects.filter(loja__vendedor__usuario=request.user)
+    perfil = request.user.perfil
+
+    
+    
+    # Lógica de autoridade: O Hub vê tudo, o Vendedor vê sua loja
+    if perfil.nivel == 'ADMIN':
+        produtos_loja = Produto.objects.all()  # Acesso total
+    else:
+        # Garante que o vendedor veja apenas sua própria loja
+        produtos_loja = Produto.objects.filter(loja=perfil.loja)
+
+    # Cálculo das métricas (funciona para ambos, com filtros diferentes)
     total_estoque = produtos_loja.aggregate(total=Sum(F('preco') * F('estoque')))['total'] or 0
     avisos = produtos_loja.filter(estoque__lte=F('estoque_minimo')).count()
+    
     context = {
         'receita': total_estoque,
         'vendas': produtos_loja.count(),
         'avisos': avisos,
         'produtos': produtos_loja[:5],
+        'nivel': perfil.nivel, # Útil para exibir elementos diferentes no HTML (ex: botão de 'Gestão Global')
     }
+    if not hasattr(request.user, 'perfil'):
+        # Opção: criar um perfil padrão automaticamente ou avisar o usuário
+        return render(request, 'erro.html', {'msg': 'Seu usuário não possui um perfil configurado.'})
+    
+    perfil = request.user.perfil
     return render(request, 'dashboard.html', context)
 
 @login_required
@@ -144,3 +163,12 @@ def adicionar_cliente(request):
         )
         return redirect('lista_clientes')
     return render(request, 'cliente_form.html')
+
+def is_nexus_hub(user):
+    return user.is_superuser or user.perfil.nivel == 'ADMIN'
+
+@user_passes_test(is_nexus_hub)
+def relatorio_global(request):
+    perfil = request.user.perfil
+    if perfil.nivel != 'ADMIN':
+        return redirect('home')

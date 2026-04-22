@@ -1,11 +1,11 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
 
 # --- CORE E PERFIS ---
 
 class Vendedor(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    # Removi nome_loja daqui, pois agora está centralizado na tabela Loja
     telefone = models.CharField(max_length=20)
     STATUS_CHOICES = [
         ('pendente', 'Pendente'),
@@ -19,7 +19,6 @@ class Vendedor(models.Model):
         return f"Vendedor: {self.usuario.username}"
 
 class Loja(models.Model):
-    # OneToOne garante que 1 Vendedor = 1 Loja
     vendedor = models.OneToOneField(Vendedor, on_delete=models.CASCADE, related_name='loja')
     nome = models.CharField(max_length=255)
     descricao = models.TextField()
@@ -28,7 +27,6 @@ class Loja(models.Model):
         return self.nome
 
 class Cliente(models.Model):
-    # Relaciona o cliente à loja que o cadastrou
     loja = models.ForeignKey(Loja, on_delete=models.CASCADE)
     nome = models.CharField(max_length=100)
     email = models.EmailField(blank=True, null=True)
@@ -37,6 +35,16 @@ class Cliente(models.Model):
 
     def __str__(self):
         return self.nome
+    
+class Perfil(models.Model):
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    NIVEL_ACESSO = (
+        ('ADMIN', 'Nexus Hub'),    # Acesso total
+        ('VENDEDOR', 'Vendedor'),  # Acesso à loja vinculada
+        ('CLIENTE', 'Cliente'),    # Acesso a compras próprias
+    )
+    nivel = models.CharField(max_length=10, choices=NIVEL_ACESSO, default='CLIENTE')
+    loja = models.ForeignKey(Loja, on_delete=models.SET_NULL, null=True, blank=True)
     
 # --- PRODUTOS E CATEGORIAS ---
 
