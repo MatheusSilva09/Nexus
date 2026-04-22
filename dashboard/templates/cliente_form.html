@@ -1,0 +1,36 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Cadastrar Novo Cliente</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Nome Completo</label>
+                    <input type="text" class="form-control" id="nome" name="nome" required>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="telefone" class="form-label">Telefone</label>
+                        <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(91) 9xxxx-xxxx">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="endereco" class="form-label">Endereço</label>
+                    <textarea class="form-control" id="endereco" name="endereco" rows="3"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'lista_clientes' %}" class="btn btn-secondary">Voltar</a>
+                    <button type="submit" class="btn btn-success">Salvar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

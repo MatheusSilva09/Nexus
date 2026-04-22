@@ -36,6 +36,9 @@
             <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
                 <a href="{% url 'lista_estoque' %}">Estoque</a>
             </li>
+            <li class="{% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
+                <a href="{% url 'lista_clientes' %}">Clientes</a>
+</li>
             </ul>
     </div>
 

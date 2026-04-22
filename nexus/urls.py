@@ -27,4 +27,6 @@ urlpatterns = [
     path('nexus/', include('dashboard.urls')),
     path('', include('dashboard.urls')),
     path('estoque/excluir/<int:produto_id>/', views.excluir_produto, name='excluir_produto'),
+    path('clientes/', views.lista_clientes, name='lista_clientes'),
+    path('clientes/novo/', views.adicionar_cliente, name='adicionar_cliente'),
 ]

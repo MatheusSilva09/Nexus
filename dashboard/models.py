@@ -28,13 +28,16 @@ class Loja(models.Model):
         return self.nome
 
 class Cliente(models.Model):
-    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    telefone = models.CharField(max_length=20)
-    endereco = models.TextField()
+    # Relaciona o cliente à loja que o cadastrou
+    loja = models.ForeignKey(Loja, on_delete=models.CASCADE)
+    nome = models.CharField(max_length=100)
+    email = models.EmailField(blank=True, null=True)
+    telefone = models.CharField(max_length=20, blank=True, null=True)
+    endereco = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.usuario.username
-
+        return self.nome
+    
 # --- PRODUTOS E CATEGORIAS ---
 
 class Categoria(models.Model):
