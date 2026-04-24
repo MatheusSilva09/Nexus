@@ -4,6 +4,9 @@ from django.db import transaction
 from django.db.models import Sum, F
 from django.contrib.auth.decorators import user_passes_test
 from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
 # --- DASHBOARD ---
 
@@ -40,7 +43,27 @@ def home(request):
 
 @login_required
 def profile(request):
-    return render(request, "dashboard/profile.html")
+    return render(request, "profile.html")
+
+def login_view(request):
+    if request.method == 'POST':
+        user_nome = request.POST.get('username')
+        senha = request.POST.get('password')
+        
+        user = authenticate(request, username=user_nome, password=senha)
+        
+        if user is not None:
+            login(request, user)
+            # Redireciona para home, onde já temos a lógica de Perfil
+            return redirect('home')
+        else:
+            messages.error(request, 'Usuário ou senha inválidos.')
+            
+    return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login_view')
 
 # --- ESTOQUE E PRODUTOS ---
 

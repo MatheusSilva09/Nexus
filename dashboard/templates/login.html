@@ -140,22 +140,12 @@
         </div>
         {% endif %}
 
-        <form method="post">
-            {% csrf_token %}
-
-            <div class="form-group">
-                <label>Usuário:</label>
-                {{ form.username }}
-            </div>
-
-            <div class="form-group">
-                <label>Senha:</label>
-                {{ form.password }}
-            </div>
-
-            <button type="submit" class="login-btn">Entrar</button>
-        </form>
-
+       <form method="post" action="{% url 'login_view' %}">
+    {% csrf_token %}
+    <input type="text" name="username" placeholder="Usuário" required>
+    <input type="password" name="password" placeholder="Senha" required>
+    <button type="submit">Entrar</button>
+</form>
         <div class="links">
             <a href="{% url 'admin:index' %}">Acesso Administrativo</a>
         </div>

@@ -21,12 +21,12 @@ from dashboard import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
     path('accounts/profile/', views.profile, name='profile'),
     path('nexus/', include('dashboard.urls')),
     path('', include('dashboard.urls')),
     path('estoque/excluir/<int:produto_id>/', views.excluir_produto, name='excluir_produto'),
     path('clientes/', views.lista_clientes, name='lista_clientes'),
     path('clientes/novo/', views.adicionar_cliente, name='adicionar_cliente'),
+    path('login/', views.login_view, name='login_view'),
+    path('logout/', views.logout_view, name='logout_view'),
 ]
