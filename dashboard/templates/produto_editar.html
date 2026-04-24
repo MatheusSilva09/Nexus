@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+
+{% block content %}
 <h2>Editar Produto: {{ produto.nome }}</h2>
 
 <form method="POST">
@@ -26,3 +29,4 @@
     <button type="submit">Salvar Alterações</button>
     <a href="{% url 'lista_estoque' %}">Cancelar</a>
 </form>
+{% endblock %}

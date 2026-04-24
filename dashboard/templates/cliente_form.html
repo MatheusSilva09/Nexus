@@ -13,11 +13,36 @@
                     <input type="text" class="form-control" id="nome" name="nome" required>
                 </div>
 
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Email</label>
+                    <input type="text" class="form-control" id="email" name="email" required>
+                </div>
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="telefone" class="form-label">Telefone</label>
                         <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(91) 9xxxx-xxxx">
                     </div>
+                        <script>
+                            const telInput = document.getElementById('telefone');
+
+                            telInput.addEventListener('input', (e) => {
+                                let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não é número
+                                
+                                // Aplica a máscara (DD) 9XXXX-XXXX
+                                if (value.length > 11) value = value.substring(0, 11);
+                                
+                                if (value.length > 6) {
+                                    value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7)}`;
+                                } else if (value.length > 2) {
+                                    value = `(${value.substring(0, 2)}) ${value.substring(2)}`;
+                                } else if (value.length > 0) {
+                                    value = `(${value}`;
+                                }
+                                
+                                e.target.value = value;
+                            });
+                        </script>
                 </div>
 
                 <div class="mb-3">

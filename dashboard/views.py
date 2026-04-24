@@ -206,6 +206,36 @@ def lista_clientes(request):
     clientes = Cliente.objects.filter(loja__vendedor__usuario=request.user)
     return render(request, 'lista_clientes.html', {'clientes': clientes})
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Cliente # Certifique-se de importar o modelo de Cliente
+
+@login_required
+def editar_cliente(request, cliente_id):
+    # Busca o cliente ou retorna 404 se não existir
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    
+    if request.method == 'POST':
+        # Atualiza os dados vindo do formulário
+        cliente.nome = request.POST.get('nome')
+        cliente.email = request.POST.get('email')
+        cliente.telefone = request.POST.get('telefone')
+        cliente.save()
+        return redirect('lista_clientes')
+        
+    # Se for GET, renderiza o formulário (pode ser o mesmo 'cliente_form.html' que você usa para criar)
+    return render(request, 'cliente_form.html', {'cliente': cliente})
+
+@login_required
+def excluir_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    
+    if request.method == 'POST':
+        cliente.delete()
+        return redirect('lista_clientes')
+        
+    # Exibe uma página de confirmação antes de deletar
+    return render(request, 'excluir_cliente_confirmar.html', {'cliente': cliente})
+
 @login_required
 def adicionar_cliente(request):
     if request.method == 'POST':
