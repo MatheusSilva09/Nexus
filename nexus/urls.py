@@ -29,4 +29,5 @@ urlpatterns = [
     path('clientes/novo/', views.adicionar_cliente, name='adicionar_cliente'),
     path('login/', views.login_view, name='login_view'),
     path('logout/', views.logout_view, name='logout_view'),
+    path('loja/criar/', views.criar_loja, name='criar_loja'),
 ]

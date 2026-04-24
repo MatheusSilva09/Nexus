@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Sum, F
 from django.contrib.auth.decorators import user_passes_test
-from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho
+from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -79,16 +79,47 @@ def lista_estoque(request):
 
 @login_required
 def adicionar_produto(request):
+    # 1. Verifica se a loja existe ANTES de qualquer processamento
+    try:
+        loja = request.user.vendedor.loja
+    except (Vendedor.DoesNotExist, AttributeError, Loja.DoesNotExist):
+        return render(request, 'erro.html', {'msg': 'Você precisa criar uma loja antes de cadastrar produtos!'})
+
+    # 2. Processa o POST apenas uma vez
     if request.method == 'POST':
         Produto.objects.create(
+            loja=loja, # Usamos a loja recuperada acima
             nome=request.POST.get('nome'),
             preco=request.POST.get('preco'),
             estoque=request.POST.get('estoque'),
-            estoque_minimo=request.POST.get('estoque_minimo'),
-            loja=request.user.vendedor.loja 
+            estoque_minimo=request.POST.get('estoque_minimo')
+        )
+
+@login_required
+def adicionar_produto(request):
+    try:
+        loja = request.user.vendedor.loja
+    except (Vendedor.DoesNotExist, AttributeError, Loja.DoesNotExist):
+        return render(request, 'erro.html', {'msg': 'Você precisa criar uma loja antes de cadastrar produtos!'})
+    
+    if request.method == 'POST':
+        # Usamos o or '0' para garantir que, se vier vazio, ele salve como 0
+        estoque = request.POST.get('estoque') or '0'
+        estoque_minimo = request.POST.get('estoque_minimo') or '0'
+        
+        Produto.objects.create(
+            loja=loja,
+            nome=request.POST.get('nome'),
+            preco=request.POST.get('preco') or '0.0',
+            estoque=estoque,
+            estoque_minimo=estoque_minimo
         )
         return redirect('lista_estoque')
+    
     return render(request, 'produto_form.html')
+
+    return redirect('lista_estoque') # Redireciona para a sua lista de produtos
+
 
 @login_required
 def editar_produto(request, produto_id):
@@ -195,3 +226,77 @@ def relatorio_global(request):
     perfil = request.user.perfil
     if perfil.nivel != 'ADMIN':
         return redirect('home')
+    
+# --- LOJA ---
+
+@login_required
+def criar_loja(request):
+    vendedor, created = Vendedor.objects.get_or_create(usuario=request.user)
+    
+    # Verifica se já existe uma loja para esse vendedor
+    loja_existente = Loja.objects.filter(vendedor=vendedor).first()
+
+    if request.method == 'POST':
+        if loja_existente:
+            # Se já existe, apenas atualiza os dados existentes
+            loja_existente.nome = request.POST.get('nome')
+            loja_existente.descricao = request.POST.get('descricao')
+            loja_existente.save()
+            return redirect('home')
+        else:
+            # Se não existe, cria a nova
+            Loja.objects.create(
+                vendedor=vendedor,
+                nome=request.POST.get('nome'),
+                descricao=request.POST.get('descricao')
+            )
+            telefone_limpo = request.POST.get('telefone').replace('(', '').replace(')', '').replace('-', '').replace(' ', '')
+        vendedor.telefone = telefone_limpo
+        vendedor.save()
+        return redirect('home')
+
+    # No GET, se a loja existir, você pode passar ela para o template para pré-preencher
+    return render(request, 'criar_loja.html', {'loja': loja_existente})
+    
+    if request.method == 'POST':
+        # 1. Captura os dados do formulário
+        nome = request.POST.get('nome')
+        descricao = request.POST.get('descricao')
+        telefone = request.POST.get('telefone')
+        
+        # 2. Garante que o usuário logado tenha um registro de 'Vendedor'
+        # O get_or_create evita erros caso o registro ainda não exista
+        vendedor, created = Vendedor.objects.get_or_create(usuario=request.user)
+        
+        # Se você quiser atualizar o telefone no registro de vendedor
+        if vendedor.telefone != telefone:
+            vendedor.telefone = telefone
+            vendedor.save()
+        
+        # 3. Cria a Loja vinculada ao Vendedor
+        Loja.objects.create(
+            vendedor=vendedor,
+            nome=nome,
+            descricao=descricao
+        )
+        
+        # 4. Redireciona para o dashboard após o sucesso
+        return redirect('home')
+    
+    return render(request, 'criar_loja.html')
+
+def ver_loja(request):
+    # Busca a loja do vendedor logado
+    loja = Loja.objects.filter(vendedor__usuario=request.user).first()
+    if not loja:
+        return render(request, 'erro.html', {'msg': 'Você ainda não possui uma loja cadastrada.'})
+    return render(request, 'ver_loja.html', {'loja': loja})
+
+@login_required
+def excluir_loja(request):
+    loja = Loja.objects.filter(vendedor__usuario=request.user).first()
+    if request.method == 'POST':
+        if loja:
+            loja.delete()
+        return redirect('home')
+    return render(request, 'excluir_loja.html', {'loja': loja})

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Tem certeza que deseja excluir a loja {{ loja.nome }}?</h2>
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sim, excluir permanentemente</button>
+    <a href="{% url 'home' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

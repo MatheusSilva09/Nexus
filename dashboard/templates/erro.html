@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<body>
+    <h1>Opa! Algo aconteceu.</h1>
+    <p>{{ msg }}</p>
+    <a href="{% url 'home' %}">Voltar para o início</a>
+</body>
+{% endblock %}

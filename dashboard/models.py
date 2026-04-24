@@ -65,12 +65,19 @@ class Produto(models.Model):
     ativo = models.BooleanField(default=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
     estoque_minimo = models.PositiveIntegerField(default=5)
+    # No seu models.py, dentro da classe Produto:
+    def diminuir_estoque(self, quantidade):
+        if self.quantidade >= quantidade:
+            self.quantidade -= quantidade
+            self.save()
+        else:
+            raise ValueError("Estoque insuficiente!")
 
-    def precisa_repor(self):
-        return self.estoque <= self.estoque_minimo
+        def precisa_repor(self):
+            return self.estoque <= self.estoque_minimo
 
-    def __str__(self):
-        return self.nome
+        def __str__(self):
+            return self.nome
 
 class ImagemProduto(models.Model):
     produto = models.ForeignKey(Produto, on_delete=models.CASCADE, related_name='imagens')

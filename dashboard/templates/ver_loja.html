@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ loja.nome }}</h1>
+<p>{{ loja.descricao }}</p>
+<a href="{% url 'criar_loja' %}" class="btn btn-warning">Editar Loja</a>
+{% endblock %}

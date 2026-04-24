@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar Loja - Nexus Hub{% endblock %}
+
+{% block page_title %}Configurar Minha Loja{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card p-4" style="background: #020617; border: 1px solid #1e293b; color: #fff;">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nome da Loja</label>
+                        <input type="text" name="nome" class="form-control" style="background: #0f172a; color: white; border: 1px solid #334155;" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <textarea name="descricao" class="form-control" rows="4" style="background: #0f172a; color: white; border: 1px solid #334155;"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Telefone de Contato</label>
+                        <input type="text" name="telefone" id="telefone" class="form-control" 
+                            placeholder="(99) 99999-9999" 
+                            style="background: #0f172a; color: white; border: 1px solid #334155;" 
+                            required>
+                    </div>
+
+                    <script>
+                        const telInput = document.getElementById('telefone');
+
+                        telInput.addEventListener('input', (e) => {
+                            let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não é número
+                            
+                            // Aplica a máscara (DD) 9XXXX-XXXX
+                            if (value.length > 11) value = value.substring(0, 11);
+                            
+                            if (value.length > 6) {
+                                value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7)}`;
+                            } else if (value.length > 2) {
+                                value = `(${value.substring(0, 2)}) ${value.substring(2)}`;
+                            } else if (value.length > 0) {
+                                value = `(${value}`;
+                            }
+                            
+                            e.target.value = value;
+                        });
+                    </script>
+
+                    <button type="submit" class="btn btn-success mt-3" style="background: #10b981; border: none;">Criar/editar Loja e Iniciar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
