@@ -11,11 +11,12 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            /* Background em degradê Azul Turquesa conforme solicitado */
+            background: linear-gradient(135deg, #00f2fe 0%, #00c9ff 50%, #0891b2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -23,38 +24,48 @@
         }
 
         .login-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            /* Mantendo o Dark Mode no container com o azul profundo #0F172A */
+            background: #0f172a;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
             width: 100%;
             max-width: 400px;
+            /* Detalhe superior em turquesa para amarrar com o fundo */
+            border-top: 5px solid #00f2fe;
+            border: 1px solid rgba(0, 242, 254, 0.1);
         }
 
-        /* LOGO DENTRO DO CONTAINER */
         .logo {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .logo img {
-            width: 150px;
+            /* Ajustei para responsivo: 100% da largura do container, com máximo de 400px */
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            /* Mantém a proporção correta sem distorcer */
+
+            /* Mantendo o efeito de brilho que você já tinha */
+            filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.3));
+
+            /* Alinhando a imagem à esquerda */
+            display: block;
+            margin: 0;
         }
 
         .login-header {
             text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .login-header h1 {
-            color: #333;
-            margin-bottom: 0.5rem;
-            font-size: 1.8rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
         }
 
         .login-header p {
-            color: #666;
-            font-size: 0.9rem;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
 
         .form-group {
@@ -64,59 +75,81 @@
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            color: #333;
+            color: #e2e8f0;
             font-weight: 500;
+            font-size: 0.9rem;
         }
 
         .form-group input {
             width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e1e5e9;
-            border-radius: 5px;
+            padding: 0.8rem;
+            background: #1e293b;
+            border: 1.5px solid #334155;
+            border-radius: 10px;
             font-size: 1rem;
+            color: white;
+            transition: all 0.3s ease;
         }
 
+        /* Foco do input puxando para o turquesa da logo */
         .form-group input:focus {
             outline: none;
-            border-color: #10b981;
+            border-color: #00f2fe;
+            box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.2);
+            background: #1e293b;
         }
 
         .login-btn {
             width: 100%;
-            padding: 0.75rem;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
+            padding: 0.8rem;
+            /* Botão em turquesa vibrante */
+            background: linear-gradient(90deg, #00f2fe, #00c9ff);
+            color: #0f172a;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
         }
 
         .login-btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
+            filter: brightness(1.1);
         }
 
         .error-message {
-            background: #fee;
-            color: #c33;
+            background: rgba(220, 38, 38, 0.15);
+            color: #fca5a5;
             padding: 0.75rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            border-left: 4px solid #c33;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            font-size: 0.85rem;
+            text-align: center;
         }
 
         .links {
             text-align: center;
             margin-top: 1.5rem;
             padding-top: 1.5rem;
-            border-top: 1px solid #e1e5e9;
+            border-top: 1px solid #334155;
         }
 
         .links a {
-            color: #10b981;
+            color: #00f2fe;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .links a:hover {
+            color: #ffffff;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -125,27 +158,36 @@
 
     <div class="login-container">
 
-        <!-- LOGO CENTRALIZADA DENTRO -->
         <div class="logo">
-            <img src="{% static 'img/logo.png' %}" alt="Nexus Logo">
+            <img src="{% static 'img/nexushub.png' %}" alt="Nexus Hub Logo">
         </div>
 
         <div class="login-header">
-            <p>Entre com suas credenciais</p>
+            <p>Bem-vindo ao Ecossistema Nexus</p>
         </div>
 
         {% if form.errors %}
         <div class="error-message">
-            <strong>Erro:</strong> Usuário ou senha incorretos.
+            Usuário ou senha incorretos.
         </div>
         {% endif %}
 
-       <form method="post" action="{% url 'login_view' %}">
-    {% csrf_token %}
-    <input type="text" name="username" placeholder="Usuário" required>
-    <input type="password" name="password" placeholder="Senha" required>
-    <button type="submit">Entrar</button>
-</form>
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Usuário</label>
+                {{ form.username }}
+            </div>
+
+            <div class="form-group">
+                <label>Senha</label>
+                {{ form.password }}
+            </div>
+
+            <button type="submit" class="login-btn">Entrar</button>
+        </form>
+
         <div class="links">
             <a href="{% url 'admin:index' %}">Acesso Administrativo</a>
         </div>
@@ -154,4 +196,5 @@
 
 </body>
 
+>>>>>>> d5eadcb73ae502a35353d297e3b88638600b99f8
 </html>
