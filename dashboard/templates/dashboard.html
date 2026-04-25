@@ -1,34 +1,165 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Painel - Nexus{% endblock %}
-{% block page_title %}Visão Geral{% endblock %}
+{% block title %}Dashboard | Nexus Hub{% endblock %}
+{% block page_title %}Visão Geral do Sistema{% endblock %}
 
 {% block content %}
-    <div class="cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-        <div class="card" style="background: linear-gradient(135deg, #10b981, #059669); padding: 25px; border-radius: 15px;">
-            <h3 style="font-size: 0.9rem; text-transform: uppercase; opacity: 0.9;">Valor em Estoque</h3>
-            <p style="font-size: 1.8rem; font-weight: bold; margin-top: 10px;">R$ {{ receita|floatformat:2 }}</p>
-        </div>
-        
-        <div class="card" style="background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155;">
-            <h3 style="font-size: 0.9rem; text-transform: uppercase; color: #94a3b8;">Alertas</h3>
-            <p style="font-size: 1.8rem; font-weight: bold; margin-top: 10px; color: {% if avisos > 0 %}#f87171{% else %}#10b981{% endif %};">
-                {{ avisos }} produtos
-            </p>
-        </div>
-        </div>
+<style>
+    /* Estilos específicos do Dashboard para manter a paleta Turquesa */
+    .metric-card {
+        background: rgba(15, 23, 42, 0.8); /* Azul Card com transparência */
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 242, 254, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+    }
 
-    <div class="grid" style="margin-top: 30px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-        <div class="box" style="background: #020617; padding: 25px; border-radius: 15px; border: 1px solid #1e293b;">
-            <h3>Últimos Produtos Cadastrados</h3>
-            <div class="list">
-                {% for produto in produtos %}
-                <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1e293b;">
-                    <span>{{ produto.nome }}</span>
-                    <span style="color: #10b981;">R$ {{ produto.preco }}</span>
+    .metric-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(0, 242, 254, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #00f2fe; /* Turquesa principal */
+        margin: 0.5rem 0;
+    }
+
+    .metric-label {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Badges de Status Turquesa */
+    .badge-nexus {
+        padding: 0.5em 1em;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .badge-online {
+        background: rgba(0, 242, 254, 0.1);
+        color: #00f2fe;
+        border: 1px solid rgba(0, 242, 254, 0.3);
+    }
+
+    .badge-alerta {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* Tabela Estilizada */
+    .nexus-table {
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(30, 41, 59, 0.5);
+    }
+
+    .nexus-table th {
+        background: rgba(2, 6, 23, 0.5);
+        color: #00f2fe;
+        font-weight: 600;
+        border-bottom: 2px solid #1e293b;
+    }
+
+    .nexus-table td {
+        color: #e2e8f0;
+        border-bottom: 1px solid #1e293b;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-label">Total em Estoque</div>
+                <div class="metric-value">1.248</div>
+                <div class="text-info" style="font-size: 0.8rem;">↑ 12% este mês</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-label">Novos Clientes</div>
+                <div class="metric-value">84</div>
+                <div class="text-info" style="font-size: 0.8rem;">+15 na última semana</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-label">Status da Loja</div>
+                <div class="mt-2">
+                    <span class="badge-nexus badge-online">Ativa & Sincronizada</span>
                 </div>
-                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-label">Alertas Críticos</div>
+                <div class="metric-value" style="color: #f59e0b;">03</div>
+                <div class="text-warning" style="font-size: 0.8rem;">Itens abaixo do estoque mínimo</div>
             </div>
         </div>
     </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="metric-card h-100">
+                <h5 class="mb-4" style="color: #00f2fe;">Atividade Recente</h5>
+                <div class="table-responsive">
+                    <table class="table nexus-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Ação</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Teclado Mecânico RGB</td>
+                                <td>Entrada de Estoque</td>
+                                <td>25 Abr 2026</td>
+                                <td><span class="badge-nexus badge-online">Concluído</span></td>
+                            </tr>
+                            <tr>
+                                <td>Monitor 144Hz</td>
+                                <td>Saída (Venda)</td>
+                                <td>24 Abr 2026</td>
+                                <td><span class="badge-nexus badge-online">Concluído</span></td>
+                            </tr>
+                            <tr>
+                                <td>Mouse Gamer Pro</td>
+                                <td>Ajuste Manual</td>
+                                <td>24 Abr 2026</td>
+                                <td><span class="badge-nexus badge-alerta">Pendente</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="metric-card h-100">
+                <h5 class="mb-4" style="color: #00f2fe;">Configuração Rápida</h5>
+                <p class="turquesa-pale small">Gerencie as preferências da sua loja Nexus de forma simplificada.</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'criar_loja' %}" class="btn btn-outline-info">Editar Perfil da Loja</a>
+                    <a href="{% url 'lista_estoque' %}" class="btn btn-outline-light">Gerar Relatório PDF</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
