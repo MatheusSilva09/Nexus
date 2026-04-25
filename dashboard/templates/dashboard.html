@@ -7,7 +7,8 @@
 <style>
     /* Estilos específicos do Dashboard para manter a paleta Turquesa */
     .metric-card {
-        background: rgba(15, 23, 42, 0.8); /* Azul Card com transparência */
+        background: rgba(15, 23, 42, 0.8);
+        /* Azul Card com transparência */
         backdrop-filter: blur(8px);
         border: 1px solid rgba(0, 242, 254, 0.1);
         border-radius: 16px;
@@ -24,7 +25,8 @@
     .metric-value {
         font-size: 2rem;
         font-weight: 800;
-        color: #00f2fe; /* Turquesa principal */
+        color: #00f2fe;
+        /* Turquesa principal */
         margin: 0.5rem 0;
     }
 
@@ -58,24 +60,52 @@
 
     /* Tabela Estilizada */
     .nexus-table {
-        background: rgba(15, 23, 42, 0.6);
+        background: #020617;
         border-radius: 12px;
         overflow: hidden;
-        border: 1px solid rgba(30, 41, 59, 0.5);
+        border: 1px solid #1e293b;
+        width: 100%;
     }
 
-    .nexus-table th {
-        background: rgba(2, 6, 23, 0.5);
+    .nexus-table thead th {
+        background-color: #020617; /* Azul mais profundo para o topo */
         color: #00f2fe;
-        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
         border-bottom: 2px solid #1e293b;
     }
 
-    .nexus-table td {
-        color: #e2e8f0;
-        border-bottom: 1px solid #1e293b;
-        vertical-align: middle;
-    }
+    /* Estilização base das colunas (Corpo) */
+/* Estilização base das colunas (Corpo) */
+.nexus-table tbody td {
+    color: #94a3b8;
+    border-bottom: 1px solid #1e293b;
+    padding: 12px 15px;
+}
+
+/* Linhas Ímpares (Fundo Principal) */
+.nexus-table tbody tr:nth-child(odd) td {
+    background-color: #0f172a; /* Azul escuro profundo padrão */
+}
+
+/* Linhas Pares (O efeito Zebra) */
+.nexus-table tbody tr:nth-child(even) td {
+    background-color: #161e31; /* Um azul levemente mais claro para contraste */
+}
+
+/* Efeito de Hover (Aumenta o brilho da linha inteira) */
+.nexus-table tbody tr:hover td {
+    background-color: #1e293b !important; /* Azul médio para destaque */
+    color: #ffffff; /* Texto brilha no hover */
+    transition: all 0.2s ease;
+}
+
+/* Ajuste na primeira coluna (Produto) para destaque */
+.nexus-table tbody tr td:first-child {
+    color: #e2e8f0;
+    font-weight: 500;
+}
 </style>
 
 <div class="container-fluid">
@@ -149,11 +179,11 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-4">
             <div class="metric-card h-100">
                 <h5 class="mb-4" style="color: #00f2fe;">Configuração Rápida</h5>
-                <p class="turquesa-pale small">Gerencie as preferências da sua loja Nexus de forma simplificada.</p>
+                <p class="turquesa-medio small">Gerencie as preferências da sua loja Nexus de forma simplificada.</p>
                 <div class="d-grid gap-2">
                     <a href="{% url 'criar_loja' %}" class="btn btn-outline-info">Editar Perfil da Loja</a>
                     <a href="{% url 'lista_estoque' %}" class="btn btn-outline-light">Gerar Relatório PDF</a>
