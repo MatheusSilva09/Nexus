@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Sum, F
 from django.contrib.auth.decorators import user_passes_test
-from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor
+from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor, Venda
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -206,6 +206,36 @@ def lista_clientes(request):
     clientes = Cliente.objects.filter(loja__vendedor__usuario=request.user)
     return render(request, 'lista_clientes.html', {'clientes': clientes})
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Cliente # Certifique-se de importar o modelo de Cliente
+
+@login_required
+def editar_cliente(request, cliente_id):
+    # Busca o cliente ou retorna 404 se não existir
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    
+    if request.method == 'POST':
+        # Atualiza os dados vindo do formulário
+        cliente.nome = request.POST.get('nome')
+        cliente.email = request.POST.get('email')
+        cliente.telefone = request.POST.get('telefone')
+        cliente.save()
+        return redirect('lista_clientes')
+        
+    # Se for GET, renderiza o formulário (pode ser o mesmo 'cliente_form.html' que você usa para criar)
+    return render(request, 'cliente_form.html', {'cliente': cliente})
+
+@login_required
+def excluir_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    
+    if request.method == 'POST':
+        cliente.delete()
+        return redirect('lista_clientes')
+        
+    # Exibe uma página de confirmação antes de deletar
+    return render(request, 'excluir_cliente_confirmar.html', {'cliente': cliente})
+
 @login_required
 def adicionar_cliente(request):
     if request.method == 'POST':
@@ -300,3 +330,55 @@ def excluir_loja(request):
             loja.delete()
         return redirect('home')
     return render(request, 'excluir_loja.html', {'loja': loja})
+
+# --- VENDAS --- 
+
+@login_required
+def realizar_venda(request, produto_id):
+    produto = get_object_or_404(Produto, id=produto_id, loja=request.user.vendedor.loja)
+    clientes = Cliente.objects.filter(loja=request.user.vendedor.loja) # Filtre pelo dono da loja!
+
+    if request.method == 'POST':
+        cliente_id = request.POST.get('cliente')
+        quantidade = int(request.POST.get('quantidade'))
+        
+        # Verificação básica de estoque
+        if quantidade <= produto.estoque:
+            cliente = Cliente.objects.get(id=cliente_id)
+            valor_total = quantidade * produto.preco
+            
+            # Registrar a venda
+            Venda.objects.create(
+                loja=produto.loja,
+                cliente=cliente,
+                produto=produto,
+                quantidade=quantidade,
+                valor_total=valor_total
+            )
+            
+            # Baixa no estoque
+            produto.estoque -= quantidade
+            produto.save()
+            
+            return redirect('lista_estoque')
+        else:
+            return render(request, 'erro.html', {'msg': 'Estoque insuficiente!'})
+
+    return render(request, 'realizar_venda.html', {'produto': produto, 'clientes': clientes})
+
+from django.db.models import Sum
+
+@login_required
+def relatorio_vendas(request):
+    # Filtra vendas apenas da loja do usuário logado
+    vendas = Venda.objects.filter(loja=request.user.vendedor.loja).order_by('-data')
+    
+    # Cálculos rápidos para o resumo
+    total_faturado = vendas.aggregate(Sum('valor_total'))['valor_total__sum'] or 0
+    total_vendas = vendas.count()
+    
+    return render(request, 'relatorio_vendas.html', {
+        'vendas': vendas,
+        'total_faturado': total_faturado,
+        'total_vendas': total_vendas
+    })

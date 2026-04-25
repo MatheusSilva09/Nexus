@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Relatório de Vendas{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card p-3" style="background: #020617; border: 1px solid #10b981;">
+            <h5>Total Faturado</h5>
+            <h3>R$ {{ total_faturado }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3" style="background: #020617; border: 1px solid #1e293b;">
+            <h5>Total de Vendas</h5>
+            <h3>{{ total_vendas }}</h3>
+        </div>
+    </div>
+</div>
+
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th>Produto</th>
+            <th>Qtd</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for venda in vendas %}
+        <tr>
+            <td>{{ venda.data|date:"d/m/Y H:i" }}</td>
+            <td>{{ venda.cliente.nome }}</td>
+            <td>{{ venda.produto.nome }}</td>
+            <td>{{ venda.quantidade }}</td>
+            <td>R$ {{ venda.valor_total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

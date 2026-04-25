@@ -15,4 +15,7 @@ urlpatterns = [
     path('loja/criar/', views.criar_loja, name='criar_loja'),
     path('loja/ver/', views.ver_loja, name='ver_loja'),
     path('loja/excluir/', views.excluir_loja, name='excluir_loja'),
+    path('clientes/editar/<int:cliente_id>/', views.editar_cliente, name='editar_cliente'),
+    path('clientes/excluir/<int:cliente_id>/', views.excluir_cliente, name='excluir_cliente'),
+    path('relatorio/vendas/', views.relatorio_vendas, name='relatorio_vendas'),
 ]

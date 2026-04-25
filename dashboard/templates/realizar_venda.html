@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Vender: {{ produto.nome }}</h2>
+<form method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label>Cliente</label>
+        <select name="cliente" class="form-control" required>
+            {% for cliente in clientes %}
+            <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Quantidade (Disponível: {{ produto.estoque }})</label>
+        <input type="number" name="quantidade" class="form-control" max="{{ produto.estoque }}" min="1" required>
+    </div>
+    <button type="submit" class="btn btn-success">Confirmar Venda</button>
+</form>
+{% endblock %}

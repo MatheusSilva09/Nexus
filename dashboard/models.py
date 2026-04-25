@@ -111,3 +111,14 @@ class Pagamento(models.Model):
     metodo = models.CharField(max_length=50) # Ex: Pix, Cartão
     status = models.CharField(max_length=50)
     id_transacao = models.CharField(max_length=255)
+
+
+# --- VENDAS ---
+
+class Venda(models.Model):
+    loja = models.ForeignKey(Loja, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True)
+    produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
+    quantidade = models.IntegerField()
+    valor_total = models.DecimalField(max_digits=10, decimal_places=2)
+    data = models.DateTimeField(auto_now_add=True)
