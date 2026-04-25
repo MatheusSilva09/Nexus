@@ -18,4 +18,7 @@ Script de Criação Automática do Superuser+Perfil
 Ele vai buscar o seu modelo de Perfil e garantir que o superusuário seja criado junto com ele.
 No seu terminal (com a venv ativa), execute este bloco de comando:
 
+Obs: Substitua username='seu_usuario' email='seu_email@nexushub.com' password='sua_senha'
+
+
 python manage.py shell -c "from django.contrib.auth.models import User; from dashboard.models import Perfil; username='renan.admin'; email='admin@email.com'; password='nexusadmin'; user, created = User.objects.get_or_create(username=username, defaults={'email': email, 'is_staff': True, 'is_superuser': True}); user.set_password(password); user.save(); Perfil.objects.get_or_create(usuario=user); print(f'\n>>> Sucesso! Usuário {username} criado com perfil vinculado ao campo \"usuario\".')"
