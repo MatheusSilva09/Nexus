@@ -6,57 +6,167 @@
     <title>{% block title %}Nexus Hub{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Copie aqui todo o bloco <style> que você enviou anteriormente */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background: #0f172a; color: #fff; min-height: 100vh; }
-        
-        .sidebar { width: 220px; height: 100vh; background: #020617; position: fixed; padding: 20px; border-right: 1px solid #1e293b; }
-        .sidebar h2 { color: #10b981; margin-bottom: 30px; font-size: 1.5rem; }
-        .sidebar ul { list-style: none; }
-        .sidebar li a { color: #94a3b8; text-decoration: none; display: block; padding: 12px; margin: 5px 0; border-radius: 8px; transition: 0.3s; }
-        .sidebar li a:hover { background: #1e293b; color: #10b981; }
-        .sidebar li.active a { background: #10b98122; color: #10b981; font-weight: bold; }
+        /* Variáveis de Cores para facilitar manutenção */
+        :root {
+            --turquesa-brilhante: #00f2fe;
+            --turquesa-medio: #00c9ff;
+            --azul-profundo: #020617;
+            --azul-card: #0f172a;
+            --texto-muted: #94a3b8;
+            --borda: #1e293b;
+        }
 
-        .header { margin-left: 220px; padding: 20px 40px; background: #020617; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
-        .main { margin-left: 220px; padding: 40px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         
-        /* Seus estilos de cards, grids e botões que você enviou... */
-        .profile-btn, .logout-btn { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; transition: 0.3s; }
-        .profile-btn:hover, .logout-btn:hover { background: #10b981; color: white; }
+        body { 
+            background: linear-gradient(135deg, #00f2fe 0%, #00c9ff 50%, #0891b2 100%);
+            color: #fff; 
+            min-height: 100vh;
+            background-attachment: fixed; /* Mantém o degradê parado ao rolar */
+        }
+        
+        /* Sidebar ajustada para o Turquesa */
+        .sidebar { 
+            width: 240px; 
+            height: 100vh; 
+            background: var(--azul-profundo); 
+            position: fixed; 
+            padding: 20px; 
+            border-right: 1px solid var(--borda);
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        
+        .sidebar h2 { 
+            color: var(--turquesa-brilhante); 
+            margin-bottom: 30px; 
+            font-size: 1.5rem; 
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.3));
+        }
+
+        .sidebar ul { list-style: none; }
+        
+        .sidebar li a { 
+            color: var(--texto-muted); 
+            text-decoration: none; 
+            display: block; 
+            padding: 12px 15px; 
+            margin: 8px 0; 
+            border-radius: 10px; 
+            transition: all 0.3s ease; 
+        }
+
+        .sidebar li a:hover { 
+            background: rgba(0, 242, 254, 0.1); 
+            color: var(--turquesa-brilhante);
+            transform: translateX(5px);
+        }
+
+        .sidebar li.active a { 
+            background: linear-gradient(90deg, rgba(0, 242, 254, 0.2), transparent); 
+            color: var(--turquesa-brilhante); 
+            font-weight: bold;
+            border-left: 4px solid var(--turquesa-brilhante);
+        }
+
+        /* Header e Main com transparência para revelar o fundo */
+        .header { 
+            margin-left: 240px; 
+            padding: 20px 40px; 
+            background: rgba(2, 6, 23, 0.8); 
+            backdrop-filter: blur(10px);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid var(--borda);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .main { 
+            margin-left: 240px; 
+            padding: 40px; 
+        }
+
+        /* Estilo dos Botões conforme a paleta de login */
+        .logout-btn { 
+            background: transparent;
+            color: var(--turquesa-brilhante); 
+            border: 1px solid var(--turquesa-brilhante); 
+            padding: 0.5rem 1.2rem; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            transition: 0.3s; 
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .logout-btn:hover { 
+            background: var(--turquesa-brilhante); 
+            color: var(--azul-profundo); 
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+        }
+
+        /* Dropdown customizado */
+        .dropdown-menu {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        
+        .dropdown-item:hover {
+            background-color: rgba(0, 242, 254, 0.1) !important;
+            color: #fff !important;
+        }
+
+        /* Estilo para os blocos de conteúdo (Cards) */
+        .content-block {
+            background: var(--azul-card);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(0, 242, 254, 0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2>Nexus Hub</h2>
-    <ul>
-        <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
-            <a href="{% url 'home' %}">Painel</a>
-        </li>
-        <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
-            <a href="{% url 'lista_estoque' %}">Estoque</a>
-        </li>
-        <li class="{% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
-            <a href="{% url 'lista_clientes' %}">Clientes</a>
-        </li>
-        <li class="nav-item dropdown">
-    <a href="#" class="d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-        Minha Loja
-    </a>
-    <ul class="dropdown-menu" style="background: #020617; border: 1px solid #1e293b;">
-        <li><a class="dropdown-item" href="{% url 'ver_loja' %}" style="color: #94a3b8;">Ver Loja</a></li>
-        <li><a class="dropdown-item" href="{% url 'criar_loja' %}" style="color: #94a3b8;">Criar/editar Loja</a></li>
-        <li><hr class="dropdown-divider" style="border-color: #1e293b;"></li>
-        <li><a class="dropdown-item" href="{% url 'excluir_loja' %}" style="color: #ef4444;">Excluir Loja</a></li>
-    </ul>
-</li>
-    </ul>
-</div>
+    <div class="sidebar">
+        <h2>Nexus Hub</h2>
+        <ul>
+            <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <a href="{% url 'home' %}">Painel</a>
+            </li>
+            <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
+                <a href="{% url 'lista_estoque' %}">Estoque</a>
+            </li>
+            <li class="{% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
+                <a href="{% url 'lista_clientes' %}">Clientes</a>
+            </li>
+            
+            <li class="nav-item dropdown mt-3">
+                <a href="#" class="d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Minha Loja
+                </a>
+                <ul class="dropdown-menu" style="background: #020617; border: 1px solid #1e293b;">
+                    <li><a class="dropdown-item" href="{% url 'ver_loja' %}" style="color: #94a3b8;">Ver Loja</a></li>
+                    <li><a class="dropdown-item" href="{% url 'criar_loja' %}" style="color: #94a3b8;">Criar/editar Loja</a></li>
+                    <li><hr class="dropdown-divider" style="border-color: #1e293b;"></li>
+                    <li><a class="dropdown-item" href="{% url 'excluir_loja' %}" style="color: #ef4444;">Excluir Loja</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
 
     <div class="header">
-        <div style="font-size: 1.2rem; font-weight: bold;">{% block page_title %}Dashboard{% endblock %}</div>
+        <div style="font-size: 1.2rem; font-weight: bold; color: var(--turquesa-brilhante);">
+            {% block page_title %}Dashboard{% endblock %}
+        </div>
         <div class="user-info" style="display: flex; align-items: center; gap: 20px;">
-            <span>Bem-vindo, <strong>{{ user.username }}</strong>!</span>
+            <span style="color: #e2e8f0;">Bem-vindo, <strong>{{ user.username }}</strong>!</span>
             <div class="user-actions">
                 <a href="/logout/" class="logout-btn">Sair</a>
             </div>
@@ -65,9 +175,9 @@
 
     <div class="main">
         {% block content %}
-        {% endblock %}
+            {% endblock %}
     </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

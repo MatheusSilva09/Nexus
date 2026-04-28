@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # --- CORE E PERFIS ---
 
@@ -37,7 +39,7 @@ class Cliente(models.Model):
         return self.nome
     
 class Perfil(models.Model):
-    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='perfil')
     NIVEL_ACESSO = (
         ('ADMIN', 'Nexus Hub'),    # Acesso total
         ('VENDEDOR', 'Vendedor'),  # Acesso à loja vinculada
@@ -122,3 +124,9 @@ class Venda(models.Model):
     quantidade = models.IntegerField()
     valor_total = models.DecimalField(max_digits=10, decimal_places=2)
     data = models.DateTimeField(auto_now_add=True)
+    
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        # USE 'usuario' em vez de 'user'
+        Perfil.objects.create(usuario=instance)
