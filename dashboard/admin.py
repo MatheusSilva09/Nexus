@@ -1,27 +1,26 @@
 from django.contrib import admin
-from .models import Vendedor, Loja, Cliente, Categoria, Produto, Pedido
-
-# Registrando as tabelas para aparecerem no painel
+from .models import Vendedor, Loja, Cliente, Categoria, Produto, Pedido, Perfil # Não esqueça de importar o Perfil!
 
 admin.site.register(Cliente)
 admin.site.register(Categoria)
 admin.site.register(Produto)
 admin.site.register(Pedido)
 
+# 1. Registre o Perfil (ESSENCIAL para o Matheus ter uma loja vinculada)
+@admin.register(Perfil)
+class PerfilAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'nivel', 'loja')
+    list_filter = ('nivel', 'loja')
+    search_fields = ('usuario__username', 'loja__nome')
+
+# 2. Mantenha o Vendedor se você ainda o usa, mas cuidado com os conflitos
 @admin.register(Vendedor)
 class VendedorAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'aprovado', 'data_cadastro')
-    list_filter = ('aprovado', 'data_cadastro')
-    search_fields = ('usuario__username', 'usuario__email')
-    ordering = ('-data_cadastro',)
-    actions = ['aprovar_vendedores']
+    # ... resto das suas configurações ...
 
-    @admin.action(description="Aprovar vendedores selecionados")
-    def aprovar_vendedores(self, request, queryset):
-        quantidade = queryset.update(aprovado=True)
-        self.message_user(request, f"{quantidade} vendedores foram aprovados com sucesso.")
-
+# 3. Ajuste a Loja (Como o Perfil agora manda na Loja, remova o 'vendedor' daqui se ele estiver dando erro)
 @admin.register(Loja)
 class LojaAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'vendedor')
-    search_fields = ('nome', 'vendedor__usuario__username')
+    list_display = ('nome',) 
+    search_fields = ('nome',)

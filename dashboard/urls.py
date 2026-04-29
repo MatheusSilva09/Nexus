@@ -29,6 +29,7 @@ urlpatterns = [
     path('estoque/editar/<int:produto_id>/', views.editar_produto, name='editar_produto'),
     path('estoque/excluir/<int:produto_id>/', views.excluir_produto, name='excluir_produto'),
     path('estoque/vender/<int:produto_id>/', views.realizar_venda, name='realizar_venda'),
+    path('cadastrar-categoria/', views.cadastrar_categoria, name='cadastrar_categoria'),
     
     # --- Rotas de Loja ---
     path('excluir_loja/', views.excluir_loja, name='excluir_loja'),

@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.text import slugify
 
 # --- CORE E PERFIS ---
 
@@ -19,7 +20,7 @@ class Loja(models.Model):
     # FK fiel ao dicionário: Relacionamento com vendedor
     vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE, related_name='lojas') 
     nome = models.CharField(max_length=255) # String
-    descricao = models.TextField() # Text (Corrigido para evitar erro de sintaxe)
+    descricao = models.TextField() 
 
     def __str__(self):
         return self.nome
@@ -77,12 +78,16 @@ class Cliente(models.Model):
 class Perfil(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='perfil')
     NIVEL_ACESSO = (
-        ('ADMIN', 'Nexus Hub'),    # Acesso total
-        ('VENDEDOR', 'Vendedor'),  # Acesso à loja vinculada
-        ('CLIENTE', 'Cliente'),    # Acesso a compras próprias
+        ('ADMIN', 'Nexus Hub'),    # Você (Dono do Sistema/Suporte)
+        ('DONO', 'Dono da Loja'),   # O cara que criou a empresa
+        ('GERENTE', 'Gerente'),     # O funcionário com acesso quase total
+        ('CLIENTE', 'Cliente'),     # Quem compra na loja
     )
     nivel = models.CharField(max_length=10, choices=NIVEL_ACESSO, default='CLIENTE')
-    loja = models.ForeignKey(Loja, on_delete=models.SET_NULL, null=True, blank=True)
+    loja = models.ForeignKey(Loja, on_delete=models.SET_NULL, null=True, blank=True, related_name='membros')
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.nivel}"
     
 # --- PRODUTOS E CATEGORIAS ---
 
@@ -90,8 +95,10 @@ class Categoria(models.Model):
     nome = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
 
-    def __str__(self):
-        return self.nome
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.nome)
+        super().save(*args, **kwargs)
 
 class Produto(models.Model):
     loja = models.ForeignKey(Loja, on_delete=models.CASCADE)

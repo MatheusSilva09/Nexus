@@ -11,6 +11,7 @@ from django.db.models import Sum, Count, F
 from django.db.models.functions import TruncDay
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login, logout
+from django.utils.text import slugify
 
 from nexus import settings
 from .models import Produto, Categoria, Loja, Vendedor
@@ -174,38 +175,54 @@ def vitrine_produtos(request):
     
     return render(request, 'vitrine.html', {'produtos': produtos})
 
+def cadastrar_categoria(request):
+    if request.method == "POST":
+        nome = request.POST.get('nome')
+        if nome:
+            novo_slug = slugify(nome)
+            
+            # Verifica se já existe uma categoria com este slug para evitar o IntegrityError
+            if not Categoria.objects.filter(slug=novo_slug).exists():
+                Categoria.objects.create(nome=nome, slug=novo_slug)
+            else:
+                # Opcional: Adicionar uma mensagem de aviso que a categoria já existe
+                from django.contrib import messages
+                messages.warning(request, "Esta categoria já está cadastrada.")
+                
+        return redirect('cadastrar_produto')
+    
+    # IMPORTANTE: Retornar o template se o método for GET para evitar o ValueError de 'None'
+    return render(request, 'categoria_form.html')
+
 def cadastrar_produto(request):
+    if hasattr(request.user, 'perfil'):
+        perfil = request.user.perfil
+    if not perfil.loja:
+        print("DEBUG: O sistema não encontrou uma loja neste perfil!")
+        return redirect('criar_loja')
     categorias = Categoria.objects.all()
 
     if request.method == "POST":
-        # 1. Captura de dados brutos
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao', '')
         categoria_id = request.POST.get('categoria')
         
-        # 2. Tratamento de Números (Estoque e Estoque Mínimo)
-        # Usamos .isdigit() para evitar o erro "expected a number but got ''"
         estoque_raw = request.POST.get('estoque', '0')
         estoque = int(estoque_raw) if estoque_raw.isdigit() else 0
         
         estoque_min_raw = request.POST.get('estoque_minimo', '5')
         estoque_minimo = int(estoque_min_raw) if estoque_min_raw.isdigit() else 5
 
-        # 3. Tratamento de Preço (Conversão de R$ para Decimal)
         preco_raw = request.POST.get('preco', '0,00')
         try:
-            # Remove símbolos para o banco entender como número (ex: 1.250,50 -> 1250.50)
             preco_limpo = preco_raw.replace('R$', '').replace('.', '').replace(',', '.').strip()
             preco_final = Decimal(preco_limpo)
         except:
             preco_final = Decimal('0.00')
 
-        # 4. Lógica de Salvamento Protegida
         try:
-            vendedor = request.user.vendedor_perfil
-            loja_vinculada = Loja.objects.get(vendedor=vendedor)
-            
-            # Buscamos a instância única da categoria, não a lista toda
+            # A mágica acontece aqui: usamos a loja que já está no perfil do usuário
+            loja_vinculada = perfil.loja
             categoria_instancia = Categoria.objects.filter(id=categoria_id).first()
 
             Produto.objects.create(
@@ -219,14 +236,10 @@ def cadastrar_produto(request):
             )
             return redirect('lista_estoque')
             
-        except Loja.DoesNotExist:
-            # Se o vendedor ainda não criou uma loja, redirecionamos
-            return redirect('criar_loja')
         except Exception as e:
-            # Caso ocorra algum erro inesperado (ex: erro de banco)
             print(f"Erro ao salvar produto: {e}")
+            # Você pode enviar uma mensagem de erro para o template aqui
 
-    # Retorno padrão para método GET ou se o salvamento falhar
     return render(request, 'produto_form.html', {'categorias': categorias})
 
 @login_required
