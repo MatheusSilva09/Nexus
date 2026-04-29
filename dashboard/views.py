@@ -26,8 +26,9 @@ from .decorators import loja_obrigatoria
 from decimal import Decimal
 from django.contrib import messages
 
-from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor, Venda
+from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor, Venda, Funcionario
 from .forms import ClienteForm
+from django.utils import timezone
 
 # --- AUTENTICAÇÃO ---
 
@@ -587,6 +588,61 @@ def excluir_loja(request):
         return redirect('home')
         
     return render(request, 'dashboard/confirm_delete.html', {'loja': loja})
+
+@login_required
+def adicionar_funcionario(request):
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        cargo = request.POST.get('cargo')
+        email = request.POST.get('email')
+        
+        # Proteção contra e-mail duplicado na equipe
+        if Funcionario.objects.filter(email=email).exists():
+            messages.error(request, "Este funcionário já está cadastrado.")
+            return render(request, 'funcionario_form.html')
+
+        Funcionario.objects.create(
+            nome=nome,
+            cargo=cargo,
+            email=email,
+            usuario_id=request.user,
+            data_admissao=request.POST.get('data_admissao')
+        )
+        messages.success(request, "Funcionário adicionado com sucesso!")
+        return redirect('lista_funcionarios') # Ou a página que você preferir
+
+    return render(request, 'funcionario_form.html')
+
+def lista_funcionarios(request):
+    funcionarios = Funcionario.objects.all()
+    return render(request, 'lista_funcionarios.html', {'funcionarios': funcionarios})
+
+def editar_funcionario(request, id):
+    funcionario = get_object_or_404(Funcionario, id=id)
+    
+    if request.method == "POST":
+        funcionario.nome = request.POST.get('nome')
+        funcionario.cargo = request.POST.get('cargo')
+        funcionario.email = request.POST.get('email')
+        funcionario.telefone = request.POST.get('telefone')
+        funcionario.endereco = request.POST.get('endereco')
+        
+        # Garante que a data de admissão nunca seja nula
+        if not funcionario.data_admissao:
+            funcionario.data_admissao = timezone.now().date()
+            
+        funcionario.save()
+        return redirect('lista_funcionarios')
+    
+    return render(request, 'editar_funcionario.html', {'funcionario': funcionario})
+
+@login_required
+def excluir_funcionario(request, id):
+    funcionario = get_object_or_404(Funcionario, id=id)
+    funcionario.delete()
+    # Mensagem de sucesso opcional para feedback ao usuário
+    # messages.success(request, f"Funcionário {funcionario.nome} removido com sucesso.")
+    return redirect('lista_funcionarios')
 
 @login_required
 @transaction.atomic

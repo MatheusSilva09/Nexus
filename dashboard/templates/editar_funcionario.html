@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Editar Funcionário | Nexus Hub{% endblock %}
+{% block page_title %}EDITAR FUNCIONÁRIO{% endblock %}
+{% block content %}
+
+<div class="nexus-form-container">
+    <div class="nexus-form-header">
+        <i class="bi bi-person-badge-fill"></i>
+        <div>
+            <h2 style="color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: 700;">EDITAR COLABORADOR</h2>
+            <p style="color: rgba(255,255,255,0.5); margin: 0; font-size: 0.9rem;">Atualize as informações de <span style="color: #00e5ff;">{{ funcionario.nome }}</span></p>
+        </div>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-nexus">
+                    <label class="label-nexus">NOME COMPLETO</label>
+                    <div class="input-wrapper-nexus">
+                        <i class="bi bi-person-fill"></i>
+                        <input type="text" name="nome" class="form-control-nexus" 
+                               placeholder="Nome do funcionário" required
+                               value="{{ funcionario.nome }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group-nexus">
+                    <label class="label-nexus">CARGO / FUNÇÃO</label>
+                    <div class="input-wrapper-nexus">
+                        <i class="bi bi-briefcase-fill"></i>
+                        <input type="text" name="cargo" class="form-control-nexus" 
+                               placeholder="Ex: Mecânico, Vendedor..." required
+                               value="{{ funcionario.cargo }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group-nexus">
+                    <label class="label-nexus">E-MAIL DE CONTATO</label>
+                    <div class="input-wrapper-nexus">
+                        <i class="bi bi-envelope-at-fill"></i>
+                        <input type="email" name="email" class="form-control-nexus" 
+                               placeholder="email@exemplo.com"
+                               value="{{ funcionario.email|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group-nexus">
+                    <label class="label-nexus">TELEFONE / WHATSAPP</label>
+                    <div class="input-wrapper-nexus">
+                        <i class="bi bi-whatsapp"></i>
+                        <input type="text" name="telefone" class="form-control-nexus" 
+                               placeholder="(91) 98000-0000"
+                               value="{{ funcionario.telefone|default:'' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group-nexus" style="margin-bottom: 25px;">
+            <label class="label-nexus">ENDEREÇO / COMPLEMENTO</label>
+            <div class="input-wrapper-nexus">
+                <i class="bi bi-geo-alt-fill"></i>
+                <input type="text" name="endereco" class="form-control-nexus" 
+                       placeholder="Rua, Número, Bairro..."
+                       value="{{ funcionario.endereco|default:'' }}">
+            </div>
+        </div>
+
+        <div class="nexus-form-footer">
+            <a href="{% url 'lista_funcionarios' %}" class="btn-nexus-cancel">
+                <i class="bi bi-x-circle"></i> CANCELAR
+            </a>
+            <button type="submit" class="btn-nexus-save">
+                <i class="bi bi-check2-circle"></i> SALVAR ALTERAÇÕES
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Estilos preservados do seu modelo base */
+    .nexus-form-container {
+        max-width: 900px;
+        margin: 40px auto;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(0, 229, 255, 0.1);
+        border-radius: 16px;
+        padding: 40px;
+        backdrop-filter: blur(10px);
+    }
+    .nexus-form-header { display: flex; align-items: center; gap: 15px; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid rgba(0, 229, 255, 0.1); }
+    .nexus-form-header i { color: #00e5ff; font-size: 1.8rem; }
+    .label-nexus { color: #00e5ff; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+    .input-wrapper-nexus { position: relative; display: flex; align-items: center; }
+    .input-wrapper-nexus i { position: absolute; left: 15px; color: rgba(0, 229, 255, 0.5); font-size: 1.1rem; }
+    .form-control-nexus { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 12px 12px 12px 45px; color: #ffffff; transition: 0.3s; }
+    .form-control-nexus:focus { border-color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); outline: none; }
+    .form-group-nexus { margin-bottom: 20px; }
+    .nexus-form-footer { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+    .btn-nexus-save { background: #00e5ff; color: #000; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 800; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+    .btn-nexus-save:hover { background: #00b8cc; transform: translateY(-2px); }
+    .btn-nexus-cancel { background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 12px 25px; border-radius: 10px; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .btn-nexus-cancel:hover { background: rgba(255,255,255,0.05); color: #ff4444; border-color: #ff4444; }
+</style>
+
+{% endblock %}

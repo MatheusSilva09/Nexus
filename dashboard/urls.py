@@ -33,4 +33,10 @@ urlpatterns = [
     
     # --- Rotas de Loja ---
     path('excluir_loja/', views.excluir_loja, name='excluir_loja'),
+    path('funcionarios/', views.lista_funcionarios, name='lista_funcionarios'),
+    path('funcionarios/novo/', views.adicionar_funcionario, name='adicionar_funcionario'),
+    path('funcionarios/editar/<int:id>/', views.editar_funcionario, name='editar_funcionario'),
+    path('funcionarios/excluir/<int:id>/', views.excluir_funcionario, name='excluir_funcionario'),
+    
+
 ]

@@ -91,6 +91,17 @@ class Perfil(models.Model):
     def __str__(self):
         return f"{self.usuario.username} - {self.nivel}"
     
+class Funcionario(models.Model):
+    usuario_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='equipe')
+    nome = models.CharField(max_length=150)
+    cargo = models.CharField(max_length=100)
+    telefone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(unique=True)
+    data_admissao = models.DateField(auto_now_add=True) # Adiciona a data de hoje automaticamente
+
+    def __str__(self):
+        return f"{self.nome} - {self.cargo}"
+    
 # --- PRODUTOS E CATEGORIAS ---
 
 class Categoria(models.Model):
