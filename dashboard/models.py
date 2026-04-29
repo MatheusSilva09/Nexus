@@ -26,10 +26,12 @@ class Loja(models.Model):
         return self.nome
 
 class Cliente(models.Model):
-    # Relacionamento com User (usuario_id)
-    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil_cliente')
-    telefone = models.CharField(max_length=20)
-    endereco = models.TextField()
+    # ALTERAÇÃO CRITICA: ForeignKey permite que UM usuário cadastre VÁRIOS clientes
+    usuario = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='clientes'
+    )
     
     nome = models.CharField(
         max_length=150, 
@@ -43,7 +45,6 @@ class Cliente(models.Model):
         verbose_name="Telefone / WhatsApp"
     )
     
-    # Validação nativa do Django para e-mails
     email = models.EmailField(
         max_length=255, 
         blank=True, 
@@ -51,18 +52,19 @@ class Cliente(models.Model):
         verbose_name="E-mail"
     )
     
-    # TextField para suportar endereços longos e o textarea do formulário
     endereco = models.TextField(
         blank=True, 
         null=True, 
         verbose_name="Endereço / Complemento"
     )
     
-    # Campo de controle interno (Útil para a listagem)
     data_cadastro = models.DateTimeField(
         auto_now_add=True, 
         verbose_name="Data de Cadastro"
     )
+
+    def __str__(self):
+        return self.nome
     
     class Meta:
         verbose_name = "Cliente"

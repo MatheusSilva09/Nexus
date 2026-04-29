@@ -204,24 +204,33 @@
             </div>
         </div>
 
-        <div class="form-row-nexus" style="margin-bottom: 25px;">
-            <div class="form-group-nexus" style="flex: 1;">
-                <label class="label-nexus">TELEFONE / WHATSAPP</label>
-                <div class="input-wrapper-nexus" style="position: relative; display: flex; align-items: center;">
-                    <i class="bi bi-whatsapp" style="position: absolute; left: 15px; color: #00e5ff; z-index: 5;"></i>
-                    {{ form.telefone }}
-                </div>
-            </div>
-
-            <div>
-                <label class="label-nexus">E-mail (Opcional)</label>
-                <div class="input-wrapper-nexus">
-                    <i class="bi bi-envelope-at"></i>
-                    <input type="email" name="email" value="{{ form.email.value|default:'' }}"
-                        class="form-control-nexus" placeholder="exemplo@email.com">
-                </div>
-            </div>
+       <div class="form-row-nexus" style="margin-bottom: 25px; display: flex; gap: 20px;">
+    <div class="form-group-nexus" style="flex: 1;">
+        <label class="label-nexus">TELEFONE / WHATSAPP</label>
+        <div class="input-wrapper-nexus" style="position: relative; display: flex; align-items: center;">
+            <i class="bi bi-whatsapp" style="position: absolute; left: 15px; color: #00e5ff; z-index: 5;"></i>
+            <input type="text" 
+                   name="telefone" 
+                   value="{{ form.telefone.value|default:'' }}"
+                   class="form-control-nexus" 
+                   placeholder="(91) 98000-0000"
+                   style="padding-left: 45px; width: 100%;">
         </div>
+    </div>
+
+    <div class="form-group-nexus" style="flex: 1;">
+        <label class="label-nexus">E-MAIL (OPCIONAL)</label>
+        <div class="input-wrapper-nexus" style="position: relative; display: flex; align-items: center;">
+            <i class="bi bi-envelope-at" style="position: absolute; left: 15px; color: #00e5ff; z-index: 5;"></i>
+            <input type="email" 
+                   name="email" 
+                   value="{{ form.email.value|default:'' }}"
+                   class="form-control-nexus" 
+                   placeholder="exemplo@email.com"
+                   style="padding-left: 45px; width: 100%;">
+        </div>
+    </div>
+</div>
 
         <div style="margin-bottom: 25px;">
             <label class="label-nexus">Endereço / Complemento</label>

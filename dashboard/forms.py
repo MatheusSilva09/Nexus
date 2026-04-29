@@ -29,6 +29,7 @@ class ClienteForm(forms.ModelForm):
             'telefone': forms.TextInput(attrs={
                 'class': 'form-control-nexus',
                 'placeholder': '(00) 00000-0000',
+                'style': 'padding-left: 45px;',
             }),
         }
 

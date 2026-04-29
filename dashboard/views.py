@@ -463,19 +463,32 @@ def cadastrar_cliente(request):
         email = request.POST.get('email')
         endereco = request.POST.get('endereco')
 
-        # 2. Criamos o objeto mas NÃO salvamos no banco ainda (commit=False)
-        novo_cliente = Cliente(
-            nome=nome,
-            telefone=telefone,
-            email=email,
-            endereco=endereco,
-            usuario=request.user  # AQUI ESTÁ A SOLUÇÃO: Vincula ao usuário logado
-        )
-        
-        # 3. Agora sim, salvamos com o ID do usuário preenchido
-        novo_cliente.save()
-        
-        return redirect('lista_clientes') # Redireciona para a tabela
+        # 2. VALIDAÇÃO DE INTEGRIDADE: Verifica se o e-mail já existe (caso seja unique no model)
+        if email and Cliente.objects.filter(email=email).exists():
+            messages.error(request, "Este e-mail já está cadastrado para outro cliente.")
+            return render(request, 'cliente_form.html', {
+                'nome': nome, 'telefone': telefone, 'endereco': endereco
+            })
+
+        # 3. Criamos o objeto vinculado ao usuário logado
+        try:
+            novo_cliente = Cliente(
+                nome=nome,
+                telefone=telefone,
+                email=email,
+                endereco=endereco,
+                usuario=request.user
+            )
+            
+            # 4. Salvamento seguro
+            novo_cliente.save()
+            messages.success(request, f"Cliente {nome} cadastrado com sucesso!")
+            return redirect('lista_clientes')
+            
+        except Exception as e:
+            # Captura qualquer outro erro de integridade não previsto
+            messages.error(request, "Erro ao salvar: Verifique se os dados estão repetidos.")
+            return render(request, 'cliente_form.html')
 
     return render(request, 'cliente_form.html')
 
