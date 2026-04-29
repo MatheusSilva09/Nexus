@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-light mb-4" style="border-left: 5px solid #00ced1; padding-left: 15px;">
+        Faturamento Diário
+    </h2>
+
+    <div class="card border-0 shadow-sm p-4" style="background-color: #1e293b;">
+        <canvas id="faturamentoChart" height="100"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('faturamentoChart').getContext('2d');
+    
+    // Gradiente Turquesa para o preenchimento
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(0, 206, 209, 0.4)');
+    gradient.addColorStop(1, 'rgba(0, 206, 209, 0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: 'Faturamento (R$)',
+                data: {{ valores|safe }},
+                borderColor: '#00ced1',
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.4, // Gráfico curvo
+                borderWidth: 3,
+                pointBackgroundColor: '#0f172a',
+                pointBorderColor: '#00ced1',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: '#f8fafc' } }
+            },
+            scales: {
+                y: {
+                    grid: { color: '#334155' },
+                    ticks: { color: '#94a3b8', callback: (v) => 'R$ ' + v }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94a3b8' }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

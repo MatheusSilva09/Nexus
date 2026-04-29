@@ -1,32 +1,381 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-4">
-    <h2>Clientes</h2>
-    <a href="{% url 'adicionar_cliente' %}" class="btn btn-success">+ Novo Cliente</a>
+<style>
+    .btn-nexus-add {
+        background-color: #00e5ff !important;
+        /* Ciano vibrante - Forçando com !important */
+        border: none !important;
+        color: #000000 !important;
+        /* Texto preto para alto contraste */
+        padding: 10px 24px !important;
+        border-radius: 12px !important;
+        /* Cantos arredondados conforme imagem */
+        text-decoration: none !important;
+        font-size: 0.95rem;
+        font-weight: 800 !important;
+        /* Negrito pesado conforme ref */
+        text-transform: uppercase;
+        /* Texto em caixa alta */
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s ease-in-out;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        /* Brilho suave de profundidade */
+        cursor: pointer;
+    }
+
+    .btn-nexus-add:hover {
+        background-color: #00b8cc !important;
+        /* Escurece levemente ao passar o mouse */
+        transform: translateY(-1px);
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+    }
+
+    .nexus-container {
+        padding: 20px;
+        color: #ffffff;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .nexus-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 0 10px;
+    }
+
+    .nexus-title {
+        font-size: 1.4rem !important;
+        font-weight: 400 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1.5px !important;
+        margin: 0 !important;
+        color: #ffffff !important;
+    }
+
+    .nexus-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .nexus-title-icon {
+        color: #00d1ff;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Tabela e Ações */
+    .nexus-table-wrapper {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+    }
+
+    .nexus-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .nexus-table th {
+        padding: 15px 20px;
+        color: #00d1ff;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        background: rgba(0, 209, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nexus-table td {
+        padding: 14px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: #e0e0e0;
+        font-size: 0.9rem;
+    }
+
+    .nexus-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .nexus-modal-content {
+        background: #0b1120;
+        border: 1px solid #ff4444;
+        /* Borda vermelha conforme o print */
+        border-radius: 12px;
+        padding: 30px;
+        width: 450px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(255, 68, 68, 0.2);
+    }
+
+    .nexus-modal-icon {
+        color: #ff4444;
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    .nexus-modal-title {
+        color: #ff4444;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
+
+    .nexus-modal-text {
+        color: #ffffff;
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+
+    .nexus-highlight {
+        color: #00d9ff;
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+    .nexus-modal-footer {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .btn-nexus-modal {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .btn-confirm {
+        background: transparent;
+        border: 1px solid #ff4444;
+        color: #ff4444;
+    }
+
+    .btn-confirm:hover {
+        background: #ff4444;
+        color: white;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        border: 1px solid #00d9ff;
+        color: #00d9ff;
+    }
+
+    .btn-cancel:hover {
+        background: #00d9ff;
+        color: #0b1120;
+    }
+
+    .nexus-modal-content h2 {
+        color: #ff4444;
+        letter-spacing: 2px;
+        font-size: 1.5rem;
+    }
+
+    .nexus-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .nexus-modal-card {
+        background: #0b1120;
+        border: 1px solid #ff4444;
+        border-radius: 15px;
+        padding: 40px;
+        width: 500px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(255, 68, 68, 0.15);
+    }
+
+    .highlight-text {
+        color: #00d9ff;
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+        justify-content: center;
+    }
+
+    .btn-modal {
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+    }
+
+    .btn-confirm-delete {
+        background: transparent;
+        border: 1px solid #ff4444;
+        color: #ff4444;
+    }
+
+    .btn-confirm-delete:hover {
+        background: #ff4444;
+        color: white;
+    }
+
+    .actions-cell {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        border: 1px solid transparent;
+    }
+
+    .btn-edit {
+        color: #00d1ff;
+        border-color: rgba(0, 209, 255, 0.2);
+    }
+
+    .btn-delete {
+        color: #ff4d4d;
+        border-color: rgba(255, 77, 77, 0.2);
+    }
+
+    .empty-row {
+        text-align: center;
+        padding: 50px !important;
+        color: #555;
+    }
+</style>
+
+<div class="nexus-container">
+    <header class="nexus-header">
+        <div class="nexus-title-wrapper">
+            <div class="nexus-title-icon">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <h1 class="nexus-title">Clientes</h1>
+        </div>
+
+        <a href="{% url 'cadastrar_cliente' %}" class="btn-nexus-add">
+            <i class="bi bi-plus" style="font-size: 1.4rem; -webkit-text-stroke: 1px;"></i> NOVO CLIENTE
+        </a>
+    </header>
+
+    <div class="nexus-table-wrapper">
+        <table class="nexus-table">
+            <thead>
+                <tr>
+                    <th>Nome do Cliente</th>
+                    <th>Telefone</th>
+                    <th style="width: 180px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.nome }}</td>
+                    <td>{{ cliente.telefone }}</td>
+                    <td class="actions-cell">
+                        <a href="{% url 'editar_cliente' cliente.id %}" class="btn-action btn-edit">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </a>
+                        <a href="javascript:void(0)"
+                            onclick="abrirModalExclusao('{{ cliente.id }}', '{{ cliente.nome }}')"
+                            class="btn-action btn-delete">
+                            <i class="bi bi-trash3"></i> Excluir
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="empty-row">Nenhum cliente registado na base de dados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+<div id="nexusDeleteModal" class="nexus-modal-backdrop" style="display: none;">
+    <div class="nexus-modal-card">
+        <div class="nexus-modal-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h2 class="nexus-modal-title">CONFIRMAR EXCLUSÃO</h2>
+        <p class="nexus-modal-text">
+            Deseja realmente excluir o cliente <span id="modalClienteNome" class="nexus-highlight"></span>?
+        </p>
+
+        <div class="nexus-modal-footer">
+            <a id="btnConfirmarNexus" href="#" class="btn-nexus-modal btn-confirm">
+                <i class="bi bi-trash"></i> SIM, EXCLUIR CLIENTE
+            </a>
+            <button onclick="fecharModalNexus()" class="btn-nexus-modal btn-cancel">
+                <i class="bi bi-x-circle"></i> CANCELAR
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    function abrirModalExclusao(id, nome) {
+        document.getElementById('modalClienteNome').innerText = nome;
+        // Ajusta a URL para o ID específico do cliente
+        document.getElementById('btnConfirmarNexus').href = "/clientes/excluir/" + id + "/";
+        document.getElementById('nexusDeleteModal').style.display = 'flex';
+    }
+
+    function fecharModalNexus() {
+        document.getElementById('nexusDeleteModal').style.display = 'none';
+    }
+
+    // Fechar se o usuário clicar no fundo escuro
+    window.onclick = function (event) {
+        const modal = document.getElementById('nexusDeleteModal');
+        if (event.target == modal) {
+            fecharModalNexus();
+        }
+    }
+</script>
 </div>
 
-<table class="table table-dark table-hover">
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Telefone</th>
-            <th class="text-center">Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for cliente in clientes %}
-        <tr>
-            <td>{{ cliente.nome }}</td>
-            <td>{{ cliente.email|default:"-" }}</td>
-            <td>{{ cliente.telefone|default:"-" }}</td>
-            <td class="text-center">
-                <a href="{% url 'editar_cliente' cliente.id %}" class="btn btn-sm btn-outline-warning">Editar</a>
-                <a href="{% url 'excluir_cliente' cliente.id %}" class="btn btn-sm btn-outline-danger">Excluir</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 {% endblock %}

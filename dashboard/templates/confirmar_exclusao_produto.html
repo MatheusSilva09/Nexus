@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* --- ESTRUTURA DO CARD DE EXCLUSÃO --- */
+    .delete-confirm-container {
+        min-height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .delete-confirm-card {
+        background: rgba(15, 23, 42, 0.6) !important;
+        backdrop-filter: blur(15px);
+        border: 1px solid #ff4444 !important;
+        /* Borda de alerta */
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 0 30px rgba(255, 68, 68, 0.15);
+        max-width: 550px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .delete-title {
+        color: #ff4444;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
+        margin-bottom: 25px;
+        font-size: 1.8rem;
+    }
+
+    .delete-text {
+        color: #e2e8f0;
+        font-size: 1.1rem;
+        margin-bottom: 35px;
+        line-height: 1.6;
+    }
+
+    .product-name-highlight {
+        color: var(--turquesa-brilhante);
+        font-weight: 800;
+        text-decoration: underline;
+    }
+
+    /* --- BOTÕES SIMÉTRICOS E SLIM --- */
+    .btn-delete-confirm,
+    .btn-cancel-delete {
+        min-width: 200px;
+        /* Largura idêntica para simetria */
+        height: 42px;
+        /* Espessura reduzida (Slim) */
+        background: transparent;
+        padding: 0 20px;
+        border-radius: 8px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+        border: none;
+    }
+
+    /* Botão Sim, Excluir (Vermelho Glow) */
+    .btn-delete-confirm {
+        border: 1px solid #ff4444 !important;
+        color: #ff4444 !important;
+    }
+
+    .btn-delete-confirm:hover {
+        background: #ff4444 !important;
+        color: #020617 !important;
+        box-shadow: 0 0 20px rgba(255, 68, 68, 0.6);
+        transform: translateY(-2px);
+    }
+
+    /* Botão Cancelar (Turquesa Corporativo) */
+    .btn-cancel-delete {
+        border: 1px solid var(--turquesa-brilhante) !important;
+        color: var(--turquesa-brilhante) !important;
+    }
+
+    .btn-cancel-delete:hover {
+        background: var(--turquesa-brilhante) !important;
+        color: #020617 !important;
+        box-shadow: 0 0 20px var(--turquesa-glow);
+        transform: translateY(-2px);
+    }
+
+    .delete-actions {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+</style>
+
+<div class="delete-confirm-container">
+    <div class="delete-confirm-card">
+        <i class="bi bi-exclamation-triangle"
+            style="font-size: 3rem; color: #ff4444; display: block; margin-bottom: 15px;"></i>
+
+        <h2 class="delete-title">Confirmar Exclusão</h2>
+
+        <p class="delete-text">
+            Deseja realmente excluir o produto</strong>
+                <span class="product-name-highlight">{{ produto.nome }}</span>?
+        </p>
+
+        <div class="delete-actions">
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-delete-confirm">
+                    <i class="bi bi-trash-fill me-2"></i>Sim, excluir produto
+                </button>
+            </form>
+
+            <a href="{% url 'lista_estoque' %}" class="btn-cancel-delete">
+                <i class="bi bi-x-circle me-2"></i>Cancelar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

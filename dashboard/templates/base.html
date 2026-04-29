@@ -1,183 +1,448 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Nexus Hub{% endblock %}</title>
+    <title>{% block title %}NEXUS HUB{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        /* Variáveis de Cores para facilitar manutenção */
+        /* --- Estética Cyberpunk Corporativo Mantida --- */
         :root {
-            --turquesa-brilhante: #00f2fe;
-            --turquesa-medio: #00c9ff;
+            --nexus-blue: #2563eb;
+            --nexus-blue-glow: rgba(37, 99, 235, 0.4);
             --azul-profundo: #020617;
             --azul-card: #0f172a;
-            --texto-muted: #94a3b8;
             --borda: #1e293b;
+            --texto-muted: #94a3b8;
+            --turquesa-brilhante: #00f2fe;
+            --turquesa-glow: rgba(0, 242, 254, 0.3);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        
-        body { 
-            background: linear-gradient(135deg, #00f2fe 0%, #00c9ff 50%, #0891b2 100%);
-            color: #fff; 
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-content {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 100%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .app-wrapper {
+            display: flex;
             min-height: 100vh;
-            background-attachment: fixed; /* Mantém o degradê parado ao rolar */
-        }
-        
-        /* Sidebar ajustada para o Turquesa */
-        .sidebar { 
-            width: 240px; 
-            height: 100vh; 
-            background: var(--azul-profundo); 
-            position: fixed; 
-            padding: 20px; 
-            border-right: 1px solid var(--borda);
-            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-        
-        .sidebar h2 { 
-            color: var(--turquesa-brilhante); 
-            margin-bottom: 30px; 
-            font-size: 1.5rem; 
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.3));
+            width: 100%;
         }
 
-        .sidebar ul { list-style: none; }
-        
-        .sidebar li a { 
-            color: var(--texto-muted); 
-            text-decoration: none; 
-            display: block; 
-            padding: 12px 15px; 
-            margin: 8px 0; 
-            border-radius: 10px; 
-            transition: all 0.3s ease; 
-        }
-
-        .sidebar li a:hover { 
-            background: rgba(0, 242, 254, 0.1); 
-            color: var(--turquesa-brilhante);
-            transform: translateX(5px);
-        }
-
-        .sidebar li.active a { 
-            background: linear-gradient(90deg, rgba(0, 242, 254, 0.2), transparent); 
-            color: var(--turquesa-brilhante); 
-            font-weight: bold;
-            border-left: 4px solid var(--turquesa-brilhante);
-        }
-
-        /* Header e Main com transparência para revelar o fundo */
-        .header { 
-            margin-left: 240px; 
-            padding: 20px 40px; 
-            background: rgba(2, 6, 23, 0.8); 
+        /* Sidebar Glassmorphism com o Novo Espaçamento */
+        .sidebar {
+            width: 240px;
+            flex-shrink: 0;
+            background: rgba(2, 6, 23, 0.8);
             backdrop-filter: blur(10px);
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 1px solid var(--borda);
+            border-right: 1px solid var(--borda);
+            display: flex;
+            flex-direction: column;
+            padding: 10px 20px;
             position: sticky;
             top: 0;
-            z-index: 999;
+            height: 100vh;
+            z-index: 1000;
         }
 
-        .main { 
-            margin-left: 240px; 
-            padding: 40px; 
+        .sidebar-brand {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        /* Estilo dos Botões conforme a paleta de login */
-        .logout-btn { 
-            background: transparent;
-            color: var(--turquesa-brilhante); 
-            border: 1px solid var(--turquesa-brilhante); 
-            padding: 0.5rem 1.2rem; 
-            border-radius: 8px; 
-            text-decoration: none; 
-            transition: 0.3s; 
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.8rem;
+        .sidebar-logo {
+            max-width: 180px;
+            filter: drop-shadow(0 0 8px var(--nexus-blue-glow));
         }
 
-        .logout-btn:hover { 
-            background: var(--turquesa-brilhante); 
-            color: var(--azul-profundo); 
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
         }
 
-        /* Dropdown customizado */
+        /* Estilo dos Links com Espaçamento de Ícone Melhorado */
+        .sidebar li a,
+        .sidebar .dropdown-toggle {
+            color: var(--texto-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: 0.3s all;
+            border: 1px solid transparent;
+            margin-bottom: 4px;
+        }
+
+        /* Reversão dos Ícones: Largura fixa e cores originais */
+        .sidebar li a i,
+        .sidebar .dropdown-toggle i {
+            width: 1.5rem;
+            display: flex;
+            justify-content: center;
+            margin-right: 14px;
+            /* Espaçamento refinado entre ícone e texto */
+            font-size: 1.2rem;
+            color: var(--nexus-blue);
+            transition: 0.3s;
+        }
+
+        .sidebar li a:hover,
+        .sidebar .dropdown-toggle:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--turquesa-brilhante);
+            border-color: rgba(0, 242, 254, 0.2);
+        }
+
+        .sidebar li a:hover i,
+        .sidebar .dropdown-toggle:hover i {
+            color: var(--turquesa-brilhante);
+            filter: drop-shadow(0 0 5px var(--turquesa-glow));
+        }
+
+        .sidebar li.active a {
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.2) 0%, transparent 100%);
+            border-left: 4px solid var(--turquesa-brilhante);
+            color: #fff;
+            box-shadow: -5px 0 15px rgba(0, 242, 254, 0.1);
+        }
+
+        /* Dropdown e Header */
         .dropdown-menu {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        
-        .dropdown-item:hover {
-            background-color: rgba(0, 242, 254, 0.1) !important;
-            color: #fff !important;
+            background: #0f172a !important;
+            border: 1px solid var(--borda) !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
         }
 
-        /* Estilo para os blocos de conteúdo (Cards) */
-        .content-block {
-            background: var(--azul-card);
-            border-radius: 15px;
+        .main-layout {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .header {
+            height: 70px;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--nexus-blue-glow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .page-title-glow {
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--turquesa-brilhante), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 5px var(--turquesa-glow));
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .logout-btn {
+            border: 1px solid var(--turquesa-brilhante);
+            color: var(--turquesa-brilhante);
+            padding: 6px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: var(--turquesa-brilhante);
+            color: var(--azul-profundo);
+            box-shadow: 0 0 15px var(--turquesa-glow);
+            transform: translateY(-2px);
+        }
+
+        .nexus-main-content {
+            flex: 1 0 auto;
+            padding: 40px;
+            opacity: 0;
+        }
+
+        .rodape {
             padding: 25px;
-            border: 1px solid rgba(0, 242, 254, 0.1);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            text-align: center;
+            background: linear-gradient(0deg, rgba(2, 6, 23, 0.9) 0%, transparent 100%);
+            border-top: 1px solid var(--borda);
+        }
+
+        /* --- Modal de Exclusão Nexus --- */
+        .nexus-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nexus-modal-content {
+            background: #0f172a;
+            border: 1px solid #ef4444;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+            animation: fadeInUp 0.3s ease-out forwards;
+        }
+
+        .modal-header-alert {
+            background: rgba(239, 68, 68, 0.1);
+            padding: 15px;
+            color: #ef4444;
+            font-weight: 800;
+            border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .modal-body-nexus {
+            padding: 25px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .modal-footer-nexus {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-nexus-cancel {
+            background: transparent;
+            border: 1px solid var(--texto-muted);
+            color: var(--texto-muted);
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        .btn-nexus-confirm {
+            background: #ef4444;
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            transition: 0.3s;
+        }
+
+        .btn-nexus-confirm:hover {
+            background: #dc2626;
+            box-shadow: 0 0 25px #ef4444;
         }
     </style>
 </head>
-<body>
 
-    <div class="sidebar">
-        <h2>Nexus Hub</h2>
-        <ul>
-            <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
-                <a href="{% url 'home' %}">Painel</a>
-            </li>
-            <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
-                <a href="{% url 'lista_estoque' %}">Estoque</a>
-            </li>
-            <li class="{% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
-                <a href="{% url 'lista_clientes' %}">Clientes</a>
-            </li>
-            
-            <li class="nav-item dropdown mt-3">
-                <a href="#" class="d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    Minha Loja
-                </a>
-                <ul class="dropdown-menu" style="background: #020617; border: 1px solid #1e293b;">
-                    <li><a class="dropdown-item" href="{% url 'ver_loja' %}" style="color: #94a3b8;">Ver Loja</a></li>
-                    <li><a class="dropdown-item" href="{% url 'criar_loja' %}" style="color: #94a3b8;">Criar/editar Loja</a></li>
-                    <li><hr class="dropdown-divider" style="border-color: #1e293b;"></li>
-                    <li><a class="dropdown-item" href="{% url 'excluir_loja' %}" style="color: #ef4444;">Excluir Loja</a></li>
-                </ul>
-            </li>
-        </ul>
+<body>
+    <div class="app-wrapper">
+        <nav class="sidebar">
+            <div class="sidebar-brand">
+                <img src="{% static 'img/nexushub.png' %}" alt="NEXUS Hub" class="sidebar-logo">
+            </div>
+            <ul>
+                <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <a href="{% url 'home' %}"><i class="bi bi-house-door-fill"></i> Painel</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
+                    <a href="{% url 'lista_estoque' %}"><i class="bi bi-box-seam-fill"></i> Estoque</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
+                    <a href="{% url 'lista_clientes' %}"><i class="bi bi-people-fill"></i> Clientes</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-shop"></i> Minha Loja
+                    </a>
+                    <ul class="dropdown-menu">
+                        {% if loja %}
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{% url 'ver_loja' %}"
+                                style="color: var(--texto-muted);">
+                                <i class="bi bi-eye-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
+                                Ver Loja
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{% url 'editar_loja' %}"
+                                style="color: var(--texto-muted);">
+                                <i class="bi bi-gear-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
+                                Configurar
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider" style="border-color: var(--borda);">
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)"
+                                onclick="openNexusModal()" style="color: #ef4444;">
+                                <i class="bi bi-trash3-fill me-2"></i> Excluir {{ loja.nome }}
+                            </a>
+                        </li>
+                        {% else %}
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{% url 'criar_loja' %}"
+                                style="color: var(--texto-muted);">
+                                <i class="bi bi-plus-circle me-2"
+                                    style="font-size: 1rem; color: var(--nexus-blue);"></i>
+                                Criar Minha Loja
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="main-layout">
+            <header class="header">
+                <div class="page-title-glow">
+                    {% block page_title %}Dashboard{% endblock %}
+                </div>
+                <div class="user-info d-flex align-items-center gap-4">
+                    <span style="color: #e2e8f0; font-size: 0.9rem;">
+                        <i class="bi bi-person-circle me-1" style="color: var(--turquesa-brilhante);"></i>
+                        Bem-vindo, <strong>{{ user.username }}</strong>!
+                    </span>
+                    <a href="/logout/" class="logout-btn">Sair</a>
+                </div>
+            </header>
+
+            <main class="nexus-main-content" id="main-content">
+                {% if messages %}
+                <div class="messages-container" style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}"
+                        style="background: #1e293b; color: #38bdf8; border: 1px solid #0ea5e9; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% block content %}
+                {% endblock %}
+            </main>
+
+            <footer class="rodape">
+                <p style="color: var(--texto-muted); font-size: 0.85rem; margin: 0;">
+                    &copy; {% now "Y" %} <strong style="color: #fff;">NEXUS HUB</strong> — Gestão Inteligente | Todos os
+                    direitos reservados.
+                </p>
+            </footer>
+        </main>
     </div>
 
-    <div class="header">
-        <div style="font-size: 1.2rem; font-weight: bold; color: var(--turquesa-brilhante);">
-            {% block page_title %}Dashboard{% endblock %}
-        </div>
-        <div class="user-info" style="display: flex; align-items: center; gap: 20px;">
-            <span style="color: #e2e8f0;">Bem-vindo, <strong>{{ user.username }}</strong>!</span>
-            <div class="user-actions">
-                <a href="/logout/" class="logout-btn">Sair</a>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const content = document.getElementById('main-content');
+            if (content) {
+                content.classList.add('fade-in-content');
+            }
+        });
+    </script>
+
+    <div id="nexusDeleteModal" class="nexus-modal-overlay" style="display: none;">
+        <div class="nexus-modal-content">
+            <div class="modal-header-alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>CONFIRMAR EXCLUSÃO</span>
+            </div>
+            <div class="modal-body-nexus">
+                <p>Aviso: Esta ação é irreversível. O acesso à loja e todos os dados serão excluídos permanentemente.
+                    Deseja continuar?</p>
+            </div>
+            <div class="modal-footer-nexus">
+                <button onclick="closeNexusModal()" class="btn-nexus-cancel">CANCELAR</button>
+
+                <form action="{% url 'excluir_loja' %}" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-nexus-confirm">EXCLUIR LOJA</button>
+                </form>
             </div>
         </div>
     </div>
 
-    <div class="main">
-        {% block content %}
-            {% endblock %}
-    </div>
+    <script>
+        function openNexusModal() {
+            document.getElementById('nexusDeleteModal').style.display = 'flex';
+        }
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        function closeNexusModal() {
+            document.getElementById('nexusDeleteModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('nexusDeleteModal');
+            if (event.target == modal) {
+                closeNexusModal();
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/imask"></script>
+    <script>
+        // Isso aplica a máscara em todos os campos que você marcar
+        var element = document.getElementById('id_telefone'); // O Django gera IDs com 'id_'
+        var maskOptions = { mask: '(00) 00000-0000' };
+        var mask = IMask(element, maskOptions);
+    </script>
 </body>
+
 </html>

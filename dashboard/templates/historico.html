@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-light mb-4" style="border-left: 5px solid #00ced1; padding-left: 15px;">
+        Meus Pedidos
+    </h2>
+
+    {% if pedidos %}
+    <div class="table-responsive rounded shadow-sm">
+        <table class="table table-hover align-middle" style="background-color: #1e293b; color: #f8fafc;">
+            <thead style="background-color: #0f172a; color: #00ced1;">
+                <tr>
+                    <th>Nº do Pedido</th>
+                    <th>Data</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th class="text-center">Detalhes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                <tr style="border-bottom: 1px solid #334155;">
+                    <td class="fw-bold">#{{ pedido.id }}</td>
+                    <td>{{ pedido.data_pedido|date:"d/m/Y H:i" }}</td>
+                    <td class="text-info">R$ {{ pedido.total }}</td>
+                    <td>
+                        {% if pedido.pago %}
+                        <span class="badge bg-success">Pago</span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark">Pendente</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <a href="{% url 'detalhe_pedido' pedido.id %}" class="btn btn-sm btn-outline-info">
+                            Ver Detalhes
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <p class="text-muted italic">Você ainda não realizou nenhum pedido.</p>
+        <a href="{% url 'vitrine_produtos' %}" class="btn mt-3" style="background-color: #00ced1; color: #0f172a;">
+            Ir para a Vitrine
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

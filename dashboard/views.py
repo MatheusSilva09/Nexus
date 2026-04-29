@@ -1,29 +1,111 @@
+import json
+from multiprocessing import context
+from urllib import request
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.views.generic import ListView
 from django.db import transaction
-from django.db.models import Sum, F
+from django.db.models import Sum, Count, F
+from django.db.models.functions import TruncDay
 from django.contrib.auth.decorators import user_passes_test
-from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor, Venda
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render, redirect
+
+from nexus import settings
+from .models import Produto, Categoria, Loja, Vendedor
+from .cart import Cart
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage, send_mail, mail_admins
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from .forms import LojaForm, ProdutoForm
+from .decorators import loja_obrigatoria
+from decimal import Decimal
 from django.contrib import messages
+
+from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor, Venda
+from .forms import ClienteForm
+
+# --- AUTENTICAÇÃO ---
+
+def login_view(request):
+    if request.method == 'POST':
+        user_nome = request.POST.get('username')
+        senha = request.POST.get('password')
+        user = authenticate(request, username=user_nome, password=senha)
+        
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, 'Usuário ou senha inválidos.')
+    return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login_view')
+
+@loja_obrigatoria
+def lista_estoque(request):
+    # Otimizamos a busca usando o perfil do vendedor
+    vendedor = Vendedor.objects.get(usuario=request.user)
+    
+    # Filtramos os produtos que pertencem à loja do vendedor logado
+    produtos = Produto.objects.filter(loja__vendedor=vendedor)
+    
+    return render(request, 'estoque.html', {'produtos': produtos})
+
+@loja_obrigatoria
+def lista_clientes(request):
+    # Sua lógica de clientes aqui...
+    return render(request, 'clientes.html')
 
 # --- DASHBOARD ---
 
+from django.shortcuts import render
+from .models import Produto, Cliente  # Ajuste conforme seus nomes de modelos
+
+def dashboard_view(request):
+    # 1. Total de itens em estoque (Soma de todas as quantidades)
+    # Se quiser apenas o número de produtos diferentes, use Produto.objects.count()
+    total_estoque = Produto.objects.all().count() 
+
+    # 2. Alertas de Baixo Estoque
+    # Filtra produtos onde a quantidade atual é menor ou igual ao mínimo definido
+    alertas_baixo_estoque = Produto.objects.filter(quantidade__lte=F('estoque_minimo')).count()
+
+    # 3. Clientes Ativos
+    total_clientes_ativos = Cliente.objects.filter(ativo=True).count()
+
+    # 4. Dados Adicionais (Ex: Novos clientes hoje)
+    from django.utils import timezone
+    hoje = timezone.now().date()
+    novos_clientes_hoje = Cliente.objects.filter(data_cadastro__date=hoje).count()
+
+    context = {
+        'total_estoque': total_estoque,
+        'alertas_baixo_estoque': alertas_baixo_estoque,
+        'total_clientes_ativos': total_clientes_ativos,
+        'novos_clientes_hoje': novos_clientes_hoje,
+        'loja_status': "Online",  # Pode ser dinâmico baseado em alguma lógica
+    }
+
+    return render(request, 'dashboard.html', context)
+
 @login_required
 def home(request):
+    if not hasattr(request.user, 'perfil'):
+        return render(request, 'erro.html', {'msg': 'Seu usuário não possui um perfil configurado.'})
+    
     perfil = request.user.perfil
-
     
-    
-    # Lógica de autoridade: O Hub vê tudo, o Vendedor vê sua loja
     if perfil.nivel == 'ADMIN':
-        produtos_loja = Produto.objects.all()  # Acesso total
+        produtos_loja = Produto.objects.all()
     else:
-        # Garante que o vendedor veja apenas sua própria loja
         produtos_loja = Produto.objects.filter(loja=perfil.loja)
 
-    # Cálculo das métricas (funciona para ambos, com filtros diferentes)
     total_estoque = produtos_loja.aggregate(total=Sum(F('preco') * F('estoque')))['total'] or 0
     avisos = produtos_loja.filter(estoque__lte=F('estoque_minimo')).count()
     
@@ -32,353 +114,474 @@ def home(request):
         'vendas': produtos_loja.count(),
         'avisos': avisos,
         'produtos': produtos_loja[:5],
-        'nivel': perfil.nivel, # Útil para exibir elementos diferentes no HTML (ex: botão de 'Gestão Global')
+        'nivel': perfil.nivel,
     }
-    if not hasattr(request.user, 'perfil'):
-        # Opção: criar um perfil padrão automaticamente ou avisar o usuário
-        return render(request, 'erro.html', {'msg': 'Seu usuário não possui um perfil configurado.'})
-    
-    perfil = request.user.perfil
     return render(request, 'dashboard.html', context)
 
-@login_required
-def profile(request):
-    return render(request, "profile.html")
+def dashboard_faturamento(request):
+    # Agrupa pedidos por dia e soma o faturamento
+    dados_vendas = (
+        Pedido.objects.filter(pago=True)
+        .annotate(dia=TruncDay('data_pedido'))
+        .values('dia')
+        .annotate(total_dia=Sum('total'))
+        .order_by('dia')
+    )
 
-def login_view(request):
-    if request.method == 'POST':
-        user_nome = request.POST.get('username')
-        senha = request.POST.get('password')
-        
-        user = authenticate(request, username=user_nome, password=senha)
-        
-        if user is not None:
-            login(request, user)
-            # Redireciona para home, onde já temos a lógica de Perfil
-            return redirect('home')
-        else:
-            messages.error(request, 'Usuário ou senha inválidos.')
-            
-    return render(request, 'login.html')
+    # Prepara listas para o Chart.js
+    labels = [d['dia'].strftime('%d/%m') for d in dados_vendas]
+    valores = [float(d['total_dia']) for d in dados_vendas]
 
-def logout_view(request):
-    logout(request)
-    return redirect('login_view')
-
+    return render(request, 'admin_stats.html', {
+        'labels': json.dumps(labels),
+        'valores': json.dumps(valores),
+    })
+    
 # --- ESTOQUE E PRODUTOS ---
 
 @login_required
 def lista_estoque(request):
+    # Base da query (filtrada pelo usuário logado)
     produtos = Produto.objects.filter(loja__vendedor__usuario=request.user)
-    nome_filtro = request.GET.get('nome')
-    if nome_filtro:
-        produtos = produtos.filter(nome__icontains=nome_filtro)
+    
+    # Filtro de estoque baixo (opcional, se você já usa)
     if request.GET.get('baixo_estoque'):
         produtos = produtos.filter(estoque__lte=F('estoque_minimo'))
-    return render(request, 'estoque_lista.html', {'produtos': produtos})
 
-@login_required
-def adicionar_produto(request):
-    # 1. Verifica se a loja existe ANTES de qualquer processamento
-    try:
-        loja = request.user.vendedor.loja
-    except (Vendedor.DoesNotExist, AttributeError, Loja.DoesNotExist):
-        return render(request, 'erro.html', {'msg': 'Você precisa criar uma loja antes de cadastrar produtos!'})
+    # Cálculos de Agregação
+    totais = produtos.aggregate(
+        total_itens=Count('id'),
+        valor_estoque=Sum(F('preco') * F('estoque'))
+    )
 
-    # 2. Processa o POST apenas uma vez
-    if request.method == 'POST':
-        Produto.objects.create(
-            loja=loja, # Usamos a loja recuperada acima
-            nome=request.POST.get('nome'),
-            preco=request.POST.get('preco'),
-            estoque=request.POST.get('estoque'),
-            estoque_minimo=request.POST.get('estoque_minimo')
-        )
+    context = {
+        'produtos': produtos,
+        'total_itens': totais['total_itens'] or 0,
+        'valor_estoque': totais['valor_estoque'] or 0,
+    }
+    return render(request, 'estoque_lista.html', context)
 
-@login_required
-def adicionar_produto(request):
-    try:
-        loja = request.user.vendedor.loja
-    except (Vendedor.DoesNotExist, AttributeError, Loja.DoesNotExist):
-        return render(request, 'erro.html', {'msg': 'Você precisa criar uma loja antes de cadastrar produtos!'})
+class ListaEstoqueView(ListView):
+    model = Produto
+    template_name = 'estoque.html'
+
+    def get_queryset(self):
+        vendedor = Vendedor.objects.get(usuario=self.request.user)
+        return Produto.objects.filter(loja__vendedor=vendedor)
+
+def vitrine_produtos(request):
+    produtos = Produto.objects.filter(quantidade__gt=0)
     
-    if request.method == 'POST':
-        # Usamos o or '0' para garantir que, se vier vazio, ele salve como 0
-        estoque = request.POST.get('estoque') or '0'
-        estoque_minimo = request.POST.get('estoque_minimo') or '0'
+    return render(request, 'vitrine.html', {'produtos': produtos})
+
+def cadastrar_produto(request):
+    categorias = Categoria.objects.all()
+
+    if request.method == "POST":
+        # 1. Captura de dados brutos
+        nome = request.POST.get('nome')
+        descricao = request.POST.get('descricao', '')
+        categoria_id = request.POST.get('categoria')
         
-        Produto.objects.create(
-            loja=loja,
-            nome=request.POST.get('nome'),
-            preco=request.POST.get('preco') or '0.0',
-            estoque=estoque,
-            estoque_minimo=estoque_minimo
-        )
-        return redirect('lista_estoque')
-    
-    return render(request, 'produto_form.html')
+        # 2. Tratamento de Números (Estoque e Estoque Mínimo)
+        # Usamos .isdigit() para evitar o erro "expected a number but got ''"
+        estoque_raw = request.POST.get('estoque', '0')
+        estoque = int(estoque_raw) if estoque_raw.isdigit() else 0
+        
+        estoque_min_raw = request.POST.get('estoque_minimo', '5')
+        estoque_minimo = int(estoque_min_raw) if estoque_min_raw.isdigit() else 5
 
-    return redirect('lista_estoque') # Redireciona para a sua lista de produtos
+        # 3. Tratamento de Preço (Conversão de R$ para Decimal)
+        preco_raw = request.POST.get('preco', '0,00')
+        try:
+            # Remove símbolos para o banco entender como número (ex: 1.250,50 -> 1250.50)
+            preco_limpo = preco_raw.replace('R$', '').replace('.', '').replace(',', '.').strip()
+            preco_final = Decimal(preco_limpo)
+        except:
+            preco_final = Decimal('0.00')
 
+        # 4. Lógica de Salvamento Protegida
+        try:
+            vendedor = request.user.vendedor_perfil
+            loja_vinculada = Loja.objects.get(vendedor=vendedor)
+            
+            # Buscamos a instância única da categoria, não a lista toda
+            categoria_instancia = Categoria.objects.filter(id=categoria_id).first()
+
+            Produto.objects.create(
+                loja=loja_vinculada,
+                categoria=categoria_instancia,
+                nome=nome,
+                descricao=descricao,
+                preco=preco_final,
+                estoque=estoque,
+                estoque_minimo=estoque_minimo
+            )
+            return redirect('lista_estoque')
+            
+        except Loja.DoesNotExist:
+            # Se o vendedor ainda não criou uma loja, redirecionamos
+            return redirect('criar_loja')
+        except Exception as e:
+            # Caso ocorra algum erro inesperado (ex: erro de banco)
+            print(f"Erro ao salvar produto: {e}")
+
+    # Retorno padrão para método GET ou se o salvamento falhar
+    return render(request, 'produto_form.html', {'categorias': categorias})
 
 @login_required
 def editar_produto(request, produto_id):
+    # Busca o produto ou retorna 404 se não existir/não for do usuário
     produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
+    categorias = Categoria.objects.all()
+    
     if request.method == 'POST':
+        # Atualiza os dados vindo do formulário
         produto.nome = request.POST.get('nome')
         produto.preco = request.POST.get('preco')
         produto.estoque = request.POST.get('estoque')
         produto.estoque_minimo = request.POST.get('estoque_minimo')
         produto.save()
+        
+        messages.success(request, f"Produto '{produto.nome}' atualizado com sucesso!")
         return redirect('lista_estoque')
-    return render(request, 'produto_editar.html', {'produto': produto})
+    
+    context = {
+        'produto': produto,
+        'categorias': categorias,
+    }
+    return render(request, 'editar_produto.html', context, {'produto': produto, 'categorias': categorias})
 
 @login_required
 def excluir_produto(request, produto_id):
+    # Busca o produto garantindo que ele pertença à loja do usuário
     produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
-    produto.delete()
-    return redirect('lista_estoque')
-
-@login_required
-def atualizar_quantidade_estoque(request, produto_id):
-    if request.method == "POST":
-        produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
-        nova_quantidade = int(request.POST.get('quantidade', 0))
-        operacao = request.POST.get('operacao')
-        if operacao == 'adicionar':
-            produto.estoque += nova_quantidade
-        else:
-            produto.estoque = nova_quantidade
-        produto.save()
-        return redirect('lista_estoque')
-    return redirect('lista_estoque')
-
-# --- VENDAS E CLIENTES ---
-
-@login_required
-def finalizar_pedido(request):
-    carrinho = Carrinho.objects.get(cliente__usuario=request.user)
-    itens_carrinho = carrinho.itens.all()
-    if not itens_carrinho:
-        return render(request, 'erro.html', {'msg': 'Seu carrinho está vazio!'})
-    try:
-        with transaction.atomic():
-            novo_pedido = Pedido.objects.create(
-                cliente=request.user.cliente,
-                total=0,
-                status='Aguardando Pagamento'
-            )
-            valor_total = 0
-            for item in itens_carrinho:
-                produto = item.produto
-                if produto.estoque < item.quantidade:
-                    raise ValueError(f"Estoque insuficiente para {produto.nome}")
-                ItemPedido.objects.create(
-                    pedido=novo_pedido,
-                    produto=produto,
-                    quantidade=item.quantidade,
-                    preco=produto.preco
-                )
-                produto.estoque -= item.quantidade
-                produto.save()
-                valor_total += (produto.preco * item.quantidade)
-            novo_pedido.total = valor_total
-            novo_pedido.save()
-            itens_carrinho.delete()
-        return render(request, 'sucesso.html', {'pedido': novo_pedido})
-    except ValueError as e:
-        return render(request, 'erro.html', {'msg': str(e)})
-
-@login_required
-def realizar_venda(request, produto_id):
-    produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
+    
     if request.method == 'POST':
-        quantidade = int(request.POST.get('quantidade', 1))
-        if produto.estoque >= quantidade:
-            produto.estoque -= quantidade
-            produto.save()
-            return redirect('lista_estoque')
-        return render(request, 'venda_form.html', {'produto': produto, 'erro': "Estoque insuficiente!"})
-    return render(request, 'venda_form.html', {'produto': produto})
+        produto.delete()
+        return redirect('lista_estoque')
+        
+    return render(request, 'confirmar_exclusao_produto.html', {'produto': produto})
+
+def alternar_status_produto(request, produto_id):
+    produto = get_object_or_404(Produto, id=produto_id, loja=request.user.vendedor.loja)
+    produto.ativo = not produto.ativo
+    produto.save()
+    return redirect('gerenciamento_estoque')
+
+def adicionar_ao_carrinho(request, produto_id):
+    cart = Cart(request)
+    produto = get_object_or_404(Produto, id=produto_id)
+    cart.add(produto_id=produto.id)
+    return redirect('vitrine_produtos')
+
+def ver_carrinho(request):
+    cart = Cart(request)
+    itens_carrinho = []
+    total_geral = 0
+
+    # Percorre os IDs guardados na sessão
+    for produto_id, dados in cart.cart.items():
+        produto = Produto.objects.get(id=produto_id)
+        subtotal = produto.preco * dados['quantidade']
+        total_geral += subtotal
+        
+        itens_carrinho.append({
+            'produto': produto,
+            'quantidade': dados['quantidade'],
+            'subtotal': subtotal
+        })
+
+    return render(request, 'carrinho.html', {
+        'itens': itens_carrinho,
+        'total': total_geral
+    })
+    
+def remover_do_carrinho(request, produto_id):
+    cart = Cart(request)
+    cart.remove(produto_id)
+    return redirect('ver_carrinho')
+
+@transaction.atomic
+def finalizar_pedido(request):
+    cart = Cart(request)
+    if not cart.cart:
+        return redirect('vitrine_produtos')
+
+    # 1. Recupera o perfil do Cliente logado
+    cliente = request.user.perfil_cliente
+
+    # 2. Otimização: Busca todos os produtos do carrinho de uma só vez
+    ids_produtos = cart.cart.keys()
+    produtos_dict = {p.id: p for p in Produto.objects.filter(id__in=ids_produtos)}
+
+    # Calcula o total usando o dicionário em memória
+    total_geral = sum(produtos_dict[int(id)].preco * item['quantidade'] 
+                      for id, item in cart.cart.items())
+    
+    # Cria o Pedido principal
+    pedido = Pedido.objects.create(cliente=cliente, total=total_geral)
+
+    # 3. Transfere os itens da Sessão para o Banco (ItemPedido)
+    for produto_id, dados in cart.cart.items():
+        produto = produtos_dict[int(produto_id)]
+        
+        ItemPedido.objects.create(
+            pedido=pedido,
+            produto=produto,
+            preco=produto.preco,
+            quantidade=dados['quantidade']
+        )
+
+        # Baixa no estoque
+        produto.quantidade -= dados['quantidade']
+        produto.save()
+
+    # 4. Limpa o carrinho
+    request.session['cart'] = {}
+    
+    # 5. Processamento de E-mail e PDF (Protegido por try/except)
+    try:
+        # Gera o HTML do PDF
+        html_string = render_to_string('dashboard/pdf_pedido.html', {'pedido': pedido})
+        # Gera o PDF em memória
+        pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
+
+        # Monta o e-mail
+        assunto = f"Nexus Hub - Pedido #{pedido.id} Confirmado!"
+        corpo = f"Olá {pedido.cliente.usuario.username}, seu pedido foi recebido com sucesso. O comprovante está em anexo."
+        destinatario = [pedido.cliente.usuario.email]
+
+        email = EmailMessage(assunto, corpo, settings.EMAIL_HOST_USER, destinatario)
+        email.attach(f'pedido_{pedido.id}.pdf', pdf_file, 'application/pdf')
+        email.send()
+        
+    except Exception as e:
+        print(f"Aviso: Não foi possível gerar/enviar o PDF/E-mail. Erro: {e}")
+        
+    # 6. Notificação para o Administrador
+    try:
+        assunto_admin = f"🚨 NOVO PEDIDO: #{pedido.id}"
+        mensagem_admin = f"""
+        Um novo pedido foi finalizado no Nexus Hub!
+        Cliente: {pedido.cliente.usuario.username}
+        Valor Total: R$ {pedido.total}
+        Data: {pedido.data_pedido.strftime('%d/%m/%Y %H:%M')}
+
+        Acesse o painel para gerenciar a entrega.
+        """
+        email_admin = 'dono@loja.com'
+
+        send_mail(
+            assunto_admin,
+            mensagem_admin,
+            settings.EMAIL_HOST_USER,
+            [email_admin],
+            fail_silently=False,
+        )
+        
+        # Dispara o e-mail para todos da lista ADMINS
+        mail_admins(
+            f"Novo Pedido #{pedido.id}",
+            f"O cliente {pedido.cliente.usuario.username} acabou de comprar R$ {pedido.total}.",
+        )
+    except Exception as e:
+        print(f"Erro ao notificar admin: {e}")
+    
+    return render(request, 'pedido_confirmado.html', {'pedido': pedido})
+
+@login_required
+def detalhe_pedido(request, pedido_id):
+    # Busca o pedido ou retorna 404 se não existir
+    # Filtramos pelo cliente logado por segurança
+    pedido = get_object_or_404(Pedido, id=pedido_id, cliente=request.user.perfil_cliente)
+    
+    itens = pedido.itens.all()
+    
+    return render(request, 'detalhe_pedido.html', {
+        'pedido': pedido,
+        'itens': itens
+    })
+    
+@login_required
+def historico_pedidos(request):
+    # Busca todos os pedidos vinculados ao perfil_cliente do usuário logado
+    # .order_by('-data_pedido') garante que o mais recente apareça primeiro
+    pedidos = Pedido.objects.filter(
+        cliente=request.user.perfil_cliente
+    ).order_by('-data_pedido')
+    
+    return render(request, 'historico.html', {'pedidos': pedidos})
+
+def exportar_pedido_pdf(request, pedido_id):
+    # 1. Busca os dados
+    pedido = get_object_or_404(Pedido, id=pedido_id, cliente=request.user.perfil_cliente)
+    
+    # 2. Renderiza o HTML para uma string
+    html_string = render_to_string('dashboard/pdf_pedido.html', {'pedido': pedido})
+    
+    # 3. Cria o PDF
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
+    result = html.write_pdf()
+
+    # 4. Prepara a resposta do navegador
+    response = HttpResponse(result, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="pedido_{pedido.id}.pdf"'
+    
+    return response
+
+# --- CLIENTES ---
+
+@login_required
+def profile(request):
+    return render(request, "profile.html")
 
 @login_required
 def lista_clientes(request):
-    clientes = Cliente.objects.filter(loja__vendedor__usuario=request.user)
+    clientes = Cliente.objects.all()
     return render(request, 'lista_clientes.html', {'clientes': clientes})
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Cliente # Certifique-se de importar o modelo de Cliente
+@login_required # Garante que só usuários logados acessem
+def cadastrar_cliente(request):
+    if request.method == 'POST':
+        # 1. Pegamos os dados do formulário
+        nome = request.POST.get('nome')
+        telefone = request.POST.get('telefone')
+        email = request.POST.get('email')
+        endereco = request.POST.get('endereco')
+
+        # 2. Criamos o objeto mas NÃO salvamos no banco ainda (commit=False)
+        novo_cliente = Cliente(
+            nome=nome,
+            telefone=telefone,
+            email=email,
+            endereco=endereco,
+            usuario=request.user  # AQUI ESTÁ A SOLUÇÃO: Vincula ao usuário logado
+        )
+        
+        # 3. Agora sim, salvamos com o ID do usuário preenchido
+        novo_cliente.save()
+        
+        return redirect('lista_clientes') # Redireciona para a tabela
+
+    return render(request, 'cliente_form.html')
 
 @login_required
-def editar_cliente(request, cliente_id):
-    # Busca o cliente ou retorna 404 se não existir
-    cliente = get_object_or_404(Cliente, id=cliente_id)
+def editar_cliente(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk, usuario=request.user)
     
     if request.method == 'POST':
-        # Atualiza os dados vindo do formulário
         cliente.nome = request.POST.get('nome')
-        cliente.email = request.POST.get('email')
         cliente.telefone = request.POST.get('telefone')
+        cliente.email = request.POST.get('email')
+        cliente.endereco = request.POST.get('endereco')
         cliente.save()
         return redirect('lista_clientes')
-        
-    # Se for GET, renderiza o formulário (pode ser o mesmo 'cliente_form.html' que você usa para criar)
+
     return render(request, 'cliente_form.html', {'cliente': cliente})
 
 @login_required
-def excluir_cliente(request, cliente_id):
-    cliente = get_object_or_404(Cliente, id=cliente_id)
-    
-    if request.method == 'POST':
-        cliente.delete()
-        return redirect('lista_clientes')
-        
-    # Exibe uma página de confirmação antes de deletar
-    return render(request, 'excluir_cliente_confirmar.html', {'cliente': cliente})
+def excluir_cliente(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk, usuario=request.user)
+    cliente.delete()
+    return redirect('lista_clientes')
 
-@login_required
-def adicionar_cliente(request):
-    if request.method == 'POST':
-        Cliente.objects.create(
-            loja=request.user.vendedor.loja,
-            nome=request.POST.get('nome'),
-            telefone=request.POST.get('telefone', ''),
-            endereco=request.POST.get('endereco', '')
-        )
-        return redirect('lista_clientes')
-    return render(request, 'cliente_form.html')
-
-def is_nexus_hub(user):
-    return user.is_superuser or user.perfil.nivel == 'ADMIN'
-
-@user_passes_test(is_nexus_hub)
-def relatorio_global(request):
-    perfil = request.user.perfil
-    if perfil.nivel != 'ADMIN':
-        return redirect('home')
-    
-# --- LOJA ---
+# --- GESTÃO DE LOJA ---
 
 @login_required
 def criar_loja(request):
-    vendedor, created = Vendedor.objects.get_or_create(usuario=request.user)
+    vendedor = get_object_or_404(Vendedor, usuario=request.user)
     
-    # Verifica se já existe uma loja para esse vendedor
-    loja_existente = Loja.objects.filter(vendedor=vendedor).first()
+    # Se já tiver loja, redireciona para a edição para evitar duplicidade
+    if Loja.objects.filter(vendedor=vendedor).exists():
+        return redirect('editar_loja')
 
     if request.method == 'POST':
-        if loja_existente:
-            # Se já existe, apenas atualiza os dados existentes
-            loja_existente.nome = request.POST.get('nome')
-            loja_existente.descricao = request.POST.get('descricao')
-            loja_existente.save()
-            return redirect('home')
-        else:
-            # Se não existe, cria a nova
-            Loja.objects.create(
-                vendedor=vendedor,
-                nome=request.POST.get('nome'),
-                descricao=request.POST.get('descricao')
-            )
-            telefone_limpo = request.POST.get('telefone').replace('(', '').replace(')', '').replace('-', '').replace(' ', '')
-        vendedor.telefone = telefone_limpo
-        vendedor.save()
-        return redirect('home')
-
-    # No GET, se a loja existir, você pode passar ela para o template para pré-preencher
-    return render(request, 'criar_loja.html', {'loja': loja_existente})
+        form = LojaForm(request.POST)
+        if form.is_valid():
+            loja = form.save(commit=False)
+            loja.vendedor = vendedor
+            loja.save()
+            messages.success(request, "Loja criada com sucesso!")
+            return redirect('ver_loja')
+    else:
+        form = LojaForm()
     
+    return render(request, 'configurar_loja.html', {'form': form, 'titulo': 'Criar Nova Loja'})
+
+@login_required
+def editar_loja(request):
+    vendedor = get_object_or_404(Vendedor, usuario=request.user)
+    loja = get_object_or_404(Loja, vendedor=vendedor)
+
     if request.method == 'POST':
-        # 1. Captura os dados do formulário
-        nome = request.POST.get('nome')
-        descricao = request.POST.get('descricao')
-        telefone = request.POST.get('telefone')
-        
-        # 2. Garante que o usuário logado tenha um registro de 'Vendedor'
-        # O get_or_create evita erros caso o registro ainda não exista
-        vendedor, created = Vendedor.objects.get_or_create(usuario=request.user)
-        
-        # Se você quiser atualizar o telefone no registro de vendedor
-        if vendedor.telefone != telefone:
-            vendedor.telefone = telefone
-            vendedor.save()
-        
-        # 3. Cria a Loja vinculada ao Vendedor
-        Loja.objects.create(
-            vendedor=vendedor,
-            nome=nome,
-            descricao=descricao
-        )
-        
-        # 4. Redireciona para o dashboard após o sucesso
-        return redirect('home')
+        # O segredo da edição é o parâmetro 'instance'
+        form = LojaForm(request.POST, instance=loja)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Configurações da loja atualizadas!")
+            return redirect('ver_loja')
+    else:
+        form = LojaForm(instance=loja)
     
-    return render(request, 'criar_loja.html')
+    return render(request, 'configurar_loja.html', {'form': form, 'loja': loja, 'titulo': 'Configurar Minha Loja'})
 
+@login_required
 def ver_loja(request):
-    # Busca a loja do vendedor logado
-    loja = Loja.objects.filter(vendedor__usuario=request.user).first()
+    vendedor = Vendedor.objects.filter(usuario=request.user).first()
+    loja = Loja.objects.filter(vendedor=vendedor).first()
     if not loja:
-        return render(request, 'erro.html', {'msg': 'Você ainda não possui uma loja cadastrada.'})
+        return redirect('criar_loja')
     return render(request, 'ver_loja.html', {'loja': loja})
 
 @login_required
 def excluir_loja(request):
-    loja = Loja.objects.filter(vendedor__usuario=request.user).first()
+    # 1. Busca o vendedor vinculado ao usuário logado
+    vendedor = Vendedor.objects.filter(usuario=request.user).first()
+    
+    if not vendedor:
+        messages.error(request, "Perfil de vendedor não encontrado.")
+        return redirect('home')
+
+    # 2. Busca a loja deste vendedor
+    loja = Loja.objects.filter(vendedor=vendedor).first()
+
     if request.method == 'POST':
         if loja:
             loja.delete()
-        return redirect('home')
-    return render(request, 'excluir_loja.html', {'loja': loja})
-
-# --- VENDAS --- 
-
-@login_required
-def realizar_venda(request, produto_id):
-    produto = get_object_or_404(Produto, id=produto_id, loja=request.user.vendedor.loja)
-    clientes = Cliente.objects.filter(loja=request.user.vendedor.loja) # Filtre pelo dono da loja!
-
-    if request.method == 'POST':
-        cliente_id = request.POST.get('cliente')
-        quantidade = int(request.POST.get('quantidade'))
-        
-        # Verificação básica de estoque
-        if quantidade <= produto.estoque:
-            cliente = Cliente.objects.get(id=cliente_id)
-            valor_total = quantidade * produto.preco
-            
-            # Registrar a venda
-            Venda.objects.create(
-                loja=produto.loja,
-                cliente=cliente,
-                produto=produto,
-                quantidade=quantidade,
-                valor_total=valor_total
-            )
-            
-            # Baixa no estoque
-            produto.estoque -= quantidade
-            produto.save()
-            
-            return redirect('lista_estoque')
+            messages.success(request, "Sua loja foi excluída com sucesso.")
+            return redirect('home')
         else:
-            return render(request, 'erro.html', {'msg': 'Estoque insuficiente!'})
+            messages.warning(request, "Você não possui uma loja ativa para excluir.")
+            return redirect('home')
 
-    return render(request, 'realizar_venda.html', {'produto': produto, 'clientes': clientes})
-
-from django.db.models import Sum
+    # Se for GET (página de confirmação)
+    if not loja:
+        messages.warning(request, "Nenhuma loja encontrada para exclusão.")
+        return redirect('home')
+        
+    return render(request, 'dashboard/confirm_delete.html', {'loja': loja})
 
 @login_required
-def relatorio_vendas(request):
-    # Filtra vendas apenas da loja do usuário logado
-    vendas = Venda.objects.filter(loja=request.user.vendedor.loja).order_by('-data')
+@transaction.atomic
+def realizar_venda(request, produto_id):
+    produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
     
-    # Cálculos rápidos para o resumo
-    total_faturado = vendas.aggregate(Sum('valor_total'))['valor_total__sum'] or 0
-    total_vendas = vendas.count()
+    if produto.estoque <= 0:
+        messages.error(request, f"O produto {produto.nome} está sem estoque!")
+        return redirect('lista_estoque')
+
+    # Diminui 1 unidade do estoque
+    produto.estoque -= 1
+    produto.save()
     
-    return render(request, 'relatorio_vendas.html', {
-        'vendas': vendas,
-        'total_faturado': total_faturado,
-        'total_vendas': total_vendas
-    })
+    # Cria o registro da venda (ajuste os campos conforme seu modelo Venda)
+    Venda.objects.create(
+        vendedor=request.user.vendedor,
+        produto=produto,
+        quantidade=1,
+        valor_total=produto.preco
+    )
+    
+    messages.success(request, f"Venda de {produto.nome} realizada com sucesso!")
+    return redirect('lista_estoque')

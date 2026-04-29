@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .nexus-edit-container {
+        animation: fadeInUP 0.5s ease-out forwards;
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 15px;
+    }
+
+    .nexus-card {
+        background: var(--azul-card);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--borda);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+
+    .nexus-card-header {
+        background: rgba(37, 99, 235, 0.1);
+        padding: 20px 30px;
+        border-bottom: 1px solid var(--borda);
+    }
+
+    .nexus-card-title {
+        color: var(--turquesa-brilhante);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Estilização dos campos */
+    .nexus-form-label {
+        color: var(--turquesa-brilhante);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+    }
+
+    .nexus-input-group {
+        position: relative;
+        margin-bottom: 25px;
+    }
+
+    .nexus-input-group i {
+        position: absolute;
+        left: 15px;
+        top: 45px;
+        color: var(--nexus-blue);
+        opacity: 0.7;
+    }
+
+    .nexus-form-control {
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px solid var(--borda) !important;
+        border-radius: 8px;
+        color: #fff !important;
+        padding: 12px 15px 12px 45px;
+        transition: all 0.3s ease;
+    }
+
+    .nexus-form-control:focus {
+        border-color: var(--turquesa-brilhante) !important;
+        box-shadow: 0 0 15px var(--turquesa-glow) !important;
+        outline: none;
+    }
+
+    /* Botões Slim (42px) */
+    .nexus-actions {
+        background: rgba(15, 23, 42, 0.4);
+        padding: 25px 30px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        border-top: 1px solid var(--borda);
+    }
+
+    .btn-nexus-save, .btn-nexus-cancel {
+        height: 42px;
+        min-width: 160px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 6px;
+        transition: 0.3s;
+        text-decoration: none;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+    .btn-nexus-save {
+        background: transparent;
+        color: var(--turquesa-brilhante);
+        border: 1px solid var(--turquesa-brilhante);
+    }
+
+    .btn-nexus-save:hover {
+        background: var(--turquesa-brilhante);
+        color: var(--azul-profundo);
+        box-shadow: 0 0 20px var(--turquesa-glow);
+    }
+
+    .btn-nexus-cancel {
+        background: transparent;
+        color: var(--texto-muted);
+        border: 1px solid var(--borda);
+    }
+
+    .btn-nexus-cancel:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+    }
+</style>
+
+<div class="nexus-edit-container">
+    <div class="nexus-card">
+        <div class="nexus-card-header">
+            <h2 class="nexus-card-title">
+                <i class="bi bi-pencil-square"></i> Editar Registro: {{ produto.nome }}
+            </h2>
+        </div>
+
+        <form method="post" class="p-4">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-12 nexus-input-group">
+                    <label class="nexus-form-label">Nome do Produto</label>
+                    <i class="bi bi-tag"></i>
+                    <input type="text" name="nome" value="{{ produto.nome }}" class="form-control nexus-form-control" required>
+                </div>
+
+                <div class="col-12 nexus-input-group">
+                    <label class="nexus-form-label">Descrição Detalhada</label>
+                    <i class="bi bi-card-text" style="top: 45px;"></i>
+                    <textarea name="descricao" class="form-control nexus-form-control" rows="4" style="padding-left: 45px;">{{ produto.descricao }}</textarea>
+                </div>
+
+                <div class="col-md-6 nexus-input-group">
+                    <label class="nexus-form-label">Preço Sugerido</label>
+                    <i class="bi bi-currency-dollar"></i>
+                    <input type="number" step="0.01" name="preco" value="{{ produto.preco|stringformat:'.2f' }}" class="form-control nexus-form-control" required>
+                </div>
+
+                <div class="col-md-6 nexus-input-group">
+                    <label class="nexus-form-label">Quantidade em Estoque</label>
+                    <i class="bi bi-box-seam"></i>
+                    <input type="number" name="quantidade" value="{{ produto.quantidade }}" class="form-control nexus-form-control" required>
+                </div>
+            </div>
+
+            <div class="nexus-actions">
+                <a href="{% url 'lista_estoque' %}" class="btn-nexus-cancel">
+                    <i class="bi bi-x-circle me-2"></i>Cancelar
+                </a>
+                <button type="submit" class="btn-nexus-save">
+                    <i class="bi bi-check2-all me-2"></i>Salvar Alterações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

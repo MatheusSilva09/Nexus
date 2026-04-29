@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-light mb-4" style="border-left: 5px solid #00ced1; padding-left: 15px;">
+        Produtos Disponíveis
+    </h2>
+
+    <div class="row">
+        {% for produto in produtos %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm" style="background-color: #1e293b; color: #f8fafc;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #00ced1;">{{ produto.nome }}</h5>
+                    <p class="card-text text-secondary">{{ produto.descricao|truncatewords:15 }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="badge bg-success">R$ {{ produto.preco }}</span>
+                        {% if produto.quantidade < 5 %}
+                            <small class="text-warning">Apenas {{ produto.quantidade }} restando!</small>
+                        {% else %}
+                            <small class="text-info">{{ produto.quantidade }} em estoque</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pb-3">
+                    <a href="{% url 'adicionar_ao_carrinho' produto.id %}" 
+                       class="btn btn-sm w-100" 
+                       style="background-color: #00ced1; color: #0f172a; font-weight: bold;">
+                        Adicionar ao Carrinho
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted italic">Nenhum produto disponível no momento.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,255 +1,262 @@
 {% extends 'base.html' %}
-
-{% block title %}Novo Cliente | Nexus Hub{% endblock %}
-{% block page_title %}Cadastro de Cliente{% endblock %}
-
+{% load static %}
+{% block title %}Cadastro de Clientes | Nexus Hub{% endblock %}
 {% block content %}
 <style>
-    /* 1. ESTILIZAÇÃO DOS CAMPOS (GLASSMORPISM) */
-    .form-label {
-        color: var(--turquesa-brilhante);
-        font-weight: 600;
-        font-size: 0.85rem;
+    /* Container Principal */
+    .nexus-form-container {
+        max-width: 900px;
+        margin: 40px auto;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(0, 229, 255, 0.1);
+        border-radius: 16px;
+        padding: 40px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Cabeçalho do Formulário */
+    .nexus-form-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 35px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+    }
+
+    .nexus-form-header i {
+        color: #00e5ff;
+        font-size: 1.8rem;
+        filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.4));
+    }
+
+    .nexus-form-header h2 {
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
+        margin: 0;
+    }
+
+    /* Labels Estilizados */
+    .label-nexus {
+        display: block;
+        color: #00e5ff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
         margin-bottom: 8px;
+        letter-spacing: 1px;
+        opacity: 0.9;
     }
 
-    .form-control {
-        background-color: rgba(2, 6, 23, 0.6) !important;
-        border: 1px solid var(--borda) !important;
-        color: #fff !important;
-        padding: 12px 15px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
-
-    .form-control:focus {
-        border-color: var(--turquesa-brilhante) !important;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.15) !important;
-        outline: none;
-    }
-
-    /* 2. VALIDAÇÃO VISUAL (GRUPOS) */
-    .input-group-nexus {
+    /* Wrapper para ícone + input */
+    .input-wrapper-nexus {
         position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
     }
 
-    /* Ícones de Check/Erro via Pseudo-elementos */
-    .input-group-nexus::after {
+    .input-wrapper-nexus i {
         position: absolute;
-        right: 15px;
-        top: 42px;
-        /* Alinhado ao input abaixo da label */
-        font-weight: 900;
-        transition: all 0.3s ease;
-        opacity: 0;
+        left: 15px;
+        color: #00e5ff;
+        font-size: 1.1rem;
+        z-index: 10;
         pointer-events: none;
     }
 
-    .input-group-nexus.is-valid .form-control {
-        border-color: #10b981 !important;
-    }
-
-    .input-group-nexus.is-valid::after {
-        content: "✓";
-        color: #10b981;
-        opacity: 1;
-    }
-
-    .input-group-nexus.is-invalid .form-control {
-        border-color: #ef4444 !important;
-    }
-
-    .input-group-nexus.is-invalid::after {
-        content: "✕";
-        color: #ef4444;
-        opacity: 1;
-    }
-
-    .error-message {
-        display: block;
-        color: #f87171;
-        font-size: 0.75rem;
-        margin-top: 5px;
-        height: 0;
-        opacity: 0;
-        overflow: hidden;
+    /* Estilo Único para Inputs (Manuais e Django) */
+    .form-control-nexus,
+    .input-wrapper-nexus input,
+    .input-wrapper-nexus textarea {
+        width: 100% !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
+        padding: 12px 15px 12px 45px !important;
+        /* Espaço para o ícone */
+        color: #ffffff !important;
+        font-size: 0.95rem;
+        outline: none !important;
         transition: all 0.3s ease;
     }
 
-    .input-group-nexus.is-invalid .error-message {
-        height: 18px;
-        opacity: 1;
-        margin-top: 8px;
+    /* Estilização para o campo gerado pelo Django {{ form.telefone }} */
+    .input-wrapper-nexus input[name="telefone"],
+    #id_telefone {
+        display: block !important;
+        width: 100% !important;
+        height: 45px !important;
+        /* Define uma altura mínima para a caixa aparecer */
+        background: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(0, 229, 255, 0.2) !important;
+        border-radius: 8px !important;
+        padding: 0 15px 0 45px !important;
+        /* 45px na esquerda para não cobrir o ícone */
+        color: #ffffff !important;
+        font-size: 0.95rem !important;
+        outline: none !important;
     }
 
-    /* 4. BOTÃO INTELIGENTE */
-    .btn-save {
-        background: var(--turquesa-brilhante);
-        color: var(--azul-profundo);
-        border: none;
-        padding: 12px 30px;
-        border-radius: 8px;
+    /* Garante que o container flexível não "esmague" o campo */
+    .form-group-nexus div {
+        width: 100%;
+    }
+
+    /* Efeito de Foco */
+    .form-control-nexus:focus,
+    .input-wrapper-nexus input:focus,
+    .input-wrapper-nexus textarea:focus {
+        border-color: #00e5ff !important;
+        background: rgba(0, 229, 255, 0.05) !important;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2) !important;
+    }
+
+    /* Placeholder */
+    ::placeholder {
+        color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* Footer e Botões */
+    .nexus-form-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 20px;
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-nexus-cancel {
+        color: #ff4d4d;
+        text-decoration: none;
         font-weight: 700;
         text-transform: uppercase;
+        font-size: 0.85rem;
+        padding: 12px 25px;
+        border: 1px solid rgba(255, 77, 77, 0.3);
+        border-radius: 8px;
         transition: 0.3s;
-        opacity: 0.5;
-        cursor: not-allowed;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .btn-save:not([disabled]):hover {
-        background: #fff;
-        box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+    .btn-nexus-cancel:hover {
+        background: rgba(255, 77, 77, 0.1);
+        border-color: #ff4d4d;
+    }
+
+    .btn-nexus-save {
+        background: #00e5ff;
+        color: #000;
+        border: none;
+        padding: 12px 35px;
+        border-radius: 8px;
+        font-weight: 800;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: 0.4s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-nexus-save:hover {
+        background: #00f2ff;
+        box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
         transform: translateY(-2px);
     }
 
-    /* Definição do movimento de tremor */
-    @keyframes shake-nexus {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-8px); }
-        50% { transform: translateX(8px); }
-        75% { transform: translateX(-8px); }
-}
+    /* Layout de Colunas */
+    .form-row-nexus {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
 
-/* Classe que aplica a animação */
-    .apply-shake {
-        animation: shake-nexus 0.4s ease-in-out;
-        border: 1px solid #ef4444 !important; /* Feedback visual extra em vermelho */
-}
-
-/* Opcional: Efeito visual no container para indicar bloqueio */
-    .btn-container {
-        display: inline-block;
-}
+    @media (max-width: 600px) {
+        .form-row-nexus {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
-<div class="container mt-2">
-    <div class="content-block">
-        <h4 class="mb-4" style="font-weight: 700; letter-spacing: -0.5px;">
-            <span style="color: var(--turquesa-brilhante);">|</span> Novo Cadastro
-        </h4>
-
-        <form method="POST" id="form-cliente">
-            {% csrf_token %}
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="input-group-nexus">
-                        <label for="nome" class="form-label">Nome Completo</label>
-                        <input type="text" class="form-control" id="nome" name="nome" required>
-                        <span class="error-message">Mínimo de 15 caracteres.</span>
-                    </div>
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <div class="input-group-nexus">
-                        <label for="email" class="form-label">E-mail</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                        <span class="error-message">Insira um e-mail válido.</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="col-md-6 mb-4">
-                        <label for="telefone" class="form-label">Telefone / WhatsApp</label>
-                        <div class="input-group-nexus" id="group-telefone">
-                            <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(91) 98888-8888">
-                            <span class="error-message">Formato incompleto.</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label for="endereco" class="form-label">Endereço / Complemento</label>
-                    <div class="input-group-nexus" id="group-endereco">
-                        <textarea class="form-control" id="endereco" name="endereco" rows="3" placeholder="Rua, número..."></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <hr style="border-color: var(--borda); margin: 2rem 0;">
-
-            <div class="d-flex justify-content-between align-items-center">
-                <a href="{% url 'lista_clientes' %}" style="color: var(--texto-muted); text-decoration: none;">←
-                    Retornar à tela anterior</a>
-                <div id="submit-wrapper" style="cursor: not-allowed;">
-                    <button type="submit" id="btn-submit" class="btn-save" disabled>Finalizar Cadastro</button>
-                </div>
-            </div>
-        </form>
+<div class="nexus-form-container">
+    <div class="nexus-form-header">
+        <i class="bi bi-person-plus-fill"></i>
+        <h2>Cadastro de Clientes</h2>
     </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div style="margin-bottom: 25px;">
+            <label class="label-nexus">Nome Completo</label>
+            <div class="input-wrapper-nexus">
+                <i class="bi bi-person-badge"></i>
+                <input type="text" name="nome" value="{{ form.nome.value|default:'' }}" class="form-control-nexus"
+                    placeholder="Digite o nome completo...">
+            </div>
+        </div>
+
+        <div class="form-row-nexus" style="margin-bottom: 25px;">
+            <div class="form-group-nexus" style="flex: 1;">
+                <label class="label-nexus">TELEFONE / WHATSAPP</label>
+                <div class="input-wrapper-nexus" style="position: relative; display: flex; align-items: center;">
+                    <i class="bi bi-whatsapp" style="position: absolute; left: 15px; color: #00e5ff; z-index: 5;"></i>
+                    {{ form.telefone }}
+                </div>
+            </div>
+
+            <div>
+                <label class="label-nexus">E-mail (Opcional)</label>
+                <div class="input-wrapper-nexus">
+                    <i class="bi bi-envelope-at"></i>
+                    <input type="email" name="email" value="{{ form.email.value|default:'' }}"
+                        class="form-control-nexus" placeholder="exemplo@email.com">
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label class="label-nexus">Endereço / Complemento</label>
+            <div class="input-wrapper-nexus">
+                <i class="bi bi-geo-alt" style="top: 15px;"></i>
+                <textarea name="endereco" rows="3" class="form-control-nexus"
+                    placeholder="Rua, número, bairro...">{{ form.endereco.value|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="nexus-form-footer">
+            <a href="{% url 'lista_clientes' %}" class="btn-nexus-cancel">
+                <i class="bi bi-arrow-left-short"></i> Voltar
+            </a>
+            <button type="submit" class="btn-nexus-save">
+                <i class="bi bi-shield-check"></i> Finalizar Cadastro
+            </button>
+        </div>
+    </form>
 </div>
 
+<script src="https://unpkg.com/imask"></script>
 <script>
-    const btnSubmit = document.getElementById('btn-submit');
-    const strengthBar = document.getElementById('strength-bar');
-    const strengthText = document.getElementById('strength-text');
+    document.addEventListener("DOMContentLoaded", function () {
+        // Busca o campo pelo ID que o Django gera automaticamente
+        var phoneElement = document.getElementById('id_telefone');
 
-    // Função de Validação Genérica
-    const validate = (input, condition) => {
-        const group = input.closest('.input-group-nexus');
-        if (condition) {
-            group.classList.add('is-valid');
-            group.classList.remove('is-invalid');
+        if (phoneElement) {
+            IMask(phoneElement, {
+                mask: '(00) 00000-0000'
+            });
+            console.log("Máscara Nexus aplicada com sucesso!");
         } else {
-            group.classList.add('is-invalid');
-            group.classList.remove('is-valid');
+            console.error("Campo id_telefone não encontrado no DOM.");
         }
-        toggleSubmit();
-    };
-
-    // Lógica do Botão Submit
-    const toggleSubmit = () => {
-        const requiredFields = document.querySelectorAll('input[required]');
-        const allValid = Array.from(requiredFields).every(input =>
-            input.closest('.input-group-nexus').classList.contains('is-valid')
-        );
-        btnSubmit.disabled = !allValid;
-        btnSubmit.style.opacity = allValid ? "1" : "0.5";
-        btnSubmit.style.cursor = allValid ? "pointer" : "not-allowed";
-    };
-
-    // Listeners Individuais
-    document.getElementById('nome').addEventListener('input', e => {
-        validate(e.target, e.target.value.trim().length >= 3);
-    });
-
-    document.getElementById('email').addEventListener('input', e => {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        validate(e.target, regex.test(e.target.value));
-    });
-
-    document.getElementById('telefone').addEventListener('input', e => {
-        let v = e.target.value.replace(/\D/g, '');
-        if (v.length > 11) v = v.substring(0, 11);
-        if (v.length > 6) v = `(${v.substring(0, 2)}) ${v.substring(2, 7)}-${v.substring(7)}`;
-        else if (v.length > 2) v = `(${v.substring(0, 2)}) ${v.substring(2)}`;
-        e.target.value = v;
-        validate(e.target, v.length === 15);
-    });
-
-    document.getElementById('senha').addEventListener('input', e => {
-        const val = e.target.value;
-        let score = 0;
-        if (val.length >= 8) score++;
-        if (/[A-Z]/.test(val)) score++;
-        if (/[0-9]/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-
-        // Atualiza Barra
-        const colors = ["#ef4444", "#ef4444", "#f59e0b", "#00c9ff", "#00f2fe"];
-        const labels = ["Muito Fraca", "Fraca", "Razoável", "Boa", "Forte"];
-        const widths = ["0%", "25%", "50%", "75%", "100%"];
-
-        strengthBar.style.width = widths[score];
-        strengthBar.style.backgroundColor = colors[score];
-        strengthText.textContent = labels[score];
-        strengthText.style.color = colors[score];
-
-        validate(e.target, score >= 3); // Requisito: Senha "Boa" ou "Forte"
     });
 </script>
 {% endblock %}

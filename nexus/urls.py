@@ -26,8 +26,12 @@ urlpatterns = [
     path('', include('dashboard.urls')),
     path('estoque/excluir/<int:produto_id>/', views.excluir_produto, name='excluir_produto'),
     path('clientes/', views.lista_clientes, name='lista_clientes'),
-    path('clientes/novo/', views.adicionar_cliente, name='adicionar_cliente'),
+    path('clientes/novo/', views.cadastrar_cliente, name='cadastrar_cliente'),
     path('login/', views.login_view, name='login_view'),
     path('logout/', views.logout_view, name='logout_view'),
+    path('loja/', views.ver_loja, name='ver_loja'),
     path('loja/criar/', views.criar_loja, name='criar_loja'),
+    path('loja/editar/', views.editar_loja, name='editar_loja'),
+    path('loja/perfil/', views.ver_loja, name='ver_loja'),
+    path('loja/excluir/', views.excluir_loja, name='excluir_loja'),
 ]

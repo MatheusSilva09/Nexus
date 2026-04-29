@@ -1,44 +1,312 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Estoque - Nexus{% endblock %}
+{% block title %}Gerenciamento de Estoque | NEXUS HUB{% endblock %}
+
+{% block page_title %}Gerenciamento de Estoque{% endblock %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Gerenciamento de Estoque</h2>
-        <a href="{% url 'adicionar_produto' %}" class="btn btn-success">+ Novo Produto</a>
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <span class="stat-label">Total de Itens</span>
+            <div class="stat-value">{{ produtos.count }}</div>
+            <span class="trend-up">↑ 5% este mês</span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <span class="stat-label">Valor em Estoque</span>
+            <div class="stat-value" style="font-size: 1.4rem;">R$ 45.280,00</div>
+            <span class="trend-up">Patrimônio Ativo</span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="border-color: rgba(239, 68, 68, 0.3);">
+            <span class="stat-label">Alertas de Reposição</span>
+            <div class="stat-value" style="color: #ef4444;">04</div>
+            <span class="trend-alert">Abaixo do mínimo</span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="d-flex flex-column h-100 justify-content-center">
+            <a href="{% url 'cadastrar_produto' %}" class="logout-btn text-center py-3 w-100"
+                style="font-size: 0.9rem;">
+                <i class="bi bi-plus-lg me-2"></i> Novo Produto
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive-nexus">
+    <div class="p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <h5 class="m-0" style="font-weight: 600; letter-spacing: 2px; color: #fff;">
+            <i class="bi bi-layers-half me-2 text-info"></i>LISTAGEM DE PRODUTOS
+        </h5>
+
+        <div class="search-container">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" id="nexusSearch" class="nexus-input" placeholder="Filtrar por nome ou SKU...">
+        </div>
     </div>
 
-    <table class="table table-striped table-hover shadow-sm">
-        <thead class="table-dark">
+    <table class="table-nexus">
+        <thead>
             <tr>
-                <th>Produto</th>
-                <th>Preço</th>
-                <th>Estoque Atual</th>
+                <th>SKU ID</th>
+                <th>Nome do Produto</th>
+                <th>Categoria</th>
+                <th>Quantidade</th>
+                <th>Preço Unit.</th>
                 <th>Status</th>
-                <th>Ações</th>
+                <th class="text-center">Ações</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="estoqueTable">
             {% for produto in produtos %}
             <tr>
-                <td>{{ produto.nome }}</td>
-                <td>R$ {{ produto.preco }}</td>
+                <td class="sku-highlight">#{{ produto.id|stringformat:"04d" }}</td>
+                <td class="fw-bold text-white">{{ produto.nome }}</td>
+                <td><span class="badge-category">{{ produto.categoria.nome }}</span></td>
+                <td>
+                    {% if produto.quantidade <= 5 %} <span class="text-danger fw-bold"><i
+                            class="bi bi-exclamation-triangle-fill me-1"></i>{{ produto.quantidade }}</span>
+                        {% else %}
+                        <span class="text-white-50">{{ produto.quantidade }}</span>
+                        {% endif %}
+                </td>
+                <td class="text-white-50">R$ {{ produto.preco }}</td>
                 <td>{{ produto.estoque }}</td>
                 <td>
-                    {% if produto.estoque <= produto.estoque_minimo %}
-                        <span class="badge bg-danger">Repor Urgente</span>
-                    {% else %}
-                        <span class="badge bg-success">Normal</span>
-                    {% endif %}
+                    <span
+                        class="badge {% if produto.status_estoque == 'À Venda' %}bg-success{% elif 'Baixo' in produto.status_estoque %}bg-warning{% else %}bg-danger{% endif %}">
+                        {{ produto.status_estoque }}
+                    </span>
                 </td>
                 <td>
-                    <a href="{% url 'editar_produto' produto.id %}" class="btn btn-sm btn-primary">Editar</a>
-                    <a href="{% url 'excluir_produto' produto.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Excluir?')">Excluir</a>
-                    <a href="{% url 'realizar_venda' produto.id %}" class="btn btn-sm btn-outline-success">Vender</a>
-    </td>
+                    {% if produto.quantidade > 0 %}
+                    <span class="status-badge status-concluido">Em Dia</span>
+                    {% else %}
+                    <span class="status-badge status-pendente">Esgotado</span>
+                    {% endif %}
                 </td>
+                <td class="text-center">
+                    <div class="action-buttons">
+                        <a href="{% url 'editar_produto' produto.id %}" class="btn-action edit" title="Editar"><i
+                                class="bi bi-pencil-square"></i></a>
+                        <a href="{% url 'excluir_produto' produto.id %}" class="btn-action delete" title="Excluir"><i
+                                class="bi bi-trash3-fill"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center py-5 text-secondary">Nenhum produto cadastrado no sistema.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<style>
+    /* --- Ajustes de Visibilidade e Estilo Cyber --- */
+
+    /* SKU: Fonte mono com brilho sutil para ser legível */
+    .sku-highlight {
+        font-family: 'Courier New', Courier, monospace;
+        color: var(--turquesa-brilhante) !important;
+        font-weight: bold;
+        text-shadow: 0 0 8px var(--turquesa-glow);
+        font-size: 0.95rem;
+    }
+
+    /* Input de Pesquisa Customizado */
+    .search-container {
+        position: relative;
+        min-width: 320px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--turquesa-brilhante);
+        pointer-events: none;
+    }
+
+    .nexus-input {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px solid var(--nexus-blue);
+        border-radius: 30px;
+        padding: 10px 20px 10px 45px;
+        color: #fff !important;
+        font-size: 0.85rem;
+        transition: 0.3s all;
+        outline: none;
+    }
+
+    .nexus-input:focus {
+        border-color: var(--turquesa-brilhante);
+        box-shadow: 0 0 15px var(--turquesa-glow);
+        background: rgba(30, 41, 59, 1) !important;
+    }
+
+    .nexus-input::placeholder {
+        color: var(--texto-muted);
+        opacity: 0.8;
+    }
+
+    /* Cards e Tabela Glassmorphism */
+    .stat-card {
+        background: var(--azul-card);
+        border: 1px solid var(--borda);
+        border-radius: 12px;
+        padding: 20px;
+        transition: 0.3s;
+    }
+
+    .stat-card:hover {
+        border-color: var(--nexus-blue);
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);
+        transform: translateY(-5px);
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 5px 0;
+    }
+
+    .stat-label {
+        color: var(--texto-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .trend-up {
+        color: #22c55e;
+        font-size: 0.8rem;
+    }
+
+    .trend-alert {
+        color: #ef4444;
+        font-size: 0.8rem;
+    }
+
+    .table-responsive-nexus {
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .table-nexus {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-nexus th {
+        padding: 18px 20px;
+        color: var(--nexus-blue);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--borda);
+    }
+
+    .table-nexus td {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+        font-size: 0.9rem;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    /* Garante que a coluna de Ações tenha espaço para os botões e não empurre os alertas */
+    .table-nexus td:last-child {
+        min-width: 120px; 
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    /* Estiliza os badges de status para ficarem compactos e alinhados */
+    .badge {
+        display: inline-block;
+        padding: 0.5em 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+    }
+
+    .table-nexus tbody tr {
+        transition: 0.2s;
+    }
+
+    .table-nexus tbody tr:hover {
+        background: rgba(37, 99, 235, 0.08);
+    }
+
+    /* Estilo Adicional */
+    .badge-category {
+        background: rgba(30, 41, 59, 0.6);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        color: var(--texto-muted);
+    }
+
+    .btn-action {
+        font-size: 1.1rem;
+        transition: 0.2s;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-action.edit:hover {
+        color: var(--turquesa-brilhante) !important;
+        filter: drop-shadow(0 0 5px var(--turquesa-glow));
+    }
+
+    .btn-action.delete:hover {
+        color: #ef4444 !important;
+        filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.5));
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: bold;
+    }
+
+    .status-concluido {
+        background: rgba(34, 197, 94, 0.1);
+        color: #4ade80;
+        border: 1px solid #22c55e;
+    }
+
+    .status-pendente {
+        background: rgba(234, 179, 8, 0.1);
+        color: #facc15;
+        border: 1px solid #eab308;
+    }
+</style>
+
+<script>
+    // Filtro dinâmico da tabela em tempo real
+    document.getElementById('nexusSearch').addEventListener('keyup', function () {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#estoqueTable tr');
+
+        rows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+        });
+    });
+</script>
 {% endblock %}

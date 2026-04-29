@@ -1,25 +1,235 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Cadastro de Produto | NEXUS HUB{% endblock %}
+{% block page_title %}CADASTRO DE PRODUTO{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 card shadow p-4">
-        <h3 class="mb-4">Novo Produto</h3>
-        <form method="POST">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label">Nome</label>
-                <input type="text" name="nome" class="form-control" required>
+<div class="fade-in-content container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="nexus-form-card">
+                <div class="card-header-nexus">
+                    <h5 class="m-0 page-title-glow" style="font-size: 1.1rem;">
+                        <i class="bi bi-plus-circle-fill me-2" style="font-size: 1.3rem;"></i>NOVO REGISTRO DE PRODUTO
+                    </h5>
+                </div>
+
+                <form method="post" class="p-4 p-md-5">
+                    {% csrf_token %}
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="nexus-label">NOME DO PRODUTO</label>
+                            <div class="input-container-nexus">
+                                <i class="bi bi-tag-fill"></i>
+                                <input type="text" name="nome" value="{{ form.nome.value|default_if_none:'' }}"
+                                    placeholder="Digite o nome do seu produto..." required>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="nexus-label">DESCRIÇÃO</label>
+                            <div class="input-container-nexus">
+                                <i class="bi bi-chat-left-text-fill"></i>
+                                <textarea name="descricao" rows="3" placeholder="Descreva seu produto..."
+                                    required>{{ form.descricao.value|default_if_none:'' }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="label-nexus">CATEGORIA</label>
+                            <select name="categoria" class="form-control select-nexus">
+                                <option value="">Selecione uma categoria...</option>
+                                {% for cat in categorias %}
+                                <option value="{{ cat.id }}">{{ cat.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="nexus-label">PREÇO SUGERIDO</label>
+                            <div class="input-container-nexus">
+                                <span class="currency-prefix">R$</span>
+                                <input type="text" name="preco" id="id_preco"
+                                    value="{{ form.preco.value|default_if_none:'0,00' }}" placeholder="0,00" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="nexus-label">QUANTIDADE ATUAL</label>
+                            <div class="input-container-nexus">
+                                <i class="bi bi-box-seam-fill"></i>
+                                <input type="number" name="estoque" value="{{ form.estoque.value|default_if_none:'0' }}"
+                                    placeholder="0" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-6 mb-4">
+                            <label class="nexus-label">ESTOQUE MÍNIMO (REPOSIÇÃO)</label>
+                            <div class="input-group-nexus">
+                                <i class="bi bi-exclamation-triangle-fill icon-nexus"></i> <input type="number"
+                                    name="estoque_minimo" class="form-control input-nexus" value="5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="d-flex justify-content-end align-items-center gap-4 mt-5 pt-4 border-top border-secondary">
+                        <a href="{% url 'lista_estoque' %}" class="btn-cancel text-decoration-none">
+                            <i class="bi bi-x-circle me-1"></i> CANCELAR
+                        </a>
+                        <button type="submit" class="logout-btn px-5">
+                            <i class="bi bi-check2-circle me-2"></i> SALVAR PRODUTO
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Preço</label>
-                <input type="number" name="preco" class="form-control" min="0.00" step="0.01" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Estoque atual</label>
-                <input type="number" name="estoque" class="form-control" min="0" step="1" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Salvar</button>
-        </form>
+        </div>
     </div>
 </div>
+
+<style>
+    /* Card e Estrutura */
+    .nexus-form-card {
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--borda);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header-nexus {
+        padding: 25px 30px;
+        background: rgba(30, 41, 59, 0.3);
+        border-bottom: 1px solid var(--borda);
+    }
+
+    /* Labels e Inputs */
+    .nexus-label {
+        display: block;
+        color: var(--turquesa-brilhante);
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        letter-spacing: 1px;
+    }
+
+    .input-container-nexus, .input-group-nexus {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .currency-prefix {
+        position: absolute;
+        left: 15px;
+        color: var(--turquesa-brilhante);
+        font-weight: 800;
+        font-size: 0.9rem;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    .input-container-nexus i, .icon-nexus {
+        position: absolute;
+        left: 15px;
+        color: var(--nexus-blue);
+        font-size: 1.1rem;
+        z-index: 10;
+        opacity: 0.8;
+    }
+
+    .input-container-nexus input,
+    .input-container-nexus textarea,
+    .input-nexus,
+    .select-nexus {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid var(--borda) !important;
+        border-radius: 10px;
+        padding: 12px 15px 12px 45px;
+        color: #fff !important;
+        transition: 0.3s;
+        outline: none;
+    }
+
+    .select-nexus {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2300ced1' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 15px center !important;
+        padding-left: 15px !important;
+    }
+
+    .input-container-nexus input:focus,
+    .input-container-nexus textarea:focus,
+    .input-nexus:focus,
+    .select-nexus:focus {
+        border-color: var(--nexus-blue) !important;
+        box-shadow: 0 0 12px var(--nexus-blue-glow) !important;
+    }
+
+    /* --- BOTÕES SLIM E SIMÉTRICOS --- */
+
+    .logout-btn, .btn-cancel {
+        min-width: 200px; /* Largura mínima idêntica */
+        height: 42px;      /* Altura reduzida para um visual mais slim */
+        background: transparent;
+        padding: 0 20px;
+        border-radius: 8px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+    }
+
+    /* Salvar Produto (Turquesa) */
+    .logout-btn {
+        border: 1px solid var(--turquesa-brilhante) !important;
+        color: var(--turquesa-brilhante) !important;
+    }
+
+    .logout-btn:hover {
+        background: var(--turquesa-brilhante) !important;
+        color: #020617 !important;
+        box-shadow: 0 0 20px var(--turquesa-glow);
+        transform: translateY(-2px);
+    }
+
+    /* Cancelar (Vermelho Alerta) */
+    .btn-cancel {
+        border: 1px solid #ff4444 !important;
+        color: #ff4444 !important;
+    }
+
+    .btn-cancel:hover {
+        background: #ff4444 !important;
+        color: #020617 !important;
+        box-shadow: 0 0 20px rgba(255, 68, 68, 0.6);
+        transform: translateY(-2px);
+    }
+
+    /* Animação de Erro */
+    .shake-animation {
+        animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+        transform: translate3d(0, 0, 0);
+        border: 1px solid #ff4444 !important;
+    }
+
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+        40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+</style>
 {% endblock %}

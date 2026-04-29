@@ -1,9 +1,75 @@
 {% extends "base.html" %}
+{% load humanize %}
 
-{% block title %}Dashboard | Nexus Hub{% endblock %}
+{% block title %}NEXUS HUB | Gestão Inteligente{% endblock %}
 {% block page_title %}Visão Geral do Sistema{% endblock %}
 
 {% block content %}
+
+<div class="dashboard-container">
+    <div class="dashboard-header mb-4">
+        <p class="text-white-50">Métricas em tempo real do NEXUS HUB</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Total em Estoque</span>
+                    <h3 class="stat-value">1,284</h3>
+                    <span class="stat-trend trend-up">
+                        <i class="bi bi-arrow-up-short"></i> 12% este mês
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Baixo Estoque</span>
+                    <h3 class="stat-value">14</h3>
+                    <span class="stat-trend text-warning">Itens abaixo do limite</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Clientes Ativos</span>
+                    <h3 class="stat-value">452</h3>
+                    <span class="stat-trend trend-up">
+                        <i class="bi bi-arrow-up-short"></i> 5 novos hoje
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card status-online">
+                <div class="stat-icon">
+                    <i class="bi bi-shop"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Status da Loja</span>
+                    <h3 class="stat-value">Online</h3>
+                    <span class="stext-white-50"">NEXUS Central Hub</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     /* Estilos específicos do Dashboard para manter a paleta Turquesa */
     .metric-card {
@@ -68,7 +134,8 @@
     }
 
     .nexus-table thead th {
-        background-color: #020617; /* Azul mais profundo para o topo */
+        background-color: #020617;
+        /* Azul mais profundo para o topo */
         color: #00f2fe;
         text-transform: uppercase;
         font-size: 0.85rem;
@@ -77,35 +144,120 @@
     }
 
     /* Estilização base das colunas (Corpo) */
-/* Estilização base das colunas (Corpo) */
-.nexus-table tbody td {
-    color: #94a3b8;
-    border-bottom: 1px solid #1e293b;
-    padding: 12px 15px;
-}
+    /* Estilização base das colunas (Corpo) */
+    .nexus-table tbody td {
+        color: #94a3b8;
+        border-bottom: 1px solid #1e293b;
+        padding: 12px 15px;
+    }
 
-/* Linhas Ímpares (Fundo Principal) */
-.nexus-table tbody tr:nth-child(odd) td {
-    background-color: #0f172a; /* Azul escuro profundo padrão */
-}
+    /* Linhas Ímpares (Fundo Principal) */
+    .nexus-table tbody tr:nth-child(odd) td {
+        background-color: #0f172a;
+        /* Azul escuro profundo padrão */
+    }
 
-/* Linhas Pares (O efeito Zebra) */
-.nexus-table tbody tr:nth-child(even) td {
-    background-color: #161e31; /* Um azul levemente mais claro para contraste */
-}
+    /* Linhas Pares (O efeito Zebra) */
+    .nexus-table tbody tr:nth-child(even) td {
+        background-color: #161e31;
+        /* Um azul levemente mais claro para contraste */
+    }
 
-/* Efeito de Hover (Aumenta o brilho da linha inteira) */
-.nexus-table tbody tr:hover td {
-    background-color: #1e293b !important; /* Azul médio para destaque */
-    color: #ffffff; /* Texto brilha no hover */
-    transition: all 0.2s ease;
-}
+    /* Efeito de Hover (Aumenta o brilho da linha inteira) */
+    .nexus-table tbody tr:hover td {
+        background-color: #1e293b !important;
+        /* Azul médio para destaque */
+        color: #ffffff;
+        /* Texto brilha no hover */
+        transition: all 0.2s ease;
+    }
 
-/* Ajuste na primeira coluna (Produto) para destaque */
-.nexus-table tbody tr td:first-child {
-    color: #e2e8f0;
-    font-weight: 500;
-}
+    /* Ajuste na primeira coluna (Produto) para destaque */
+    .nexus-table tbody tr td:first-child {
+        color: #e2e8f0;
+        font-weight: 500;
+    }
+
+    /* Container de Estatísticas */
+    .stat-card {
+        background: linear-gradient(145deg, #0f172a, #020617);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Efeito de Glow no Hover */
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--nexus-blue);
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.15),
+            inset 0 0 15px rgba(37, 99, 235, 0.05);
+    }
+
+    /* Ícones dos Cards */
+    .stat-icon {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--nexus-blue);
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        filter: drop-shadow(0 0 5px rgba(37, 99, 235, 0.3));
+    }
+
+    /* Textos e Valores */
+    .stat-label {
+        color: var(--texto-muted);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #f8fafc;
+        margin: 0;
+    }
+
+    .stat-trend {
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: block;
+        margin-top: 8px;
+    }
+
+    .trend-up {
+        color: #10b981;
+    }
+
+    /* Variação para Alertas (Glow Vermelho Sutil) */
+    .stat-card.warning {
+        border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .stat-card.warning .stat-icon {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .stat-card.warning:hover {
+        border-color: #ef4444;
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+    }
 </style>
 
 <div class="container-fluid">
@@ -183,7 +335,7 @@
         <div class="col-lg-4">
             <div class="metric-card h-100">
                 <h5 class="mb-4" style="color: #00f2fe;">Configuração Rápida</h5>
-                <p class="turquesa-medio small">Gerencie as preferências da sua loja Nexus de forma simplificada.</p>
+                <p class="text-white-50">Gerencie as preferências da sua Loja de forma simplificada.</p>
                 <div class="d-grid gap-2">
                     <a href="{% url 'criar_loja' %}" class="btn btn-outline-info">Editar Perfil da Loja</a>
                     <a href="{% url 'lista_estoque' %}" class="btn btn-outline-light">Gerar Relatório PDF</a>

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cadastrar Produto | NEXUS HUB{% endblock %}
+{% block page_title %}Cadastrar Produto{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in-content">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="nexus-form-card">
+                <div class="card-header-nexus">
+                    <h5 class="m-0"><i class="bi bi-plus-square-dotted me-2 text-info"></i>NOVO REGISTRO DE PRODUTO</h5>
+                    <p class="text-muted mb-0" style="font-size: 0.8rem;">Preencha os dados técnicos para integração ao inventário.</p>
+                </div>
+
+                <form method="post" class="p-4">
+                    {% csrf_token %}
+                    
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <label class="nexus-label">Nome do Produto</label>
+                            <div class="input-container-nexus">
+                                {{ form.nome }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="nexus-label">Descrição</label>
+                            <div class="input-container-nexus">
+                                {{ form.descricao }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="nexus-label">Preço de Venda</label>
+                            <div class="input-container-nexus">
+                                {{ form.preco }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="nexus-label">Quantidade em Estoque</label>
+                            <div class="input-container-nexus">
+                                {{ form.estoque }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3 mt-5 pt-4 border-top border-secondary">
+                        <a href="{% url 'lista_estoque' %}" class="btn-cancel">
+                            <i class="bi bi-x-circle me-1"></i> CANCELAR
+                        </a>
+                        <button type="submit" class="logout-btn px-5 py-2">
+                            <i class="bi bi-check2-circle me-1"></i> SALVAR PRODUTO
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estética Nexus Hub */
+    .nexus-form-card {
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--borda);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    }
+    .card-header-nexus { padding: 25px 30px; background: rgba(30, 41, 59, 0.3); border-bottom: 1px solid var(--borda); }
+    .nexus-label { display: block; color: var(--turquesa-brilhante); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+    
+    /* Inputs */
+    .input-container-nexus input, .input-container-nexus textarea {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid var(--borda);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: #fff !important;
+        transition: 0.3s;
+    }
+    .input-container-nexus input:focus, .input-container-nexus textarea:focus {
+        border-color: var(--nexus-blue);
+        box-shadow: 0 0 10px var(--nexus-blue-glow);
+        outline: none;
+    }
+
+    /* Botão Salvar - Cyberpunk Corporativo */
+    .logout-btn {
+        border: 1px solid var(--turquesa-brilhante) !important;
+        color: var(--turquesa-brilhante) !important;
+        background: transparent;
+        transition: all 0.4s ease;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+    .logout-btn:hover {
+        background: var(--turquesa-brilhante) !important;
+        color: #0f172a !important; /* Azul escuro profundo para contraste */
+        box-shadow: 0 0 20px var(--turquesa-glow);
+        transform: translateY(-2px);
+    }
+    .btn-cancel { text-decoration: none; color: var(--texto-muted); font-size: 0.75rem; padding: 8px 20px; transition: 0.3s; }
+    .btn-cancel:hover { color: #ef4444; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+{% verbatim %}
+<script>
+    new Cleave('#id_preco', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand',
+        numeralDecimalMark: ',',
+        delimiter: '.',
+        prefix: 'R$ ',
+        numeralDecimalScale: 2
+    });
+</script>
+{% endverbatim %}
+
+{% endblock %}

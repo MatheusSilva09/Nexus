@@ -1,21 +1,35 @@
 from django.urls import path
+from dashboard import views
 from . import views
 
 urlpatterns = [
+    # --- Rota da Home/Dashboard ---
     path('', views.home, name='home'),
+    
+    # --- Rotas de Autenticação ---
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+
+    # --- Rotas de Clientes ---
+    # Esta é a lista que você chama após salvar
+    path('clientes/', views.lista_clientes, name='lista_clientes'),
+    path('clientes/novo/', views.cadastrar_cliente, name='cadastrar_cliente'),
+    path('clientes/editar/<int:pk>/', views.editar_cliente, name='editar_cliente'),
+    path('clientes/excluir/<int:pk>/', views.excluir_cliente, name='excluir_cliente'),
+
+    # --- Rotas de Estoque/Produtos ---
+    path('vitrine/', views.vitrine_produtos, name='vitrine_produtos'),
+    path('carrinho/adicionar/<int:produto_id>/', views.adicionar_ao_carrinho, name='adicionar_ao_carrinho'),
+    path('carrinho/', views.ver_carrinho, name='ver_carrinho'),
+    path('carrinho/remover/<int:produto_id>/', views.remover_do_carrinho, name='remover_do_carrinho'),
+    path('pedido/<int:pedido_id>/', views.detalhe_pedido, name='detalhe_pedido'),
+    path('meus-pedidos/', views.historico_pedidos, name='historico_pedidos'),
+    path('estoque/novo/', views.cadastrar_produto, name='cadastrar_produto'),
     path('estoque/', views.lista_estoque, name='lista_estoque'),
-    
-    # Nova rota para o formulário manual que você criou
-    path('estoque/novo/', views.adicionar_produto, name='adicionar_produto'),
-    
-    path('estoque/atualizar/<int:produto_id>/', views.atualizar_quantidade_estoque, name='atualizar_estoque'),
-    path('checkout/finalizar/', views.finalizar_pedido, name='finalizar_pedido'),
     path('estoque/editar/<int:produto_id>/', views.editar_produto, name='editar_produto'),
-    path('venda/<int:produto_id>/', views.realizar_venda, name='realizar_venda'),
-    path('loja/criar/', views.criar_loja, name='criar_loja'),
-    path('loja/ver/', views.ver_loja, name='ver_loja'),
-    path('loja/excluir/', views.excluir_loja, name='excluir_loja'),
-    path('clientes/editar/<int:cliente_id>/', views.editar_cliente, name='editar_cliente'),
-    path('clientes/excluir/<int:cliente_id>/', views.excluir_cliente, name='excluir_cliente'),
-    path('relatorio/vendas/', views.relatorio_vendas, name='relatorio_vendas'),
+    path('estoque/excluir/<int:produto_id>/', views.excluir_produto, name='excluir_produto'),
+    path('estoque/vender/<int:produto_id>/', views.realizar_venda, name='realizar_venda'),
+    
+    # --- Rotas de Loja ---
+    path('excluir_loja/', views.excluir_loja, name='excluir_loja'),
 ]
