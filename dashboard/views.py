@@ -556,7 +556,7 @@ def criar_loja(request):
     else:
         form = LojaForm()
     
-    return render(request, 'configurar_loja.html', {'form': form, 'titulo': 'Criar Nova Loja'})
+    return render(request, 'editar_loja.html', {'form': form, 'titulo': 'Loja'})
 
 @login_required
 def editar_loja(request):
@@ -573,7 +573,7 @@ def editar_loja(request):
     else:
         form = LojaForm(instance=loja)
     
-    return render(request, 'configurar_loja.html', {'form': form, 'loja': loja, 'titulo': 'Configurar Minha Loja'})
+    return render(request, 'editar_loja.html', {'form': form, 'loja': loja, 'titulo': 'Editar Minha Loja'})
 
 @login_required
 def ver_loja(request):
