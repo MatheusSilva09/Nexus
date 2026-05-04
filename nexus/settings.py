@@ -135,6 +135,8 @@ USE_L10N = True
 
 USE_I18N = True
 
+DECIMAL_SEPARATOR = ','
+
 USE_TZ = True
 
 

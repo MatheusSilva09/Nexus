@@ -245,26 +245,48 @@ def cadastrar_produto(request):
 
 @login_required
 def editar_produto(request, produto_id):
-    # Busca o produto ou retorna 404 se não existir/não for do usuário
+    # Mantendo sua segurança de busca por usuário
     produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
     categorias = Categoria.objects.all()
     
     if request.method == 'POST':
-        # Atualiza os dados vindo do formulário
+        # 1. Pegamos os dados simples
         produto.nome = request.POST.get('nome')
-        produto.preco = request.POST.get('preco')
-        produto.estoque = request.POST.get('estoque')
-        produto.estoque_minimo = request.POST.get('estoque_minimo')
-        produto.save()
+        produto.descricao = request.POST.get('descricao', '')
         
-        messages.success(request, f"Produto '{produto.nome}' atualizado com sucesso!")
-        return redirect('lista_estoque')
+        # 2. Tratamos a Categoria
+        categoria_id = request.POST.get('categoria')
+        produto.categoria = Categoria.objects.filter(id=categoria_id).first()
+
+        # 3. Tratamos os números inteiros
+        estoque_raw = request.POST.get('estoque', '0')
+        produto.estoque = int(estoque_raw) if estoque_raw.isdigit() else 0
+        
+        estoque_min_raw = request.POST.get('estoque_minimo', '5')
+        produto.estoque_minimo = int(estoque_min_raw) if estoque_min_raw.isdigit() else 5
+
+        # 4. Tratamos o Preço (Limpando antes de salvar no objeto)
+        preco_raw = request.POST.get('preco', '0,00')
+        try:
+            # Usando sua lógica de limpeza completa para evitar erros
+            preco_limpo = preco_raw.replace('R$', '').replace('.', '').replace(',', '.').strip()
+            produto.preco = Decimal(preco_limpo)
+        except:
+            produto.preco = Decimal('0.00')
+        
+        # 5. Agora sim, salvamos o objeto completo
+        try:
+            produto.save()
+            messages.success(request, f"Produto '{produto.nome}' atualizado com sucesso!")
+            return redirect('lista_estoque')
+        except Exception as e:
+            messages.error(request, f"Erro ao atualizar: {e}")
     
-    context = {
-        'produto': produto,
-        'categorias': categorias,
-    }
-    return render(request, 'editar_produto.html', context, {'produto': produto, 'categorias': categorias})
+    # O contexto unificado que você já estava usando
+    return render(request, 'editar_produto.html', {
+        'produto': produto, 
+        'categorias': categorias
+    })
 
 @login_required
 def excluir_produto(request, produto_id):
