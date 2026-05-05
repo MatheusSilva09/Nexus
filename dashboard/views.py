@@ -573,7 +573,7 @@ def editar_loja(request):
     else:
         form = LojaForm(instance=loja)
     
-    return render(request, 'editar_loja.html', {'form': form, 'loja': loja, 'titulo': 'Editar Minha Loja'})
+    return render(request, 'editar_loja.html', {'form': form, 'loja': loja, 'titulo': 'Editar Informações da Loja'})
 
 @login_required
 def ver_loja(request):
