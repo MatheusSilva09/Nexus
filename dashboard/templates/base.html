@@ -87,6 +87,13 @@
             filter: drop-shadow(0 0 8px var(--nexus-blue-glow));
         }
 
+        .sidebar-logo:hover {
+            filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.7));
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
         .sidebar ul {
             list-style: none;
             padding: 0;
@@ -287,6 +294,23 @@
             background: #dc2626;
             box-shadow: 0 0 25px #ef4444;
         }
+
+        .logo-container a {
+            text-decoration: none;
+            display: inline-block;
+            /* Garante que o link envolva toda a imagem */
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-logo {
+            cursor: pointer;
+        }
+
+        /* Efeito opcional de brilho ao passar o mouse na logo */
+        .logo-container a:hover .sidebar-logo {
+            filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.8));
+            transform: scale(1.02);
+        }
     </style>
 </head>
 
@@ -294,7 +318,9 @@
     <div class="app-wrapper">
         <nav class="sidebar">
             <div class="sidebar-brand">
-                <img src="{% static 'img/nexushub.png' %}" alt="NEXUS Hub" class="sidebar-logo">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'img/nexushub.png' %}" alt="NEXUS HUB" class="sidebar-logo">
+            </a>
             </div>
             <ul>
                 <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
@@ -328,8 +354,9 @@
                         </li>
                         <li>
                             <a class="dropdown-item d-flex align-items-center" href="{% url 'lista_funcionarios' %}"
-                            style="color: var(--texto-muted);">
-                                <i class="bi bi-people-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
+                                style="color: var(--texto-muted);">
+                                <i class="bi bi-people-fill me-2"
+                                    style="font-size: 1rem; color: var(--nexus-blue);"></i>
                                 Gerenciar Funcionários
                             </a>
                         </li>
