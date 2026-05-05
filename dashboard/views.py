@@ -556,7 +556,7 @@ def criar_loja(request):
     else:
         form = LojaForm()
     
-    return render(request, 'editar_loja.html', {'form': form, 'titulo': 'Nova Loja'})
+    return render(request, 'editar_loja.html', {'form': form, 'titulo': 'Criar Nova Loja'})
 
 @login_required
 def editar_loja(request):
