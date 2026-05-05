@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}Cadastro de Produto | NEXUS HUB{% endblock %}
-{% block page_title %}CADASTRO DE PRODUTO{% endblock %}
+{% block page_title %}NOVO REGISTRO DE PRODUTO{% endblock %}
 
 {% block content %}
 <div class="fade-in-content container-fluid">
@@ -11,7 +11,7 @@
             <div class="nexus-form-card">
                 <div class="card-header-nexus">
                     <h5 class="m-0 page-title-glow" style="font-size: 1.1rem;">
-                        <i class="bi bi-plus-circle-fill me-2" style="font-size: 1.3rem;"></i>NOVO REGISTRO DE PRODUTO
+                        <i class="bi bi-plus-circle-fill me-2" style="font-size: 1.3rem;"></i>Produto
                     </h5>
                 </div>
 
@@ -45,10 +45,17 @@
                                 <option value="{{ cat.id }}">{{ cat.id }} - {{ cat.nome }}</option>
                                 {% endfor %}
                             </select>
-                            
-                            <a href="{% url 'cadastrar_categoria' %}" style="color: var(--nexus-blue); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block;">
+
+                            <a href="{% url 'cadastrar_categoria' %}"
+                                style="color: var(--nexus-blue); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block;">
                                 <i class="bi bi-plus-circle"></i> Criar nova categoria
                             </a>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="nexus-label">SELECIONAR IMAGENS</label>
+                            <input type="file" name="imagens_galeria" class="form-control" multiple accept="image/*">
+                            <small class="text-secondary">Você pode selecionar várias imagens segurando Ctrl ou Shift.</small>
                         </div>
 
                         <div class="col-md-6">
@@ -72,13 +79,16 @@
                         <div class="form-group col-md-6 mb-4">
                             <label class="nexus-label">ESTOQUE MÍNIMO (REPOSIÇÃO)</label>
                             <div class="input-group-nexus">
-                                <i class="bi bi-exclamation-triangle-fill" style="position: absolute; left: 15px; color: var(--nexus-blue); z-index: 10; margin-top: 12px;"></i> 
-                                <input type="number" name="estoque_minimo" class="input-nexus" value="5" style="padding-left: 45px;">
+                                <i class="bi bi-exclamation-triangle-fill"
+                                    style="position: absolute; left: 15px; color: var(--nexus-blue); z-index: 10; margin-top: 12px;"></i>
+                                <input type="number" name="estoque_minimo" class="input-nexus" value="5"
+                                    style="padding-left: 45px;">
                             </div>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end align-items-center gap-4 mt-5 pt-4 border-top border-secondary">
+                    <div
+                        class="d-flex justify-content-end align-items-center gap-4 mt-5 pt-4 border-top border-secondary">
                         <a href="{% url 'lista_estoque' %}" class="btn-cancel text-decoration-none">
                             <i class="bi bi-x-circle me-1"></i> CANCELAR
                         </a>
@@ -119,7 +129,8 @@
         letter-spacing: 1px;
     }
 
-    .input-container-nexus, .input-group-nexus {
+    .input-container-nexus,
+    .input-group-nexus {
         position: relative;
         display: flex;
         align-items: center;
@@ -135,7 +146,8 @@
         pointer-events: none;
     }
 
-    .input-container-nexus i, .icon-nexus {
+    .input-container-nexus i,
+    .icon-nexus {
         position: absolute;
         left: 15px;
         color: var(--nexus-blue);
@@ -161,7 +173,8 @@
 
     .input-container-nexus input::placeholder,
     .input-container-nexus textarea::placeholder {
-        color: #64748b !important; /* Cor do texto de dica (placeholder) */
+        color: #64748b !important;
+        /* Cor do texto de dica (placeholder) */
     }
 
     .select-nexus {
@@ -182,9 +195,12 @@
 
     /* --- BOTÕES SLIM E SIMÉTRICOS --- */
 
-    .logout-btn, .btn-cancel {
-        min-width: 200px; /* Largura mínima idêntica */
-        height: 42px;      /* Altura reduzida para um visual mais slim */
+    .logout-btn,
+    .btn-cancel {
+        min-width: 200px;
+        /* Largura mínima idêntica */
+        height: 42px;
+        /* Altura reduzida para um visual mais slim */
         background: transparent;
         padding: 0 20px;
         border-radius: 8px;
@@ -235,11 +251,27 @@
     }
 
     @keyframes shake {
-        10%, 90% { transform: translate3d(-1px, 0, 0); }
-        20%, 80% { transform: translate3d(2px, 0, 0); }
-        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-        40%, 60% { transform: translate3d(4px, 0, 0); }
-    }
 
+        10%,
+        90% {
+            transform: translate3d(-1px, 0, 0);
+        }
+
+        20%,
+        80% {
+            transform: translate3d(2px, 0, 0);
+        }
+
+        30%,
+        50%,
+        70% {
+            transform: translate3d(-4px, 0, 0);
+        }
+
+        40%,
+        60% {
+            transform: translate3d(4px, 0, 0);
+        }
+    }
 </style>
 {% endblock %}
