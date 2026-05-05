@@ -197,35 +197,56 @@ def cadastrar_categoria(request):
 
 def cadastrar_produto(request):
     if request.method == 'POST':
-        # 1. Processa os dados básicos do produto
+        # 1. Processa os dados básicos do formulário
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao')
         preco = request.POST.get('preco')
         estoque = request.POST.get('estoque')
         categoria_id = request.POST.get('categoria')
         
-        # 2. Cria a instância do Produto
-        novo_produto = Produto.objects.create(
-            nome=nome,
-            descricao=descricao,
-            preco=preco,
-            estoque=estoque,
-            categoria_id=categoria_id,
-            loja=request.user.loja_set.first() # Exemplo de vínculo com a loja do user
-        )
+        # 2. BUSCA DE INSTÂNCIAS (O Ponto Crítico)
+        # Primeiro, pegamos o perfil de Vendedor do usuário logado
+        vendedor_perfil = Vendedor.objects.filter(usuario=request.user).first()
+        
+        # Agora, buscamos a Loja vinculada a esse perfil de Vendedor
+        loja_do_usuario = None
+        if vendedor_perfil:
+            loja_do_usuario = Loja.objects.filter(vendedor=vendedor_perfil).first()
 
-        # 3. FUNÇÃO PARA MÚLTIPLAS IMAGENS
-        imagens = request.FILES.getlist('imagens_galeria') # Captura a lista de arquivos
-        for img in imagens:
-            ProdutoImagem.objects.create(produto=novo_produto, imagem=img)
+        # 3. VALIDAÇÃO E CRIAÇÃO
+        if loja_do_usuario:
+            novo_produto = Produto.objects.create(
+                nome=nome,
+                descricao=descricao,
+                preco=preco,
+                estoque=estoque,
+                categoria_id=categoria_id,
+                loja=loja_do_usuario, # Passa a instância correta da Loja
+            )
 
-        return redirect('lista_estoque')
+            # 4. FUNÇÃO PARA MÚLTIPLAS IMAGENS
+            imagens = request.FILES.getlist('imagens_galeria')
+            for img in imagens:
+                ProdutoImagem.objects.create(produto=novo_produto, image=img)
+
+            messages.success(request, f"Produto '{nome}' cadastrado com sucesso!")
+            return redirect('lista_estoque')
+        
+        else:
+            # Caso o vendedor não tenha loja cadastrada no Admin
+            messages.error(request, "Erro: Nenhuma loja vinculada ao seu perfil. Contate o administrador.")
+            return redirect('cadastrar_produto')
+
     else:
         form = ProdutoForm()
         
-    categorias = Categoria.objects.all()
+    categorias = Categoria.objects.all() # Garante que as categorias apareçam no select
     
-    return render(request, 'produto_form.html', {'form': form, 'titulo': 'Cadastrar Novo Produto', 'categorias': categorias})
+    return render(request, 'produto_form.html', {
+        'form': form, 
+        'titulo': 'Cadastrar Novo Produto', 
+        'categorias': categorias
+    })
 
 @login_required
 def editar_produto(request, produto_id):
