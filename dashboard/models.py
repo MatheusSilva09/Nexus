@@ -149,7 +149,7 @@ class Produto(models.Model):
 
 class ProdutoImagem(models.Model):
     produto = models.ForeignKey(Produto, related_name='imagens', on_delete=models.CASCADE)
-    imagem = models.ImageField(upload_to='produtos/')
+    imagem = models.ImageField(upload_to='produtos/galeria/')
 
 # --- CARRINHO E PEDIDOS ---
 
