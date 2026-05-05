@@ -196,52 +196,24 @@ def cadastrar_categoria(request):
     return render(request, 'categoria_form.html')
 
 def cadastrar_produto(request):
-    if hasattr(request.user, 'perfil'):
-        perfil = request.user.perfil
-    if not perfil.loja:
-        print("DEBUG: O sistema não encontrou uma loja neste perfil!")
-        return redirect('criar_loja')
-    categorias = Categoria.objects.all()
-
-    if request.method == "POST":
-        nome = request.POST.get('nome')
-        descricao = request.POST.get('descricao', '')
-        categoria_id = request.POST.get('categoria')
-        
-        estoque_raw = request.POST.get('estoque', '0')
-        estoque = int(estoque_raw) if estoque_raw.isdigit() else 0
-        
-        estoque_min_raw = request.POST.get('estoque_minimo', '5')
-        estoque_minimo = int(estoque_min_raw) if estoque_min_raw.isdigit() else 5
-
-        preco_raw = request.POST.get('preco', '0,00')
-        try:
-            preco_limpo = preco_raw.replace('R$', '').replace('.', '').replace(',', '.').strip()
-            preco_final = Decimal(preco_limpo)
-        except:
-            preco_final = Decimal('0.00')
-
-        try:
-            # A mágica acontece aqui: usamos a loja que já está no perfil do usuário
-            loja_vinculada = perfil.loja
-            categoria_instancia = Categoria.objects.filter(id=categoria_id).first()
-
-            Produto.objects.create(
-                loja=loja_vinculada,
-                categoria=categoria_instancia,
-                nome=nome,
-                descricao=descricao,
-                preco=preco_final,
-                estoque=estoque,
-                estoque_minimo=estoque_minimo
-            )
-            return redirect('lista_estoque')
+    if request.method == 'POST':
+        form = ProdutoForm(request.POST, request.FILES)
+        if form.is_valid():
+            produto = form.save(commit=False)
+            # Vincula automaticamente à loja do usuário logado (exemplo)
+            produto.loja = request.user.loja 
+            produto.save()
             
-        except Exception as e:
-            print(f"Erro ao salvar produto: {e}")
-            # Você pode enviar uma mensagem de erro para o template aqui
-
-    return render(request, 'produto_form.html', {'categorias': categorias})
+            # Lógica para salvar múltiplas imagens
+            imagens = request.FILES.getlist('imagens')
+            for img in imagens:
+                ProdutoImagem.objects.create(produto=produto, imagem=img)
+                
+            return redirect('lista_estoque')
+    else:
+        form = ProdutoForm()
+    
+    return render(request, 'produto_form.html', {'form': form, 'titulo': 'Cadastrar Novo Produto'})
 
 @login_required
 def editar_produto(request, produto_id):
