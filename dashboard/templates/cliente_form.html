@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Cadastro de Clientes | NEXUS Hub{% endblock %}
+{% block title %}Cadastrar Novo Cliente | NEXUS Hub{% endblock %}
 
-{% block page_title %}Cadastrar Novo Cliente{% endblock %}
+{% block page_title %}CADASTRAR NOVO CLIENTE{% endblock %}
 
 {% block content %}
 <style>
@@ -200,7 +200,7 @@
         {% csrf_token %}
 
         <div style="margin-bottom: 25px;">
-            <label class="label-nexus">Nome Completo</label>
+            <label class="label-nexus">NOME COMPLETO</label>
             <div class="input-wrapper-nexus">
                 <i class="bi bi-person-badge"></i>
                 <input type="text" name="nome" value="{{ form.nome.value|default:'' }}" class="form-control-nexus"
@@ -237,7 +237,7 @@
 </div>
 
         <div style="margin-bottom: 25px;">
-            <label class="label-nexus">Endereço / Complemento</label>
+            <label class="label-nexus">ENDEREÇO / COMPLEMENTO</label>
             <div class="input-wrapper-nexus">
                 <i class="bi bi-geo-alt" style="top: 15px;"></i>
                 <textarea name="endereco" rows="3" class="form-control-nexus"
@@ -247,10 +247,10 @@
 
         <div class="nexus-form-footer">
             <a href="{% url 'lista_clientes' %}" class="btn-nexus-cancel">
-                <i class="bi bi-arrow-left-short"></i> Voltar
+                <i class="bi bi-x-circle me-1"></i> CANCELAR
             </a>
             <button type="submit" class="btn-nexus-save">
-                <i class="bi bi-shield-check"></i> Finalizar Cadastro
+                <i class="bi bi-shield-check"></i> CADASTRAR
             </button>
         </div>
     </form>
