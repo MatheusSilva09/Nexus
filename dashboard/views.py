@@ -66,36 +66,43 @@ def lista_clientes(request):
 
 # --- DASHBOARD ---
 
-from django.shortcuts import render
-from .models import Produto, Cliente  # Ajuste conforme seus nomes de modelos
-
 def dashboard_view(request):
-    # 1. Total de itens em estoque (Soma de todas as quantidades)
-    # Se quiser apenas o número de produtos diferentes, use Produto.objects.count()
-    total_estoque = Produto.objects.all().count() 
+    # 1. Total de itens físicos (Soma da coluna estoque)
+    total_itens = Produto.objects.aggregate(total=Sum('estoque'))['total'] or 0
 
-    # 2. Alertas de Baixo Estoque
-    # Filtra produtos onde a quantidade atual é menor ou igual ao mínimo definido
-    alertas_baixo_estoque = Produto.objects.filter(quantidade__lte=F('estoque_minimo')).count()
+    # 2. Valor financeiro do estoque
+    valor_estoque = Produto.objects.all().aggregate(
+        total=Sum(F('preco') * F('estoque'))
+    )['total'] or 0
 
-    # 3. Clientes Ativos
-    total_clientes_ativos = Cliente.objects.filter(ativo=True).count()
+    # 3. Alertas de reposição
+    alertas_reposicao = Produto.objects.filter(estoque__lte=F('estoque_minimo')).count()
 
-    # 4. Dados Adicionais (Ex: Novos clientes hoje)
-    from django.utils import timezone
+    # 4. Total de Clientes
+    total_clientes_ativos = Cliente.objects.count()
+    
     hoje = timezone.now().date()
     novos_clientes_hoje = Cliente.objects.filter(data_cadastro__date=hoje).count()
 
+    # 5. Produtos para a tabela de 'Atividade Recente'
+    produtos_recentes = Produto.objects.all().order_by('-id')[:5]
+
     context = {
-        'total_estoque': total_estoque,
-        'alertas_baixo_estoque': alertas_baixo_estoque,
+        'total_itens': total_itens,
+        'valor_estoque': valor_estoque,
+        'alertas_reposicao': alertas_reposicao,
         'total_clientes_ativos': total_clientes_ativos,
         'novos_clientes_hoje': novos_clientes_hoje,
-        'loja_status': "Online",  # Pode ser dinâmico baseado em alguma lógica
+        'produtos': produtos_recentes,
+        'loja_status': "Online",
+        'hoje': hoje,
     }
 
+    # Print de teste para confirmar no seu terminal
+    print("--- DEBUG NEXUS HUB ---")
+    print(f"Itens: {total_itens} | Valor: {valor_estoque}")
+    
     return render(request, 'dashboard.html', context)
-
 @login_required
 def home(request):
     if not hasattr(request.user, 'perfil'):
@@ -121,7 +128,6 @@ def home(request):
     return render(request, 'dashboard.html', context)
 
 def dashboard_faturamento(request):
-    # Agrupa pedidos por dia e soma o faturamento
     dados_vendas = (
         Pedido.objects.filter(pago=True)
         .annotate(dia=TruncDay('data_pedido'))
@@ -130,7 +136,6 @@ def dashboard_faturamento(request):
         .order_by('dia')
     )
 
-    # Prepara listas para o Chart.js
     labels = [d['dia'].strftime('%d/%m') for d in dados_vendas]
     valores = [float(d['total_dia']) for d in dados_vendas]
 
@@ -142,24 +147,31 @@ def dashboard_faturamento(request):
 # --- ESTOQUE E PRODUTOS ---
 
 @login_required
+@login_required
 def lista_estoque(request):
-    # Base da query (filtrada pelo usuário logado)
-    produtos = Produto.objects.filter(loja__vendedor__usuario=request.user)
+    # 1. Busca a base de produtos do usuário logado
+    produtos_base = Produto.objects.filter(loja__vendedor__usuario=request.user)
     
-    # Filtro de estoque baixo (opcional, se você já usa)
+    # 2. CALCULA OS ALERTAS (Antes de qualquer filtro de busca)
+    # Aqui definimos a variável que estava faltando
+    alertas_count = produtos_base.filter(estoque__lte=F('estoque_minimo')).count()
+
+    # 3. Lógica de filtro (se o usuário clicou para ver apenas baixo estoque)
+    produtos = produtos_base
     if request.GET.get('baixo_estoque'):
         produtos = produtos.filter(estoque__lte=F('estoque_minimo'))
 
-    # Cálculos de Agregação
+    # 4. Agregações de valores
     totais = produtos.aggregate(
-        total_itens=Count('id'),
-        valor_estoque=Sum(F('preco') * F('estoque'))
+        total_itens=Sum('estoque'), # Soma a quantidade total de peças
+        valor_total=Sum(F('preco') * F('estoque')) # Valor total em R$
     )
 
     context = {
         'produtos': produtos,
         'total_itens': totais['total_itens'] or 0,
-        'valor_estoque': totais['valor_estoque'] or 0,
+        'valor_estoque': totais['valor_total'] or 0,
+        'alertas_reposicao': alertas_count, # Agora a variável existe!
     }
     return render(request, 'estoque_lista.html', context)
 
@@ -191,8 +203,6 @@ def cadastrar_categoria(request):
                 messages.warning(request, "Esta categoria já está cadastrada.")
                 
         return redirect('cadastrar_produto')
-    
-    # IMPORTANTE: Retornar o template se o método for GET para evitar o ValueError de 'None'
     return render(request, 'categoria_form.html')
 
 def cadastrar_produto(request):

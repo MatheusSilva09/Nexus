@@ -4,7 +4,8 @@ from . import views
 
 urlpatterns = [
     # --- Rota da Home/Dashboard ---
-    path('', views.home, name='home'),
+    path('', views.dashboard_view, name='home'),
+    path('', views.dashboard_view, name='dashboard'),
     
     # --- Rotas de Autenticação ---
     path('login/', views.login_view, name='login'),

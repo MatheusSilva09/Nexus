@@ -5,36 +5,30 @@
 {% block page_title %}Visão Geral do Sistema{% endblock %}
 
 {% block content %}
-
 <div class="dashboard-container">
     <div class="dashboard-header mb-4">
         <p class="text-white-50">Métricas em tempo real do NEXUS HUB</p>
     </div>
 
-    <div class="row g-4">
+    <!-- BLOCO 1: Cards com Ícones (Dinâmicos) -->
+    <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="bi bi-box-seam"></i>
-                </div>
+                <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
                 <div class="stat-content">
                     <span class="stat-label">Total em Estoque</span>
-                    <h3 class="stat-value">1,284</h3>
-                    <span class="stat-trend trend-up">
-                        <i class="bi bi-arrow-up-short"></i> 12% este mês
-                    </span>
+                    <h3 class="stat-value">{{ total_itens }}</h3>
+                    <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i> Dados Reais</span>
                 </div>
             </div>
         </div>
 
         <div class="col-md-3">
             <div class="stat-card warning">
-                <div class="stat-icon">
-                    <i class="bi bi-exclamation-triangle"></i>
-                </div>
+                <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
                 <div class="stat-content">
                     <span class="stat-label">Baixo Estoque</span>
-                    <h3 class="stat-value">14</h3>
+                    <h3 class="stat-value">{{ alertas_reposicao }}</h3>
                     <span class="stat-trend text-warning">Itens abaixo do limite</span>
                 </div>
             </div>
@@ -42,28 +36,101 @@
 
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="bi bi-people"></i>
-                </div>
+                <div class="stat-icon"><i class="bi bi-people"></i></div>
                 <div class="stat-content">
                     <span class="stat-label">Clientes Ativos</span>
-                    <h3 class="stat-value">452</h3>
-                    <span class="stat-trend trend-up">
-                        <i class="bi bi-arrow-up-short"></i> 5 novos hoje
-                    </span>
+                    <h3 class="stat-value">{{ total_clientes_ativos|default:"0" }}</h3>
+                    <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i> +{{ novos_clientes_hoje|default:"0" }} hoje</span>
                 </div>
             </div>
         </div>
 
         <div class="col-md-3">
             <div class="stat-card status-online">
-                <div class="stat-icon">
-                    <i class="bi bi-shop"></i>
-                </div>
+                <div class="stat-icon"><i class="bi bi-shop"></i></div>
                 <div class="stat-content">
                     <span class="stat-label">Status da Loja</span>
-                    <h3 class="stat-value">Online</h3>
-                    <span class="stext-white-50"">NEXUS Central Hub</span>
+                    <h3 class="stat-value">{{ loja_status|default:"Online" }}</h3>
+                    <span class="text-white-50">NEXUS Central Hub</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BLOCO 2: Métricas de Valor e Alertas Críticos -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-label">Valor Total Estoque</div>
+                <div class="metric-value">R$ {{ valor_estoque|floatformat:2 }}</div>
+                <div class="text-info" style="font-size: 0.8rem;">Patrimônio Ativo</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-label">Novos Clientes</div>
+                <div class="metric-value">{{ novos_clientes_hoje|default:"0" }}</div>
+                <div class="text-info" style="font-size: 0.8rem;">Cadastrados hoje</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-label">Sincronização</div>
+                <div class="mt-2">
+                    <span class="badge-nexus badge-online">Ativa & Sincronizada</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-label">Alertas Críticos</div>
+                <div class="metric-value" style="color: #f59e0b;">{{ alertas_reposicao|stringformat:"02d" }}</div>
+                <div class="text-warning" style="font-size: 0.8rem;">Abaixo do estoque mínimo</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BLOCO 3: Atividade Recente e Configuração Rápida -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="metric-card h-100">
+                <h5 class="mb-4" style="color: #00f2fe;">Atividade Recente</h5>
+                <div class="table-responsive">
+                    <table class="table nexus-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Ação</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for produto in produtos|slice:":3" %}
+                            <tr>
+                                <td>{{ produto.nome }}</td>
+                                <td>Entrada/Ajuste</td>
+                                <td>{{ hoje|date:"d M Y" }}</td>
+                                <td><span class="badge-nexus badge-online">Concluído</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">Sem atividades recentes</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="metric-card h-100">
+                <h5 class="mb-4" style="color: #00f2fe;">Configuração Rápida</h5>
+                <p class="text-white-50">Gerencie as preferências da sua Loja de forma simplificada.</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'criar_loja' %}" class="btn btn-outline-info">Editar Perfil da Loja</a>
+                    <a href="{% url 'lista_estoque' %}" class="btn btn-outline-light">Ver Estoque Completo</a>
                 </div>
             </div>
         </div>
@@ -259,89 +326,4 @@
         box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
     }
 </style>
-
-<div class="container-fluid">
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="metric-card">
-                <div class="metric-label">Total em Estoque</div>
-                <div class="metric-value">1.248</div>
-                <div class="text-info" style="font-size: 0.8rem;">↑ 12% este mês</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="metric-card">
-                <div class="metric-label">Novos Clientes</div>
-                <div class="metric-value">84</div>
-                <div class="text-info" style="font-size: 0.8rem;">+15 na última semana</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="metric-card">
-                <div class="metric-label">Status da Loja</div>
-                <div class="mt-2">
-                    <span class="badge-nexus badge-online">Ativa & Sincronizada</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="metric-card">
-                <div class="metric-label">Alertas Críticos</div>
-                <div class="metric-value" style="color: #f59e0b;">03</div>
-                <div class="text-warning" style="font-size: 0.8rem;">Itens abaixo do estoque mínimo</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="metric-card h-100">
-                <h5 class="mb-4" style="color: #00f2fe;">Atividade Recente</h5>
-                <div class="table-responsive">
-                    <table class="table nexus-table mb-0">
-                        <thead>
-                            <tr>
-                                <th>Produto</th>
-                                <th>Ação</th>
-                                <th>Data</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Teclado Mecânico RGB</td>
-                                <td>Entrada de Estoque</td>
-                                <td>25 Abr 2026</td>
-                                <td><span class="badge-nexus badge-online">Concluído</span></td>
-                            </tr>
-                            <tr>
-                                <td>Monitor 144Hz</td>
-                                <td>Saída (Venda)</td>
-                                <td>24 Abr 2026</td>
-                                <td><span class="badge-nexus badge-online">Concluído</span></td>
-                            </tr>
-                            <tr>
-                                <td>Mouse Gamer Pro</td>
-                                <td>Ajuste Manual</td>
-                                <td>24 Abr 2026</td>
-                                <td><span class="badge-nexus badge-alerta">Pendente</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="metric-card h-100">
-                <h5 class="mb-4" style="color: #00f2fe;">Configuração Rápida</h5>
-                <p class="text-white-50">Gerencie as preferências da sua Loja de forma simplificada.</p>
-                <div class="d-grid gap-2">
-                    <a href="{% url 'criar_loja' %}" class="btn btn-outline-info">Editar Perfil da Loja</a>
-                    <a href="{% url 'lista_estoque' %}" class="btn btn-outline-light">Gerar Relatório PDF</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

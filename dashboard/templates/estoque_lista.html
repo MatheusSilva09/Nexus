@@ -6,28 +6,39 @@
 {% block page_title %}Gerenciamento de Estoque{% endblock %}
 
 {% block content %}
-<div class="row g-4 mb-5">
+<div class="row g-4 mb-5"><div class="row g-4 mb-5">
+    <!-- Card 1: Total de Itens (Dinâmico) -->
     <div class="col-md-3">
         <div class="stat-card">
             <span class="stat-label">Total de Itens</span>
-            <div class="stat-value">{{ produtos.count }}</div>
+            <div class="stat-value">{{ total_itens }}</div>
             <span class="trend-up">↑ 5% este mês</span>
         </div>
     </div>
+
+    <!-- Card 2: Valor em Estoque (Dinâmico) -->
     <div class="col-md-3">
         <div class="stat-card">
             <span class="stat-label">Valor em Estoque</span>
-            <div class="stat-value" style="font-size: 1.4rem;">R$ 45.280,00</div>
+            <div class="stat-value" style="font-size: 1.4rem;">
+                R$ {{ valor_estoque|floatformat:2 }}
+            </div>
             <span class="trend-up">Patrimônio Ativo</span>
         </div>
     </div>
+
+    <!-- Card 3: Alertas de Reposição (Dinâmico) -->
     <div class="col-md-3">
         <div class="stat-card" style="border-color: rgba(239, 68, 68, 0.3);">
             <span class="stat-label">Alertas de Reposição</span>
-            <div class="stat-value" style="color: #ef4444;">04</div>
+            <div class="stat-value" style="color: #ef4444;">
+                {{ alertas_reposicao|stringformat:"02d" }}
+            </div>
             <span class="trend-alert">Abaixo do mínimo</span>
         </div>
     </div>
+
+    <!-- Card 4: Botão Novo Produto (Original) -->
     <div class="col-md-3">
         <div class="d-flex flex-column h-100 justify-content-center">
             <a href="{% url 'cadastrar_produto' %}" class="logout-btn text-center py-3 w-100"
@@ -51,61 +62,73 @@
     </div>
 
     <table class="table-nexus">
-        <thead>
-            <tr>
-                <th>SKU ID</th>
-                <th>Nome do Produto</th>
-                <th>Categoria</th>
-                <th>Quantidade</th>
-                <th>Preço Unit.</th>
-                <th>Status</th>
-                <th class="text-center">Ações</th>
-            </tr>
-        </thead>
-        <tbody id="estoqueTable">
-            {% for produto in produtos %}
-            <tr>
-                <td class="sku-highlight">#{{ produto.id|stringformat:"04d" }}</td>
-                <td class="fw-bold text-white">{{ produto.nome }}</td>
-                <td><span class="badge-category">{{ produto.categoria.nome }}</span></td>
-                <td>
-                    {% if produto.quantidade <= 5 %} <span class="text-danger fw-bold"><i
-                            class="bi bi-exclamation-triangle-fill me-1"></i>{{ produto.quantidade }}</span>
-                        {% else %}
-                        <span class="text-white-50">{{ produto.quantidade }}</span>
-                        {% endif %}
-                </td>
-                <td class="text-white-50">R$ {{ produto.preco }}</td>
-                <td>{{ produto.estoque }}</td>
-                <td>
-                    <span
-                        class="badge {% if produto.status_estoque == 'À Venda' %}bg-success{% elif 'Baixo' in produto.status_estoque %}bg-warning{% else %}bg-danger{% endif %}">
-                        {{ produto.status_estoque }}
+    <thead>
+        <tr>
+            <th>SKU ID</th>
+            <th>Nome do Produto</th>
+            <th>Categoria</th>
+            <th>Quantidade</th>
+            <th>Preço Unit.</th>
+            <th>Status</th>
+            <th class="text-center">Ações</th>
+        </tr>
+    </thead>
+    <tbody id="estoqueTable">
+        {% for produto in produtos %}
+        <tr>
+            <!-- 1. SKU -->
+            <td class="sku-highlight">#{{ produto.id|stringformat:"04d" }}</td>
+            
+            <!-- 2. NOME -->
+            <td class="fw-bold text-white">{{ produto.nome }}</td>
+            
+            <!-- 3. CATEGORIA -->
+            <td><span class="badge-category">{{ produto.categoria.nome }}</span></td>
+            
+            <!-- 4. QUANTIDADE (Com lógica de cor) -->
+            <td>
+                {% if produto.estoque <= produto.estoque_minimo %}
+                    <span class="text-danger fw-bold">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ produto.estoque }}
                     </span>
-                </td>
-                <td>
-                    {% if produto.quantidade > 0 %}
-                    <span class="status-badge status-concluido">Em Dia</span>
-                    {% else %}
-                    <span class="status-badge status-pendente">Esgotado</span>
-                    {% endif %}
-                </td>
-                <td class="text-center">
-                    <div class="action-buttons">
-                        <a href="{% url 'editar_produto' produto.id %}" class="btn-action edit" title="Editar"><i
-                                class="bi bi-pencil-square"></i></a>
-                        <a href="{% url 'excluir_produto' produto.id %}" class="btn-action delete" title="Excluir"><i
-                                class="bi bi-trash3-fill"></i></a>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="text-center py-5 text-secondary">Nenhum produto cadastrado no sistema.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                {% else %}
+                    <span class="text-white-50">{{ produto.estoque }}</span>
+                {% endif %}
+            </td>
+            
+            <!-- 5. PREÇO -->
+            <td class="text-white-50">R$ {{ produto.preco|floatformat:2 }}</td>
+            
+            <!-- 6. STATUS (À Venda / Baixo / Esgotado) -->
+            <td>
+                {% if produto.estoque <= 0 %}
+                    <span class="badge bg-danger">Esgotado</span>
+                {% elif produto.estoque <= produto.estoque_minimo %}
+                    <span class="badge bg-warning text-dark">Estoque Baixo</span>
+                {% else %}
+                    <span class="badge bg-success">À Venda</span>
+                {% endif %}
+            </td>
+            
+            <!-- 7. AÇÕES -->
+            <td class="text-center">
+                <div class="action-buttons">
+                    <a href="{% url 'editar_produto' produto.id %}" class="btn-action edit" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a href="{% url 'excluir_produto' produto.id %}" class="btn-action delete" title="Excluir">
+                        <i class="bi bi-trash3-fill"></i>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" class="text-center py-5 text-secondary">Nenhum produto cadastrado no sistema.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 </div>
 
 <style>
