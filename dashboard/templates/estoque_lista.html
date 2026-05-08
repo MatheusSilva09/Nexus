@@ -113,6 +113,9 @@
             <!-- 7. AÇÕES -->
             <td class="text-center">
                 <div class="action-buttons">
+                    <a href="{% url 'detalhe_produto' produto.id %}" class="btn-action details" title="Ver detalhes">
+                        <i class="bi bi-eye-fill"></i>
+                    </a>
                     <a href="{% url 'editar_produto' produto.id %}" class="btn-action edit" title="Editar">
                         <i class="bi bi-pencil-square"></i>
                     </a>

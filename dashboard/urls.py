@@ -27,6 +27,7 @@ urlpatterns = [
     path('meus-pedidos/', views.historico_pedidos, name='historico_pedidos'),
     path('estoque/novo/', views.cadastrar_produto, name='cadastrar_produto'),
     path('estoque/', views.lista_estoque, name='lista_estoque'),
+    path('estoque/detalhe/<int:produto_id>/', views.detalhe_produto, name='detalhe_produto'),
     path('estoque/editar/<int:produto_id>/', views.editar_produto, name='editar_produto'),
     path('estoque/excluir/<int:produto_id>/', views.excluir_produto, name='excluir_produto'),
     path('estoque/vender/<int:produto_id>/', views.realizar_venda, name='realizar_venda'),

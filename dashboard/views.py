@@ -14,19 +14,18 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils.text import slugify
 
 from nexus import settings
-from .models import Produto, Categoria, Loja, Vendedor
+from .models import Produto, ProdutoImagem, Categoria, Loja, Vendedor
 from .cart import Cart
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage, send_mail, mail_admins
 from django.template.loader import render_to_string
-from weasyprint import HTML
 from .forms import LojaForm, ProdutoForm
 from .decorators import loja_obrigatoria
 from decimal import Decimal
 from django.contrib import messages
 
-from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor, Venda, Funcionario
+from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor, Venda, Funcionario, ProdutoImagem
 from .forms import ClienteForm
 from django.utils import timezone
 
@@ -236,8 +235,10 @@ def cadastrar_produto(request):
 
             # 4. FUNÇÃO PARA MÚLTIPLAS IMAGENS
             imagens = request.FILES.getlist('imagens_galeria')
+            print(f"DEBUG: Imagens recebidas: {len(imagens)}")  # Debug temporário
             for img in imagens:
-                ProdutoImagem.objects.create(produto=novo_produto, image=img)
+                print(f"DEBUG: Salvando imagem: {img.name}")  # Debug temporário
+                ProdutoImagem.objects.create(produto=novo_produto, imagem=img)
 
             messages.success(request, f"Produto '{nome}' cadastrado com sucesso!")
             return redirect('lista_estoque')
@@ -301,6 +302,15 @@ def editar_produto(request, produto_id):
     return render(request, 'editar_produto.html', {
         'produto': produto, 
         'categorias': categorias
+    })
+
+@login_required
+def detalhe_produto(request, produto_id):
+    produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
+    imagens = produto.imagens.all()
+    return render(request, 'produto_detalhe.html', {
+        'produto': produto,
+        'imagens': imagens,
     })
 
 @login_required

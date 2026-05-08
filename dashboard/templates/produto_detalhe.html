@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalhes do Produto | NEXUS Hub{% endblock %}
+
+{% block page_title %}Detalhes do Produto{% endblock %}
+
+{% block content %}
+<div class="produto-detalhe-container">
+    <div class="detalhe-header">
+        <div>
+            <h2>{{ produto.nome }}</h2>
+            <p class="texto-muted">SKU #{{ produto.id|stringformat:"04d" }} · Categoria: {% if produto.categoria %}{{ produto.categoria.nome }}{% else %}Sem categoria{% endif %}</p>
+        </div>
+        <div class="detalhe-actions">
+            <a href="{% url 'lista_estoque' %}" class="btn btn-outline-secondary">Voltar</a>
+            <a href="{% url 'editar_produto' produto.id %}" class="btn btn-primary">Editar</a>
+        </div>
+    </div>
+
+    <div class="detalhe-grid">
+        <div class="detalhe-card info-card">
+            <h5>Informações do Produto</h5>
+            <div class="info-row"><span>Preço:</span> <strong>R$ {{ produto.preco|floatformat:2 }}</strong></div>
+            <div class="info-row"><span>Estoque atual:</span> <strong>{{ produto.estoque }}</strong></div>
+            <div class="info-row"><span>Estoque mínimo:</span> <strong>{{ produto.estoque_minimo }}</strong></div>
+            <div class="info-row"><span>Status:</span>
+                {% if produto.estoque <= 0 %}
+                    <span class="badge bg-danger">Esgotado</span>
+                {% elif produto.estoque <= produto.estoque_minimo %}
+                    <span class="badge bg-warning text-dark">Estoque Baixo</span>
+                {% else %}
+                    <span class="badge bg-success">À Venda</span>
+                {% endif %}
+            </div>
+            <div class="info-row descricao"><span>Descrição:</span>
+                <p>{{ produto.descricao|linebreaksbr }}</p>
+            </div>
+            <div class="info-row"><span>Data de criação:</span> <strong>{{ produto.data_criacao|date:'d/m/Y H:i' }}</strong></div>
+        </div>
+
+        <div class="detalhe-card imagens-card">
+            <h5>Galeria de Imagens</h5>
+            {% if imagens %}
+                <div class="galeria-imagens">
+                    {% for imagem in imagens %}
+                        <div class="galeria-item">
+                            <button type="button" class="lightbox-thumb" data-image-src="{{ imagem.imagem.url }}" data-index="{{ forloop.counter0 }}">
+                                <img src="{{ imagem.imagem.url }}" alt="Imagem do produto {{ produto.nome }}">
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div id="lightboxModal" class="lightbox-modal" aria-hidden="true">
+                    <div class="lightbox-backdrop"></div>
+                    <div class="lightbox-content" role="dialog" aria-modal="true" aria-label="Visualização da imagem do produto">
+                        <button type="button" class="lightbox-close" aria-label="Fechar">×</button>
+                        <button type="button" class="lightbox-nav lightbox-prev" aria-label="Imagem anterior">‹</button>
+                        <img id="lightboxImage" src="" alt="Imagem ampliada do produto {{ produto.nome }}">
+                        <button type="button" class="lightbox-nav lightbox-next" aria-label="Próxima imagem">›</button>
+                    </div>
+                </div>
+            {% else %}
+                <p class="texto-muted">Nenhuma imagem cadastrada para este produto.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.produto-detalhe-container {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 18px;
+    padding: 30px;
+}
+.detalhe-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.detalhe-header h2 {
+    margin: 0;
+}
+.texto-muted {
+    color: #94a3b8;
+}
+.detalhe-actions a {
+    margin-left: 10px;
+}
+.detalhe-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 24px;
+}
+.detalhe-card {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(71, 85, 105, 0.18);
+    border-radius: 16px;
+    padding: 24px;
+}
+.detalhe-card h5 {
+    margin-bottom: 18px;
+    color: #38bdf8;
+}
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    gap: 10px;
+    color: #e2e8f0;
+}
+.info-row span {
+    color: #94a3b8;
+}
+.info-row.descricao p {
+    margin: 8px 0 0;
+    line-height: 1.7;
+}
+.galeria-imagens {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.galeria-item {
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(15, 23, 42, 0.85);
+}
+.galeria-item button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    width: 100%;
+    cursor: pointer;
+}
+.galeria-item img {
+    display: block;
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+}
+.galeria-item button:hover img {
+    transform: scale(1.04);
+}
+.lightbox-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.lightbox-modal.active {
+    display: flex;
+}
+.lightbox-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+}
+.lightbox-content {
+    position: relative;
+    max-width: 95%;
+    max-height: 95%;
+    z-index: 1;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.95);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+.lightbox-content img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 90vh;
+    object-fit: contain;
+    background: #111;
+}
+.lightbox-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(15, 23, 42, 0.9);
+    color: #ffffff;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 1.35rem;
+    cursor: pointer;
+    z-index: 2;
+}
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 1.35rem;
+    cursor: pointer;
+    z-index: 2;
+    transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+    opacity: 0.72;
+    backdrop-filter: blur(8px);
+}
+.lightbox-nav:hover {
+    transform: translateY(-50%) scale(1.03);
+    background: rgba(255, 255, 255, 0.18);
+    opacity: 1;
+}
+.lightbox-prev {
+    left: 12px;
+}
+.lightbox-next {
+    right: 12px;
+}
+@media (max-width: 900px) {
+    .detalhe-grid {
+        grid-template-columns: 1fr;
+    }
+    .lightbox-nav {
+        width: 42px;
+        height: 42px;
+        font-size: 1.2rem;
+    }
+}
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const lightbox = document.getElementById('lightboxModal');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const closeButton = lightbox.querySelector('.lightbox-close');
+        const prevButton = lightbox.querySelector('.lightbox-prev');
+        const nextButton = lightbox.querySelector('.lightbox-next');
+        const backdrop = lightbox.querySelector('.lightbox-backdrop');
+        const thumbnails = Array.from(document.querySelectorAll('.lightbox-thumb'));
+        let currentIndex = 0;
+
+        function openLightbox(index) {
+            const button = thumbnails[index];
+            lightboxImage.src = button.dataset.imageSrc;
+            currentIndex = index;
+            lightbox.classList.add('active');
+            lightbox.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            lightbox.setAttribute('aria-hidden', 'true');
+            lightboxImage.src = '';
+        }
+
+        function showPrevious() {
+            currentIndex = (currentIndex - 1 + thumbnails.length) % thumbnails.length;
+            openLightbox(currentIndex);
+        }
+
+        function showNext() {
+            currentIndex = (currentIndex + 1) % thumbnails.length;
+            openLightbox(currentIndex);
+        }
+
+        thumbnails.forEach(function (button, index) {
+            button.addEventListener('click', function () {
+                openLightbox(index);
+            });
+        });
+
+        closeButton.addEventListener('click', closeLightbox);
+        backdrop.addEventListener('click', closeLightbox);
+        prevButton.addEventListener('click', function (event) {
+            event.stopPropagation();
+            showPrevious();
+        });
+        nextButton.addEventListener('click', function (event) {
+            event.stopPropagation();
+            showNext();
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (!lightbox.classList.contains('active')) {
+                return;
+            }
+            if (event.key === 'Escape') {
+                closeLightbox();
+            } else if (event.key === 'ArrowLeft') {
+                showPrevious();
+            } else if (event.key === 'ArrowRight') {
+                showNext();
+            }
+        });
+    });
+</script>
+{% endblock %}
