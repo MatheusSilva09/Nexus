@@ -34,9 +34,9 @@
                         {% endfor %}
 
                         <div class="d-grid mt-5">
-                            <button type="submit" class="logout-btn"
-                                style="background: transparent; height: 50px; font-size: 0.9rem;">
-                                <i class="bi bi-shield-check me-2"></i> SALVAR ALTERAÇÕES NO SISTEMA
+                            <button type="submit" class="logout-btn btn-cadastrar"
+                                style="height: 50px; font-size: 0.9rem;">
+                                <i class="bi bi-shield-check me-2"></i> Cadastrar
                             </button>
                         </div>
                     </form>
@@ -87,6 +87,19 @@
 
     .form-control:-ms-input-placeholder {
         color: #64748b !important;
+    }
+
+    .btn-cadastrar {
+        color: var(--turquesa-brilhante);
+        border-color: var(--turquesa-brilhante);
+        background: transparent;
+    }
+
+    .btn-cadastrar:hover {
+        background: var(--turquesa-brilhante);
+        color: var(--azul-profundo);
+        box-shadow: 0 0 15px var(--turquesa-glow);
+        transform: translateY(-2px);
     }
 </style>
 {% endblock %}

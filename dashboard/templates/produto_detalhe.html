@@ -1,46 +1,87 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Detalhes do Produto | NEXUS Hub{% endblock %}
+{% block title %}Detalhes do Produto{% endblock %}
 
 {% block page_title %}Detalhes do Produto{% endblock %}
 
 {% block content %}
 <div class="produto-detalhe-container">
-    <div class="detalhe-header">
-        <div>
-            <h2>{{ produto.nome }}</h2>
-            <p class="texto-muted">SKU #{{ produto.id|stringformat:"04d" }} · Categoria: {% if produto.categoria %}{{ produto.categoria.nome }}{% else %}Sem categoria{% endif %}</p>
-        </div>
-        <div class="detalhe-actions">
-            <a href="{% url 'lista_estoque' %}" class="btn btn-outline-secondary">Voltar</a>
-            <a href="{% url 'editar_produto' produto.id %}" class="btn btn-primary">Editar</a>
-        </div>
-    </div>
-
-    <div class="detalhe-grid">
-        <div class="detalhe-card info-card">
-            <h5>Informações do Produto</h5>
-            <div class="info-row"><span>Preço:</span> <strong>R$ {{ produto.preco|floatformat:2 }}</strong></div>
-            <div class="info-row"><span>Estoque atual:</span> <strong>{{ produto.estoque }}</strong></div>
-            <div class="info-row"><span>Estoque mínimo:</span> <strong>{{ produto.estoque_minimo }}</strong></div>
-            <div class="info-row"><span>Status:</span>
+    <section class="produto-topo">
+        <div class="produto-header-info">
+            <div>
+                <span class="produto-chip">SKU #{{ produto.id|stringformat:"04d" }}</span>
+                <span class="produto-chip produto-chip-secondary">Categoria: {% if produto.categoria %}{{ produto.categoria.nome }}{% else %}Sem categoria{% endif %}</span>
                 {% if produto.estoque <= 0 %}
-                    <span class="badge bg-danger">Esgotado</span>
+                    <span class="produto-badge produto-badge-danger">Esgotado</span>
                 {% elif produto.estoque <= produto.estoque_minimo %}
-                    <span class="badge bg-warning text-dark">Estoque Baixo</span>
+                    <span class="produto-badge produto-badge-warning">Estoque Baixo</span>
                 {% else %}
-                    <span class="badge bg-success">À Venda</span>
+                    <span class="produto-badge produto-badge-success">À Venda</span>
                 {% endif %}
             </div>
-            <div class="info-row descricao"><span>Descrição:</span>
-                <p>{{ produto.descricao|linebreaksbr }}</p>
+            <div class="produto-actions">
+                <a href="{% url 'lista_estoque' %}" class="logout-btn btn-voltar">Voltar</a>
+                <a href="{% url 'editar_produto' produto.id %}" class="logout-btn btn-editar">Editar Produto</a>
             </div>
-            <div class="info-row"><span>Data de criação:</span> <strong>{{ produto.data_criacao|date:'d/m/Y H:i' }}</strong></div>
         </div>
 
-        <div class="detalhe-card imagens-card">
-            <h5>Galeria de Imagens</h5>
+        <div class="produto-titulo-wrapper">
+            <h2>{{ produto.nome }}</h2>
+            <p class="produto-subtitulo">Detalhes completos do produto para o seu controle de estoque no NEXUS Hub.</p>
+        </div>
+
+        <div class="produto-resumo">
+            <div class="resumo-card">
+                <span>Preço</span>
+                <strong>R$ {{ produto.preco|floatformat:2 }}</strong>
+            </div>
+            <div class="resumo-card">
+                <span>Estoque atual</span>
+                <strong>{{ produto.estoque }}</strong>
+            </div>
+            <div class="resumo-card">
+                <span>Estoque mínimo</span>
+                <strong>{{ produto.estoque_minimo }}</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="produto-main-grid">
+        <article class="produto-card detalhe-card">
+            <div class="card-header">
+                <h5>Informações do Produto</h5>
+            </div>
+            <div class="campo-item">
+                <span>Nome</span>
+                <strong>{{ produto.nome }}</strong>
+            </div>
+            <div class="campo-item">
+                <span>Preço de Venda</span>
+                <strong>R$ {{ produto.preco|floatformat:2 }}</strong>
+            </div>
+            <div class="campo-item">
+                <span>Estoque Atual</span>
+                <strong>{{ produto.estoque }}</strong>
+            </div>
+            <div class="campo-item">
+                <span>Estoque Mínimo</span>
+                <strong>{{ produto.estoque_minimo }}</strong>
+            </div>
+            <div class="campo-item campo-descricao">
+                <span>Descrição</span>
+                <p>{{ produto.descricao|linebreaksbr }}</p>
+            </div>
+            <div class="campo-item">
+                <span>Data de Criação</span>
+                <strong>{{ produto.data_criacao|date:'d/m/Y H:i' }}</strong>
+            </div>
+        </article>
+
+        <article class="produto-card galeria-card">
+            <div class="card-header">
+                <h5>Galeria de Imagens</h5>
+            </div>
             {% if imagens %}
                 <div class="galeria-imagens">
                     {% for imagem in imagens %}
@@ -61,64 +102,198 @@
                     </div>
                 </div>
             {% else %}
-                <p class="texto-muted">Nenhuma imagem cadastrada para este produto.</p>
+                <div class="sem-imagem-card">
+                    <p>Nenhuma imagem cadastrada para este produto.</p>
+                </div>
             {% endif %}
-        </div>
-    </div>
+        </article>
+    </section>
 </div>
 
 <style>
 .produto-detalhe-container {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    border-radius: 18px;
-    padding: 30px;
+    background: linear-gradient(135deg, rgba(2, 12, 29, 0.95), rgba(8, 18, 38, 0.95));
+    border: 1px solid rgba(37, 99, 235, 0.22);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 24px 90px rgba(0, 0, 0, 0.35);
 }
-.detalhe-header {
+.produto-topo {
+    margin-bottom: 28px;
+}
+.produto-header-info {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 16px;
+    margin-bottom: 22px;
 }
-.detalhe-header h2 {
-    margin: 0;
+.produto-header-info div {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
-.texto-muted {
+.produto-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+}
+.produto-chip-secondary {
     color: #94a3b8;
 }
-.detalhe-actions a {
-    margin-left: 10px;
+.produto-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
-.detalhe-grid {
+.produto-badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #a7f3d0;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+.produto-badge-warning {
+    background: rgba(234, 179, 8, 0.15);
+    color: #facc15;
+    border: 1px solid rgba(234, 179, 8, 0.25);
+}
+.produto-badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fecaca;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+.produto-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.btn-editar,
+.btn-voltar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    padding: 13px 26px;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+}
+.btn-editar {
+    background: transparent;
+    color: var(--turquesa-brilhante);
+    border: 1px solid var(--turquesa-brilhante);
+    box-shadow: 0 12px 24px rgba(0, 242, 254, 0.18);
+}
+.btn-editar:hover {
+    transform: translateY(-2px);
+    background: var(--turquesa-brilhante);
+    color: #0f172a;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.45);
+    border-color: var(--turquesa-brilhante);
+}
+.btn-voltar {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+    color: #ffffff !important;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+}
+.btn-voltar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(15, 23, 42, 0.98));
+}
+.produto-titulo-wrapper h2 {
+    margin: 0 0 10px;
+    font-size: 2.3rem;
+    color: #ffffff;
+}
+.produto-subtitulo {
+    margin: 0;
+    color: #94a3b8;
+    max-width: 760px;
+}
+.produto-resumo {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+.resumo-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: 18px;
+    padding: 20px;
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.resumo-card span {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+.resumo-card strong {
+    font-size: 1.7rem;
+    color: #ffffff;
+}
+.produto-main-grid {
     display: grid;
     grid-template-columns: 1.2fr 0.8fr;
     gap: 24px;
 }
-.detalhe-card {
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(71, 85, 105, 0.18);
-    border-radius: 16px;
-    padding: 24px;
+.produto-card {
+    background: rgba(7, 16, 34, 0.96);
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
 }
-.detalhe-card h5 {
-    margin-bottom: 18px;
-    color: #38bdf8;
-}
-.info-row {
+.card-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 14px;
-    gap: 10px;
-    color: #e2e8f0;
+    align-items: center;
+    margin-bottom: 22px;
 }
-.info-row span {
+.card-header h5 {
+    margin: 0;
+    color: #38bdf8;
+    font-size: 1.15rem;
+}
+.campo-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.07);
+}
+.campo-item span {
     color: #94a3b8;
+    font-size: 0.95rem;
 }
-.info-row.descricao p {
-    margin: 8px 0 0;
-    line-height: 1.7;
+.campo-item strong {
+    color: #e2e8f0;
+    font-size: 1.05rem;
+}
+.campo-descricao {
+    grid-template-columns: 1fr;
+}
+.campo-descricao p {
+    margin: 0.5rem 0 0;
+    color: #cbd5e1;
+    line-height: 1.8;
 }
 .galeria-imagens {
     display: grid;
@@ -127,9 +302,9 @@
 }
 .galeria-item {
     overflow: hidden;
-    border-radius: 14px;
-    border: 1px solid rgba(148, 163, 184, 0.16);
-    background: rgba(15, 23, 42, 0.85);
+    border-radius: 18px;
+    border: 1px solid rgba(56, 189, 248, 0.16);
+    background: linear-gradient(180deg, rgba(15,23,42,0.96), rgba(15,23,42,0.8));
 }
 .galeria-item button {
     background: transparent;
@@ -141,12 +316,25 @@
 .galeria-item img {
     display: block;
     width: 100%;
-    height: 180px;
+    height: 220px;
     object-fit: cover;
-    transition: transform 0.25s ease;
+    transition: transform 0.25s ease, filter 0.25s ease;
 }
 .galeria-item button:hover img {
-    transform: scale(1.04);
+    transform: scale(1.05);
+    filter: brightness(0.95);
+}
+.sem-imagem-card {
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    border: 1px dashed rgba(148, 163, 184, 0.3);
+    background: rgba(15, 23, 42, 0.85);
+    color: #94a3b8;
+    text-align: center;
+    padding: 24px;
 }
 .lightbox-modal {
     display: none;
@@ -163,17 +351,17 @@
 .lightbox-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.82);
 }
 .lightbox-content {
     position: relative;
     max-width: 95%;
     max-height: 95%;
     z-index: 1;
-    border-radius: 18px;
+    border-radius: 22px;
     overflow: hidden;
-    background: rgba(15, 23, 42, 0.95);
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    background: rgba(8, 14, 28, 0.98);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
 }
 .lightbox-content img {
     display: block;
@@ -181,7 +369,7 @@
     height: auto;
     max-height: 90vh;
     object-fit: contain;
-    background: #111;
+    background: #081124;
 }
 .lightbox-close {
     position: absolute;
@@ -190,10 +378,10 @@
     background: rgba(15, 23, 42, 0.9);
     color: #ffffff;
     border: none;
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
-    font-size: 1.35rem;
+    font-size: 1.4rem;
     cursor: pointer;
     z-index: 2;
 }
@@ -204,35 +392,41 @@
     background: rgba(255, 255, 255, 0.12);
     color: rgba(255, 255, 255, 0.88);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    font-size: 1.35rem;
+    font-size: 1.45rem;
     cursor: pointer;
     z-index: 2;
     transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
-    opacity: 0.72;
+    opacity: 0.78;
     backdrop-filter: blur(8px);
 }
 .lightbox-nav:hover {
-    transform: translateY(-50%) scale(1.03);
-    background: rgba(255, 255, 255, 0.18);
+    transform: translateY(-50%) scale(1.05);
+    background: rgba(255, 255, 255, 0.2);
     opacity: 1;
 }
 .lightbox-prev {
-    left: 12px;
+    left: 16px;
 }
 .lightbox-next {
-    right: 12px;
+    right: 16px;
 }
 @media (max-width: 900px) {
-    .detalhe-grid {
+    .produto-resumo,
+    .produto-main-grid {
         grid-template-columns: 1fr;
     }
-    .lightbox-nav {
-        width: 42px;
-        height: 42px;
-        font-size: 1.2rem;
+    .produto-header-info {
+        align-items: stretch;
+    }
+    .produto-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .produto-titulo-wrapper h2 {
+        font-size: 1.85rem;
     }
 }
 </style>

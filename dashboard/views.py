@@ -4,6 +4,7 @@ from urllib import request
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.db import transaction
@@ -21,7 +22,7 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage, send_mail, mail_admins
 from django.template.loader import render_to_string
 from .forms import LojaForm, ProdutoForm
-from .decorators import loja_obrigatoria
+from .decorators import loja_obrigatoria, admin_only_required, vendedor_restrito_required
 from decimal import Decimal
 from django.contrib import messages
 
@@ -49,22 +50,15 @@ def logout_view(request):
     return redirect('login_view')
 
 @loja_obrigatoria
-def lista_estoque(request):
-    # Otimizamos a busca usando o perfil do vendedor
-    vendedor = Vendedor.objects.get(usuario=request.user)
-    
-    # Filtramos os produtos que pertencem à loja do vendedor logado
-    produtos = Produto.objects.filter(loja__vendedor=vendedor)
-    
-    return render(request, 'estoque.html', {'produtos': produtos})
-
-@loja_obrigatoria
+@admin_only_required
 def lista_clientes(request):
     # Sua lógica de clientes aqui...
     return render(request, 'clientes.html')
 
 # --- DASHBOARD ---
 
+@admin_only_required
+@login_required(login_url='login_view')
 def dashboard_view(request):
     # 1. Total de itens físicos (Soma da coluna estoque)
     total_itens = Produto.objects.aggregate(total=Sum('estoque'))['total'] or 0
@@ -104,6 +98,13 @@ def dashboard_view(request):
     return render(request, 'dashboard.html', context)
 @login_required
 def home(request):
+    # Verifica se é um vendedor aprovado (não admin)
+    vendedor = Vendedor.objects.filter(usuario=request.user).first()
+    if vendedor and vendedor.aprovado and not request.user.is_superuser:
+        # Redireciona vendedor para lista de estoque
+        return redirect('lista_estoque')
+    
+    # Admin continua para o dashboard
     if not hasattr(request.user, 'perfil'):
         return render(request, 'erro.html', {'msg': 'Seu usuário não possui um perfil configurado.'})
     
@@ -145,8 +146,7 @@ def dashboard_faturamento(request):
     
 # --- ESTOQUE E PRODUTOS ---
 
-@login_required
-@login_required
+@loja_obrigatoria
 def lista_estoque(request):
     # 1. Busca a base de produtos do usuário logado
     produtos_base = Produto.objects.filter(loja__vendedor__usuario=request.user)
@@ -174,7 +174,8 @@ def lista_estoque(request):
     }
     return render(request, 'estoque_lista.html', context)
 
-class ListaEstoqueView(ListView):
+class ListaEstoqueView(LoginRequiredMixin, ListView):
+    login_url = 'login_view'
     model = Produto
     template_name = 'estoque.html'
 
@@ -204,6 +205,7 @@ def cadastrar_categoria(request):
         return redirect('cadastrar_produto')
     return render(request, 'categoria_form.html')
 
+@vendedor_restrito_required
 def cadastrar_produto(request):
     if request.method == 'POST':
         # 1. Processa os dados básicos do formulário
@@ -324,6 +326,7 @@ def excluir_produto(request, produto_id):
         
     return render(request, 'confirmar_exclusao_produto.html', {'produto': produto})
 
+@vendedor_restrito_required
 def alternar_status_produto(request, produto_id):
     produto = get_object_or_404(Produto, id=produto_id, loja=request.user.vendedor.loja)
     produto.ativo = not produto.ativo
@@ -364,6 +367,7 @@ def remover_do_carrinho(request, produto_id):
     return redirect('ver_carrinho')
 
 @transaction.atomic
+@login_required
 def finalizar_pedido(request):
     cart = Cart(request)
     if not cart.cart:
@@ -474,6 +478,7 @@ def historico_pedidos(request):
     
     return render(request, 'historico.html', {'pedidos': pedidos})
 
+@login_required
 def exportar_pedido_pdf(request, pedido_id):
     # 1. Busca os dados
     pedido = get_object_or_404(Pedido, id=pedido_id, cliente=request.user.perfil_cliente)
@@ -637,6 +642,7 @@ def excluir_loja(request):
     return render(request, 'dashboard/confirm_delete.html', {'loja': loja})
 
 @login_required
+@login_required
 def adicionar_funcionario(request):
     if request.method == 'POST':
         nome = request.POST.get('nome')
@@ -660,12 +666,24 @@ def adicionar_funcionario(request):
 
     return render(request, 'funcionario_form.html')
 
+@login_required
 def lista_funcionarios(request):
-    funcionarios = Funcionario.objects.all()
+    # Se for admin, mostra todos os funcionários
+    if request.user.is_superuser:
+        funcionarios = Funcionario.objects.all()
+    else:
+        # Se for vendedor, mostra apenas seus funcionários
+        funcionarios = Funcionario.objects.filter(usuario_id=request.user)
+    
     return render(request, 'lista_funcionarios.html', {'funcionarios': funcionarios})
 
+@login_required
 def editar_funcionario(request, id):
-    funcionario = get_object_or_404(Funcionario, id=id)
+    # Verifica permissão: admin vê todos, vendedor vê só seus
+    if request.user.is_superuser:
+        funcionario = get_object_or_404(Funcionario, id=id)
+    else:
+        funcionario = get_object_or_404(Funcionario, id=id, usuario_id=request.user)
     
     if request.method == "POST":
         funcionario.nome = request.POST.get('nome')
@@ -685,13 +703,18 @@ def editar_funcionario(request, id):
 
 @login_required
 def excluir_funcionario(request, id):
-    funcionario = get_object_or_404(Funcionario, id=id)
+    # Verifica permissão: admin deleta todos, vendedor deleta só seus
+    if request.user.is_superuser:
+        funcionario = get_object_or_404(Funcionario, id=id)
+    else:
+        funcionario = get_object_or_404(Funcionario, id=id, usuario_id=request.user)
+    
     funcionario.delete()
     # Mensagem de sucesso opcional para feedback ao usuário
     # messages.success(request, f"Funcionário {funcionario.nome} removido com sucesso.")
     return redirect('lista_funcionarios')
 
-@login_required
+@vendedor_restrito_required
 @transaction.atomic
 def realizar_venda(request, produto_id):
     produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
