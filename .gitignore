@@ -1,13 +1,6 @@
-# Ambiente Virtual
-venv_nexus/
-
-# Python cache
+.venv/
 __pycache__/
-*.pyc
-
-# Banco de dados local
+*.py[cod]
 db.sqlite3
-
-# Arquivos do sistema e IDE
-.vscode/
-.DS_Store
+media/
+staticfiles/

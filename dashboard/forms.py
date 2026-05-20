@@ -18,9 +18,6 @@ class LojaForm(forms.ModelForm):
             }),
         }
         
-from django import forms
-from .models import Cliente
-
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
@@ -32,10 +29,6 @@ class ClienteForm(forms.ModelForm):
                 'style': 'padding-left: 45px;',
             }),
         }
-
-    class Meta:
-        model = Cliente
-        fields = ['nome', 'telefone', 'email', 'endereco']
 
 class ProdutoForm(forms.ModelForm):
     class Meta:

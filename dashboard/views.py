@@ -1,34 +1,27 @@
 import json
-from multiprocessing import context
-from urllib import request
+from decimal import Decimal
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.db import transaction
 from django.db.models import Sum, Count, F
 from django.db.models.functions import TruncDay
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login, logout
 from django.utils.text import slugify
-
-from nexus import settings
-from .models import Produto, ProdutoImagem, Categoria, Loja, Vendedor
-from .cart import Cart
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage, send_mail, mail_admins
-from django.template.loader import render_to_string
-from .forms import LojaForm, ProdutoForm
-from .decorators import loja_obrigatoria, admin_only_required, vendedor_restrito_required
-from decimal import Decimal
 from django.contrib import messages
-
-from .models import Cliente, Loja, Produto, Pedido, ItemPedido, Carrinho, Vendedor, Venda, Funcionario, ProdutoImagem
-from .forms import ClienteForm
 from django.utils import timezone
+
+from nexus import settings
+from .models import Produto, ProdutoImagem, Categoria, Loja, Vendedor, Cliente, Pedido, ItemPedido, Carrinho, Venda, Funcionario
+from .cart import Cart
+from .forms import LojaForm, ProdutoForm, ClienteForm
+from .decorators import loja_obrigatoria, admin_only_required, vendedor_restrito_required
 
 # --- AUTENTICAÇÃO ---
 
@@ -405,24 +398,17 @@ def finalizar_pedido(request):
     # 4. Limpa o carrinho
     request.session['cart'] = {}
     
-    # 5. Processamento de E-mail e PDF (Protegido por try/except)
+    # 5. Processamento de E-mail (Protegido por try/except)
     try:
-        # Gera o HTML do PDF
-        html_string = render_to_string('dashboard/pdf_pedido.html', {'pedido': pedido})
-        # Gera o PDF em memória
-        pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
-
         # Monta o e-mail
         assunto = f"Nexus Hub - Pedido #{pedido.id} Confirmado!"
-        corpo = f"Olá {pedido.cliente.usuario.username}, seu pedido foi recebido com sucesso. O comprovante está em anexo."
+        corpo = f"Olá {pedido.cliente.usuario.username}, seu pedido #{pedido.id} foi recebido com sucesso."
         destinatario = [pedido.cliente.usuario.email]
 
-        email = EmailMessage(assunto, corpo, settings.EMAIL_HOST_USER, destinatario)
-        email.attach(f'pedido_{pedido.id}.pdf', pdf_file, 'application/pdf')
-        email.send()
+        send_mail(assunto, corpo, settings.EMAIL_HOST_USER, destinatario)
         
     except Exception as e:
-        print(f"Aviso: Não foi possível gerar/enviar o PDF/E-mail. Erro: {e}")
+        print(f"Aviso: Não foi possível enviar o e-mail. Erro: {e}")
         
     # 6. Notificação para o Administrador
     try:
@@ -477,24 +463,6 @@ def historico_pedidos(request):
     ).order_by('-data_pedido')
     
     return render(request, 'historico.html', {'pedidos': pedidos})
-
-@login_required
-def exportar_pedido_pdf(request, pedido_id):
-    # 1. Busca os dados
-    pedido = get_object_or_404(Pedido, id=pedido_id, cliente=request.user.perfil_cliente)
-    
-    # 2. Renderiza o HTML para uma string
-    html_string = render_to_string('dashboard/pdf_pedido.html', {'pedido': pedido})
-    
-    # 3. Cria o PDF
-    html = HTML(string=html_string, base_url=request.build_absolute_uri())
-    result = html.write_pdf()
-
-    # 4. Prepara a resposta do navegador
-    response = HttpResponse(result, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="pedido_{pedido.id}.pdf"'
-    
-    return response
 
 # --- CLIENTES ---
 

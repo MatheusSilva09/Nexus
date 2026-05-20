@@ -1,6 +1,11 @@
 from django.contrib import admin
 from .models import Vendedor, Loja, Cliente, Categoria, Produto, Pedido, Perfil # Não esqueça de importar o Perfil!
 
+# Configurações de exibição do NEXUS Hub Admin
+admin.site.site_header = "NEXUS Hub - Administração"
+admin.site.site_title = "Portal NEXUS Hub"
+admin.site.index_title = "Gerenciamento do Ecossistema NEXUS Hub"
+
 admin.site.register(Cliente)
 admin.site.register(Categoria)
 admin.site.register(Produto)

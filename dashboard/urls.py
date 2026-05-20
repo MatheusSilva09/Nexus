@@ -1,11 +1,10 @@
 from django.urls import path
-from dashboard import views
 from . import views
 
 urlpatterns = [
     # --- Rota da Home/Dashboard ---
     path('', views.dashboard_view, name='home'),
-    path('', views.dashboard_view, name='dashboard'),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
     
     # --- Rotas de Autenticação ---
     path('login/', views.login_view, name='login'),
