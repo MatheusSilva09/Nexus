@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Cadastro de Cliente | NEXUS Hub{% endblock %}
+{% block page_title %}CADASTRO DE CLIENTE{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="nexus-form-card p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="nexus-label">NOME DE USUÁRIO</label>
+                    <div class="input-container-nexus">
+                        <i class="bi bi-person-fill"></i>
+                        <input type="text" name="username" required placeholder="Escolha um usuário">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="nexus-label">E-MAIL</label>
+                    <div class="input-container-nexus">
+                        <i class="bi bi-envelope-fill"></i>
+                        <input type="email" name="email" required placeholder="seu@email.com">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="nexus-label">SENHA</label>
+                    <div class="input-container-nexus">
+                        <i class="bi bi-lock-fill"></i>
+                        <input type="password" name="password" required placeholder="********">
+                    </div>
+                </div>
+                <button type="submit" class="btn-nexus-save w-100 mb-4 py-2">CADASTRAR</button>
+                <div class="text-center">
+                    <a href="{% url 'login_view' %}" style="color: var(--texto-muted); font-size: 0.8rem; text-decoration: none;">
+                        Já tem uma conta? <span style="color: var(--turquesa-brilhante);">Acesse aqui</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nexus-form-card {
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--borda);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .nexus-label {
+        display: block;
+        color: var(--turquesa-brilhante);
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        letter-spacing: 1px;
+    }
+
+    .input-container-nexus {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-container-nexus i {
+        position: absolute;
+        left: 15px;
+        color: var(--nexus-blue);
+        font-size: 1.1rem;
+        z-index: 10;
+        opacity: 0.8;
+    }
+
+    .input-container-nexus input {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid var(--borda) !important;
+        border-radius: 10px;
+        padding: 12px 15px 12px 45px;
+        color: #e2e8f0 !important;
+        font-size: 0.95rem;
+        transition: 0.3s;
+        outline: none;
+    }
+
+    .input-container-nexus input:focus {
+        border-color: var(--nexus-blue) !important;
+        box-shadow: 0 0 12px var(--nexus-blue-glow) !important;
+    }
+
+    .input-container-nexus input::placeholder {
+        color: #64748b !important;
+    }
+
+    .btn-nexus-save {
+        background: var(--turquesa-brilhante) !important;
+        color: var(--azul-profundo) !important;
+        border: none !important;
+        border-radius: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        box-shadow: 0 0 15px var(--turquesa-glow);
+    }
+
+    .btn-nexus-save:hover {
+        background: var(--turquesa-brilhante) !important;
+        filter: brightness(1.1);
+        box-shadow: 0 0 25px var(--turquesa-glow);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

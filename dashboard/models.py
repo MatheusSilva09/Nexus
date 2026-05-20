@@ -62,20 +62,11 @@ class Cliente(models.Model):
         auto_now_add=True, 
         verbose_name="Data de Cadastro"
     )
-
-    def __str__(self):
-        return self.nome
     
     class Meta:
         verbose_name = "Cliente"
         verbose_name_plural = "Clientes"
         ordering = ['-data_cadastro'] # Mais recentes primeiro
-
-    def __str__(self):
-        return self.nome
-
-    def __str__(self):
-        return self.usuario.username
     
 class Perfil(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='perfil')
@@ -193,7 +184,7 @@ class Venda(models.Model):
     data = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"Venda {self.id} - {self.vendedor.nome_exibicao}"
+        return f"Venda {self.id} - {self.vendedor.username}"
 
 @receiver(post_save, sender=User)    
 def create_vendedor_perfil(sender, instance, created, **kwargs):

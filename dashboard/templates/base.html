@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}{{ titulo_aba|default:"NEXUS Hub" }}{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'img/LOGOMARCA FAVICON.png' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'img/LOGOMARCA FAVICON.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -23,6 +23,7 @@
             --turquesa-glow: rgba(0, 242, 254, 0.3);
         }
 
+        
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -325,22 +326,40 @@
             </a>
             </div>
             <ul>
-                {% if not is_vendedor %}
+                {% if is_admin %}
                 <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                     <a href="{% url 'home' %}"><i class="bi bi-house-door-fill"></i> Painel</a>
                 </li>
                 {% endif %}
                 
+                {% if is_vendedor or is_admin %}
                 <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
                     <a href="{% url 'lista_estoque' %}"><i class="bi bi-box-seam-fill"></i> Estoque</a>
                 </li>
+                {% endif %}
                 
-                {% if not is_vendedor %}
+                {% if is_admin %}
                 <li class="{% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
                     <a href="{% url 'lista_clientes' %}"><i class="bi bi-people-fill"></i> Clientes</a>
                 </li>
                 {% endif %}
                 
+                <!-- Opções para o Cliente -->
+                {% if is_cliente %}
+                <li class="{% if request.resolver_match.url_name == 'vitrine_produtos' %}active{% endif %}">
+                    <a href="{% url 'vitrine_produtos' %}"><i class="bi bi-shop-window"></i> Vitrine</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'ver_carrinho' %}active{% endif %}">
+                    <a href="{% url 'ver_carrinho' %}">
+                        <i class="bi bi-cart-fill"></i> Carrinho
+                    </a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'historico_pedidos' %}active{% endif %}">
+                    <a href="{% url 'historico_pedidos' %}"><i class="bi bi-bag-check-fill"></i> Meus Pedidos</a>
+                </li>
+                {% endif %}
+
+                {% if is_vendedor or is_admin %}
                 <li class="nav-item dropdown">
                     <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="bi bi-shop"></i> Loja
@@ -438,6 +457,7 @@
                         {% endif %}
                     </ul>
                 </li>
+                {% endif %}
             </ul>
         </nav>
 
@@ -446,6 +466,7 @@
                 <div class="page-title-glow">
                     {% block page_title %}Dashboard{% endblock %}
                 </div>
+                {% if user.is_authenticated %}
                 <div class="user-info d-flex align-items-center gap-4">
                     <span style="color: #e2e8f0; font-size: 0.9rem;">
                         <i class="bi bi-person-circle me-1" style="color: var(--turquesa-brilhante);"></i>
@@ -453,6 +474,7 @@
                     </span>
                     <a href="/logout/" class="logout-btn">Sair</a>
                 </div>
+                {% endif %}
             </header>
 
             <main class="nexus-main-content" id="main-content">

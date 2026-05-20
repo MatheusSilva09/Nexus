@@ -30,7 +30,8 @@ def vendedor_aprovado_required(view_func):
         if request.user.is_superuser:
             return view_func(request, *args, **kwargs)
             
-        vendedor = getattr(request.user, 'vendedor', None)
+        # O related_name definido em models.py é 'vendedor_perfil'
+        vendedor = getattr(request.user, 'vendedor_perfil', None)
         
         if vendedor and vendedor.aprovado:
             return view_func(request, *args, **kwargs)

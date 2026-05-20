@@ -10,6 +10,7 @@ from django.db import transaction
 from django.db.models import Sum, Count, F
 from django.db.models.functions import TruncDay
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -17,7 +18,7 @@ from django.core.mail import EmailMessage, send_mail, mail_admins
 from django.contrib import messages
 from django.utils import timezone
 
-from nexus import settings
+from django.conf import settings
 from .models import Produto, ProdutoImagem, Categoria, Loja, Vendedor, Cliente, Pedido, ItemPedido, Carrinho, Venda, Funcionario
 from .cart import Cart
 from .forms import LojaForm, ProdutoForm, ClienteForm
@@ -26,6 +27,9 @@ from .decorators import loja_obrigatoria, admin_only_required, vendedor_restrito
 # --- AUTENTICAÇÃO ---
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+        
     if request.method == 'POST':
         user_nome = request.POST.get('username')
         senha = request.POST.get('password')
@@ -42,11 +46,26 @@ def logout_view(request):
     logout(request)
     return redirect('login_view')
 
-@loja_obrigatoria
-@admin_only_required
-def lista_clientes(request):
-    # Sua lógica de clientes aqui...
-    return render(request, 'clientes.html')
+def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        user_nome = request.POST.get('username')
+        email = request.POST.get('email')
+        senha = request.POST.get('password')
+        
+        if User.objects.filter(username=user_nome).exists():
+            messages.error(request, 'Este nome de usuário já está em uso.')
+        else:
+            user = User.objects.create_user(username=user_nome, email=email, password=senha)
+            # O sinal 'create_user_profile' em models.py criará o Perfil automaticamente como 'CLIENTE'
+            login(request, user)
+            messages.success(request, f'Bem-vindo, {user_nome}! Sua conta foi criada.')
+            return redirect('vitrine_produtos')
+            
+    return render(request, 'signup.html')
+
 
 # --- DASHBOARD ---
 
@@ -91,6 +110,11 @@ def dashboard_view(request):
     return render(request, 'dashboard.html', context)
 @login_required
 def home(request):
+    # 1. Se for cliente, vai para a vitrine
+    perfil = getattr(request.user, 'perfil', None)
+    if perfil and perfil.nivel == 'CLIENTE':
+        return redirect('vitrine_produtos')
+
     # Verifica se é um vendedor aprovado (não admin)
     vendedor = Vendedor.objects.filter(usuario=request.user).first()
     if vendedor and vendedor.aprovado and not request.user.is_superuser:
@@ -98,10 +122,10 @@ def home(request):
         return redirect('lista_estoque')
     
     # Admin continua para o dashboard
-    if not hasattr(request.user, 'perfil'):
-        return render(request, 'erro.html', {'msg': 'Seu usuário não possui um perfil configurado.'})
-    
-    perfil = request.user.perfil
+    perfil = getattr(request.user, 'perfil', None)
+    if not perfil:
+        messages.error(request, "Perfil não encontrado. Contate o suporte.")
+        return redirect('logout')
     
     if perfil.nivel == 'ADMIN':
         produtos_loja = Produto.objects.all()
@@ -123,7 +147,7 @@ def home(request):
 def dashboard_faturamento(request):
     dados_vendas = (
         Pedido.objects.filter(pago=True)
-        .annotate(dia=TruncDay('data_pedido'))
+        .annotate(dia=TruncDay('data_criacao'))
         .values('dia')
         .annotate(total_dia=Sum('total'))
         .order_by('dia')
@@ -177,9 +201,24 @@ class ListaEstoqueView(LoginRequiredMixin, ListView):
         return Produto.objects.filter(loja__vendedor=vendedor)
 
 def vitrine_produtos(request):
-    produtos = Produto.objects.filter(quantidade__gt=0)
+    query = request.GET.get('q')
+    categoria_id = request.GET.get('categoria')
     
-    return render(request, 'vitrine.html', {'produtos': produtos})
+    produtos = Produto.objects.filter(estoque__gt=0, ativo=True)
+    
+    if query:
+        produtos = produtos.filter(nome__icontains=query)
+    if categoria_id:
+        produtos = produtos.filter(categoria_id=categoria_id)
+
+    categorias = Categoria.objects.all()
+    
+    return render(request, 'vitrine.html', {
+        'produtos': produtos,
+        'categorias': categorias,
+        'titulo_aba': 'Vitrine | NEXUS Hub',
+        'query': query
+    })
 
 def cadastrar_categoria(request):
     if request.method == "POST":
@@ -351,7 +390,8 @@ def ver_carrinho(request):
 
     return render(request, 'carrinho.html', {
         'itens': itens_carrinho,
-        'total': total_geral
+        'total': total_geral,
+        'titulo_aba': 'Carrinho | NEXUS Hub'
     })
     
 def remover_do_carrinho(request, produto_id):
@@ -366,8 +406,12 @@ def finalizar_pedido(request):
     if not cart.cart:
         return redirect('vitrine_produtos')
 
-    # 1. Recupera o perfil do Cliente logado
-    cliente = request.user.perfil_cliente
+    # 1. Recupera o cadastro de Cliente do usuário logado
+    cliente = Cliente.objects.filter(usuario=request.user).first()
+
+    if not cliente:
+        messages.warning(request, "Por favor, complete seus dados de entrega antes de finalizar a compra.")
+        return redirect('cadastrar_cliente')
 
     # 2. Otimização: Busca todos os produtos do carrinho de uma só vez
     ids_produtos = cart.cart.keys()
@@ -392,7 +436,7 @@ def finalizar_pedido(request):
         )
 
         # Baixa no estoque
-        produto.quantidade -= dados['quantidade']
+        produto.estoque -= dados['quantidade']
         produto.save()
 
     # 4. Limpa o carrinho
@@ -417,7 +461,7 @@ def finalizar_pedido(request):
         Um novo pedido foi finalizado no Nexus Hub!
         Cliente: {pedido.cliente.usuario.username}
         Valor Total: R$ {pedido.total}
-        Data: {pedido.data_pedido.strftime('%d/%m/%Y %H:%M')}
+        Data: {pedido.data_criacao.strftime('%d/%m/%Y %H:%M')}
 
         Acesse o painel para gerenciar a entrega.
         """
@@ -439,13 +483,14 @@ def finalizar_pedido(request):
     except Exception as e:
         print(f"Erro ao notificar admin: {e}")
     
-    return render(request, 'pedido_confirmado.html', {'pedido': pedido})
+    messages.success(request, f"Pedido #{pedido.id} realizado com sucesso! Acompanhe o status abaixo.")
+    return redirect('historico_pedidos')
 
 @login_required
 def detalhe_pedido(request, pedido_id):
     # Busca o pedido ou retorna 404 se não existir
-    # Filtramos pelo cliente logado por segurança
-    pedido = get_object_or_404(Pedido, id=pedido_id, cliente=request.user.perfil_cliente)
+    # Filtramos pelo usuario do cliente logado por segurança
+    pedido = get_object_or_404(Pedido, id=pedido_id, cliente__usuario=request.user)
     
     itens = pedido.itens.all()
     
@@ -453,16 +498,18 @@ def detalhe_pedido(request, pedido_id):
         'pedido': pedido,
         'itens': itens
     })
-    
 @login_required
 def historico_pedidos(request):
-    # Busca todos os pedidos vinculados ao perfil_cliente do usuário logado
-    # .order_by('-data_pedido') garante que o mais recente apareça primeiro
+    # Busca todos os pedidos vinculados ao usuário logado através do modelo Cliente
+    # .order_by('-data_criacao') garante que o mais recente apareça primeiro
     pedidos = Pedido.objects.filter(
-        cliente=request.user.perfil_cliente
-    ).order_by('-data_pedido')
+        cliente__usuario=request.user
+    ).order_by('-data_criacao')
     
-    return render(request, 'historico.html', {'pedidos': pedidos})
+    return render(request, 'historico.html', {
+        'pedidos': pedidos,
+        'titulo_aba': 'Meus Pedidos | NEXUS Hub'
+    })
 
 # --- CLIENTES ---
 
@@ -610,7 +657,6 @@ def excluir_loja(request):
     return render(request, 'dashboard/confirm_delete.html', {'loja': loja})
 
 @login_required
-@login_required
 def adicionar_funcionario(request):
     if request.method == 'POST':
         nome = request.POST.get('nome')
@@ -697,7 +743,7 @@ def realizar_venda(request, produto_id):
     
     # Cria o registro da venda (ajuste os campos conforme seu modelo Venda)
     Venda.objects.create(
-        vendedor=request.user.vendedor,
+        vendedor=request.user,
         produto=produto,
         quantidade=1,
         valor_total=produto.preco

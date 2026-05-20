@@ -28,6 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 
+# Configuração para evitar erro de CSRF em ambiente de desenvolvimento
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
 
 # Application definition
 
@@ -83,7 +85,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_HOST = 'smtp.gmail.com'
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'seu-email@gmail.com'
+EMAIL_HOST_USER = 'webmaster@localhost'
 # EMAIL_HOST_PASSWORD = 'sua-senha-de-app'
 
 # Lista de administradores que receberão os alertas
@@ -131,8 +133,6 @@ LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'America/Sao_Paulo'
 
-USE_L10N = True
-
 USE_I18N = True
 
 DECIMAL_SEPARATOR = ','
@@ -144,7 +144,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),

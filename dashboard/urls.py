@@ -3,12 +3,14 @@ from . import views
 
 urlpatterns = [
     # --- Rota da Home/Dashboard ---
-    path('', views.dashboard_view, name='home'),
+    path('', views.home, name='home'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     
     # --- Rotas de Autenticação ---
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
+    path('login/', views.login_view, name='login_view'),
+    path('logout/', views.logout_view, name='logout_view'),
+    path('signup/', views.signup_view, name='signup_view'),
+    path('registrar/', views.signup_view, name='registrar'), # Atalho amigável em português
 
     # --- Rotas de Clientes ---
     # Esta é a lista que você chama após salvar
@@ -22,6 +24,7 @@ urlpatterns = [
     path('carrinho/adicionar/<int:produto_id>/', views.adicionar_ao_carrinho, name='adicionar_ao_carrinho'),
     path('carrinho/', views.ver_carrinho, name='ver_carrinho'),
     path('carrinho/remover/<int:produto_id>/', views.remover_do_carrinho, name='remover_do_carrinho'),
+    path('carrinho/finalizar/', views.finalizar_pedido, name='finalizar_pedido'),
     path('pedido/<int:pedido_id>/', views.detalhe_pedido, name='detalhe_pedido'),
     path('meus-pedidos/', views.historico_pedidos, name='historico_pedidos'),
     path('estoque/novo/', views.cadastrar_produto, name='cadastrar_produto'),
@@ -33,6 +36,9 @@ urlpatterns = [
     path('cadastrar-categoria/', views.cadastrar_categoria, name='cadastrar_categoria'),
     
     # --- Rotas de Loja ---
+    path('loja/', views.ver_loja, name='ver_loja'),
+    path('loja/criar/', views.criar_loja, name='criar_loja'),
+    path('loja/editar/', views.editar_loja, name='editar_loja'),
     path('excluir_loja/', views.excluir_loja, name='excluir_loja'),
     path('funcionarios/', views.lista_funcionarios, name='lista_funcionarios'),
     path('funcionarios/novo/', views.adicionar_funcionario, name='adicionar_funcionario'),
