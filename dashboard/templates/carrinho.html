@@ -1,18 +1,130 @@
 {% extends 'base.html' %}
 
+{% block title %}Carrinho | NEXUS Hub{% endblock %}
+{% block page_title %}Meu Carrinho{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2 class="text-light mb-4" style="border-left: 5px solid #00ced1; padding-left: 15px;">
-        Meu Carrinho
-    </h2>
+<style>
+    .nexus-container {
+        padding: 20px;
+        color: #ffffff;
+    }
+
+    .nexus-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .nexus-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-left: 5px solid var(--turquesa-brilhante);
+        padding-left: 15px;
+    }
+
+    .nexus-table-wrapper {
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .nexus-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .nexus-table th {
+        padding: 18px 20px;
+        color: var(--nexus-blue);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        background: rgba(15, 23, 42, 0.8);
+        border-bottom: 2px solid var(--borda);
+        text-align: left;
+    }
+
+    .nexus-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+        color: #e2e8f0;
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    .nexus-table tbody tr:hover {
+        background: rgba(37, 99, 235, 0.08);
+    }
+
+    .subtotal-highlight {
+        color: var(--turquesa-brilhante);
+        font-weight: 800;
+        text-shadow: 0 0 8px var(--turquesa-glow);
+    }
+
+    .btn-action-delete {
+        color: #ff4d4d;
+        text-decoration: none;
+        transition: 0.3s;
+        font-size: 1.1rem;
+    }
+
+    .btn-action-delete:hover {
+        color: #ff0000;
+        filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.5));
+    }
+
+    .summary-card {
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--turquesa-brilhante);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 0 15px var(--turquesa-glow);
+    }
+
+    .btn-finalizar {
+        background: var(--turquesa-brilhante) !important;
+        color: var(--azul-profundo) !important;
+        border: none !important;
+        border-radius: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        transition: 0.3s;
+        padding: 12px;
+        box-shadow: 0 0 15px var(--turquesa-glow);
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+
+    .btn-finalizar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 25px var(--turquesa-glow);
+        filter: brightness(1.1);
+        color: var(--azul-profundo) !important;
+    }
+</style>
+
+<div class="nexus-container mt-4">
+    <header class="nexus-header">
+        <div class="nexus-title-wrapper">
+            <h2 class="text-light m-0">Meu Carrinho</h2>
+        </div>
+    </header>
 
     {% if itens %}
-    <div class="table-responsive rounded shadow-sm">
-        <table class="table table-hover align-middle" style="background-color: #1e293b; color: #f8fafc;">
-            <thead style="background-color: #0f172a; color: #00ced1;">
+    <div class="nexus-table-wrapper">
+        <table class="nexus-table">
+            <thead>
                 <tr>
                     <th>Produto</th>
-                    <th>Preço Unitário</th>
+                    <th>Preço Unit.</th>
                     <th>Quantidade</th>
                     <th>Subtotal</th>
                     <th class="text-center">Ações</th>
@@ -20,15 +132,16 @@
             </thead>
             <tbody>
                 {% for item in itens %}
-                <tr style="border-bottom: 1px solid #334155;">
+                <tr>
                     <td class="fw-bold">{{ item.produto.nome }}</td>
-                    <td>R$ {{ item.produto.preco }}</td>
+                    <td class="text-white-50">R$ {{ item.produto.preco }}</td>
                     <td>{{ item.quantidade }}</td>
-                    <td class="text-info fw-bold">R$ {{ item.subtotal }}</td>
+                    <td class="subtotal-highlight">R$ {{ item.subtotal }}</td>
                     <td class="text-center">
-                        <a href="{% url 'remover_do_carrinho' item.produto.id %}" class="btn btn-outline-danger btn-sm"
+                        <a href="{% url 'remover_do_carrinho' item.produto.id %}" class="btn-action-delete"
                             onclick="return confirm('Tem certeza que deseja remover este item?')">
-                            <i class="bi bi-trash"></i>Remover</a>
+                            <i class="bi bi-trash3-fill"></i>
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -38,26 +151,22 @@
 
     <div class="row mt-4 justify-content-end">
         <div class="col-md-4">
-            <div class="p-4 rounded" style="background-color: #0f172a; border: 1px solid #00ced1;">
-                <h4 class="text-light">Total da Compra</h4>
-                <h2 style="color: #00ced1;">R$ {{ total }}</h2>
+            <div class="summary-card">
+                <h4 class="text-light small fw-bold text-uppercase" style="letter-spacing: 1px;">Total da Compra</h4>
+                <h2 style="color: var(--turquesa-brilhante); font-weight: 800;">R$ {{ total }}</h2>
                 <hr style="background-color: #334155;">
-                <button class="btn btn-lg w-100 mt-2"
-                    style="background-color: #00ced1; color: #0f172a; font-weight: bold;">
-                    <a href="{% url 'finalizar_pedido' %}" class="btn btn-lg w-100 mt-2"
-                        style="background-color: #00ced1; color: #0f172a; font-weight: bold;">
-                        Confirmar e Finalizar Compra
-                    </a>
-                </button>
+                <a href="{% url 'finalizar_pedido' %}" class="btn-finalizar mt-3">
+                    <i class="bi bi-check-all me-2"></i>Confirmar e Finalizar
+                </a>
             </div>
         </div>
     </div>
 
     {% else %}
     <div class="text-center py-5">
-        <h4 class="text-muted">Seu carrinho está vazio.</h4>
-        <a href="{% url 'vitrine_produtos' %}" class="btn mt-3" style="background-color: #00ced1; color: #0f172a;">
-            Voltar para a Vitrine
+        <h4 class="text-muted italic">Seu carrinho está vazio.</h4>
+        <a href="{% url 'vitrine_produtos' %}" class="logout-btn mt-3 px-4 d-inline-block">
+            <i class="bi bi-arrow-left me-2"></i>Voltar para a Vitrine
         </a>
     </div>
     {% endif %}

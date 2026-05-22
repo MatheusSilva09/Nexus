@@ -1,17 +1,101 @@
 {% extends 'base.html' %}
 
+{% block title %}Meus Pedidos | NEXUS Hub{% endblock %}
+{% block page_title %}Meus Pedidos{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2 class="text-light mb-4" style="border-left: 5px solid #00ced1; padding-left: 15px;">
-        Meus Pedidos
-    </h2>
+<style>
+    .nexus-container {
+        padding: 20px;
+        color: #ffffff;
+    }
+
+    .nexus-header {
+        margin-bottom: 30px;
+    }
+
+    .nexus-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-left: 5px solid var(--turquesa-brilhante);
+        padding-left: 15px;
+    }
+
+    .nexus-table-wrapper {
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .nexus-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .nexus-table th {
+        padding: 18px 20px;
+        color: var(--nexus-blue);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        background: rgba(15, 23, 42, 0.8);
+        border-bottom: 2px solid var(--borda);
+        text-align: left;
+    }
+
+    .nexus-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+        color: #e2e8f0;
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    .nexus-table tbody tr:hover {
+        background: rgba(37, 99, 235, 0.08);
+    }
+
+    .order-number {
+        font-family: 'Courier New', monospace;
+        color: var(--turquesa-brilhante);
+        font-weight: bold;
+    }
+
+    .btn-nexus-detail {
+        border: 1px solid var(--nexus-blue);
+        color: var(--nexus-blue);
+        padding: 6px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        transition: 0.3s;
+    }
+
+    .btn-nexus-detail:hover {
+        background: var(--nexus-blue);
+        color: white;
+        box-shadow: 0 0 15px var(--nexus-blue-glow);
+    }
+</style>
+
+<div class="nexus-container mt-4">
+    <header class="nexus-header">
+        <div class="nexus-title-wrapper">
+            <h2 class="text-light m-0">Meus Pedidos</h2>
+        </div>
+    </header>
 
     {% if pedidos %}
-    <div class="table-responsive rounded shadow-sm">
-        <table class="table table-hover align-middle" style="background-color: #1e293b; color: #f8fafc;">
-            <thead style="background-color: #0f172a; color: #00ced1;">
+    <div class="nexus-table-wrapper">
+        <table class="nexus-table">
+            <thead>
                 <tr>
-                    <th>Nº do Pedido</th>
+                    <th>ID Pedido</th>
                     <th>Data</th>
                     <th>Total</th>
                     <th>Status</th>
@@ -20,21 +104,17 @@
             </thead>
             <tbody>
                 {% for pedido in pedidos %}
-                <tr style="border-bottom: 1px solid #334155;">
-                    <td class="fw-bold">#{{ pedido.id }}</td>
-                    <td>{{ pedido.data_pedido|date:"d/m/Y H:i" }}</td>
-                    <td class="text-info">R$ {{ pedido.total }}</td>
+                <tr>
+                    <td class="order-number">#{{ pedido.id|stringformat:"05d" }}</td>
+                    <td class="text-white-50">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</td>
+                    <td class="fw-bold text-white">R$ {{ pedido.total }}</td>
                     <td>
-                        {% if pedido.pago %}
-                        <span class="badge bg-success">Pago</span>
-                        {% else %}
-                        <span class="badge bg-warning text-dark">Pendente</span>
-                        {% endif %}
+                        <span class="badge {% if pedido.pago %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                            {% if pedido.pago %}PAGO{% else %}PENDENTE{% endif %}
+                        </span>
                     </td>
                     <td class="text-center">
-                        <a href="{% url 'detalhe_pedido' pedido.id %}" class="btn btn-sm btn-outline-info">
-                            Ver Detalhes
-                        </a>
+                        <a href="{% url 'detalhe_pedido' pedido.id %}" class="btn-nexus-detail">Ver Detalhes</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -43,8 +123,8 @@
     </div>
     {% else %}
     <div class="text-center py-5">
-        <p class="text-muted italic">Você ainda não realizou nenhum pedido.</p>
-        <a href="{% url 'vitrine_produtos' %}" class="btn mt-3" style="background-color: #00ced1; color: #0f172a;">
+        <h4 class="text-muted italic">Você ainda não realizou nenhum pedido.</h4>
+        <a href="{% url 'vitrine_produtos' %}" class="logout-btn mt-3 px-4 d-inline-block">
             Ir para a Vitrine
         </a>
     </div>

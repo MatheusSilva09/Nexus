@@ -1,57 +1,119 @@
 {% extends 'base.html' %}
 
+{% block title %}Detalhes do Pedido | NEXUS Hub{% endblock %}
+{% block page_title %}Detalhes do Pedido{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-light" style="border-left: 5px solid #00ced1; padding-left: 15px;">
-            Detalhes do Pedido #{{ pedido.id }}
-        </h2>
-        <a href="{% url 'historico_pedidos' %}" class="btn btn-outline-secondary btn-sm">
-            Voltar ao Histórico
-        </a>
-    </div>
+<style>
+    .nexus-container {
+        padding: 20px;
+        color: #ffffff;
+    }
 
-    <div class="card border-0 mb-4" style="background-color: #1e293b; color: #f8fafc;">
-        <div class="card-body d-flex justify-content-between">
-            <div>
-                <p class="mb-1 text-secondary">Data do Pedido</p>
-                <h5 class="text-light">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</h5>
-            </div>
-            <div class="text-end">
-                <p class="mb-1 text-secondary">Status do Pagamento</p>
-                {% if pedido.pago %}
-                    <span class="badge bg-success">Pago</span>
-                {% else %}
-                    <span class="badge bg-warning text-dark">Aguardando Pagamento</span>
-                {% endif %}
-            </div>
+    .nexus-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .nexus-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-left: 5px solid var(--turquesa-brilhante);
+        padding-left: 15px;
+    }
+
+    .nexus-table-wrapper {
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .nexus-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .nexus-table th {
+        padding: 18px 20px;
+        color: var(--nexus-blue);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        background: rgba(15, 23, 42, 0.8);
+        border-bottom: 2px solid var(--borda);
+        text-align: left;
+    }
+
+    .nexus-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+        color: #e2e8f0;
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    .order-number {
+        font-family: 'Courier New', monospace;
+        color: var(--turquesa-brilhante);
+        font-weight: bold;
+    }
+
+    .total-highlight {
+        color: var(--turquesa-brilhante);
+        font-weight: 800;
+        text-shadow: 0 0 8px var(--turquesa-glow);
+    }
+</style>
+
+<div class="nexus-container mt-4">
+    <header class="nexus-header">
+        <div class="nexus-title-wrapper">
+            <h2 class="text-light m-0">Pedido <span class="order-number">#{{ pedido.id|stringformat:"05d" }}</span></h2>
         </div>
-    </div>
+        <a href="{% url 'historico_pedidos' %}" class="logout-btn px-4 d-inline-block">
+            <i class="bi bi-arrow-left me-2"></i>Voltar
+        </a>
+    </header>
 
-    <div class="table-responsive rounded shadow-sm">
-        <table class="table table-hover align-middle" style="background-color: #1e293b; color: #f8fafc;">
-            <thead style="background-color: #0f172a; color: #00ced1;">
+    <div class="nexus-table-wrapper">
+        <table class="nexus-table">
+            <thead>
                 <tr>
                     <th>Produto</th>
                     <th class="text-center">Qtd</th>
-                    <th class="text-end">Preço Unit.</th>
+                    <th>Preço Unit.</th>
+                    <th>Status</th>
+                    <th>Data do Pedido</th>
                     <th class="text-end">Subtotal</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in itens %}
-                <tr style="border-bottom: 1px solid #334155;">
-                    <td class="fw-bold">{{ item.produto.nome }}</td>
-                    <td class="text-center">{{ item.quantidade }}</td>
-                    <td class="text-end">R$ {{ item.preco }}</td>
-                    <td class="text-end text-info fw-bold">R$ {{ item.quantidade|add:0 }}</td> 
-                    </tr>
+                <tr>
+                    <td class="fw-bold text-white">{{ item.produto.nome }}</td>
+                    <td class="text-center text-white-50">{{ item.quantidade }}</td>
+                    <td class="text-white-50">R$ {{ item.preco }}</td>
+                    <td>
+                        <span class="badge {% if pedido.pago %}bg-success{% else %}bg-warning text-dark{% endif %}" style="font-size: 0.7rem;">
+                            {% if pedido.pago %}PAGO{% else %}PENDENTE{% endif %}
+                        </span>
+                    </td>
+                    <td class="text-white-50 small font-monospace">{{ pedido.data_pedido|date:"d/m/Y H:i" }}</td>
+                    <td class="text-end text-white fw-bold">R$ {{ item.subtotal|default:item.preco }}</td>
+                </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
-                <tr style="background-color: #0f172a;">
-                    <td colspan="3" class="text-end fw-bold text-light">Total Geral:</td>
-                    <td class="text-end fw-bold" style="color: #00ced1; font-size: 1.2rem;">R$ {{ pedido.total }}</td>
+                <tr style="background: rgba(0, 242, 254, 0.05);">
+                    <td colspan="5" class="text-end py-4 px-4 text-uppercase small fw-bold" style="letter-spacing: 2px;">Total Geral</td>
+                    <td class="text-end py-4 px-4 total-highlight" style="font-size: 1.2rem;">
+                        R$ {{ pedido.total }}
+                    </td>
                 </tr>
             </tfoot>
         </table>
