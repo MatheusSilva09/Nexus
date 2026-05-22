@@ -1,0 +1,36 @@
+{% extends 'loja_base.html' %}
+
+{% block title %}Login | NEXUS Store{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center animate-fade-in" style="margin-top: 50px;">
+    <div class="col-md-5">
+        <div style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); border: 1px solid var(--borda); border-radius: 16px; padding: 40px;">
+            <h2 class="text-center text-white mb-4" style="font-weight: 300; letter-spacing: 1px;">ACESSAR <strong style="color: var(--turquesa-brilhante); font-weight: 800;">CONTA</strong></h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger bg-dark border-danger text-white style=font-size: 0.9rem;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label text-white-50" style="font-size: 0.85rem;">Usuário ou E-mail</label>
+                    <input type="text" name="username" class="form-control bg-dark text-white border-secondary" style="border-radius: 8px; padding: 12px;" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-white-50" style="font-size: 0.85rem;">Senha</label>
+                    <input type="password" name="password" class="form-control bg-dark text-white border-secondary" style="border-radius: 8px; padding: 12px;" required>
+                </div>
+                <button type="submit" class="btn-nexus-checkout w-100" style="margin-top: 10px;">Entrar na Loja</button>
+            </form>
+            
+            <div class="text-center mt-4">
+                <p class="mb-0" style="color: var(--texto-muted); font-size: 0.9rem;">Não tem uma conta? <a href="{% url 'loja_cadastro' %}" style="color: var(--turquesa-brilhante); text-decoration: none;">Cadastre-se aqui</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

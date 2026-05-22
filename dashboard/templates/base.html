@@ -326,19 +326,19 @@
             </a>
             </div>
             <ul>
-                {% if is_admin %}
+                {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
                 <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                     <a href="{% url 'home' %}"><i class="bi bi-house-door-fill"></i> Painel</a>
                 </li>
                 {% endif %}
                 
-                {% if is_vendedor or is_admin %}
+                {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
                 <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
                     <a href="{% url 'lista_estoque' %}"><i class="bi bi-box-seam-fill"></i> Estoque</a>
                 </li>
                 {% endif %}
                 
-                {% if is_admin %}
+                {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
                 <li class="{% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
                     <a href="{% url 'lista_clientes' %}"><i class="bi bi-people-fill"></i> Clientes</a>
                 </li>
@@ -346,7 +346,7 @@
                 
                 <!-- Opções para o Cliente -->
                 {% if is_cliente %}
-                <li class="{% if request.resolver_match.url_name == 'vitrine_produtos' %}active{% endif %}">
+                <!-- <li class="{% if request.resolver_match.url_name == 'vitrine_produtos' %}active{% endif %}">
                     <a href="{% url 'vitrine_produtos' %}"><i class="bi bi-shop-window"></i> Vitrine</a>
                 </li>
                 <li class="{% if request.resolver_match.url_name == 'ver_carrinho' %}active{% endif %}">
@@ -359,14 +359,14 @@
                 </li>
                 {% endif %}
 
-                {% if is_vendedor or is_admin %}
+                {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
                 <li class="nav-item dropdown">
                     <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="bi bi-shop"></i> Loja
                     </a>
                     <ul class="dropdown-menu">
                         {% if is_vendedor %}
-                            {% if loja %}
+                            {% if loja %} -->
                             <!-- Vendedor com loja: mostrar Visualizar, Editar, Funcionários e Excluir -->
                             <li>
                                 <a class="dropdown-item d-flex align-items-center" href="{% url 'ver_loja' %}"
@@ -459,6 +459,9 @@
                 </li>
                 {% endif %}
             </ul>
+                <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
+                    <a href="{% url 'vitrine' %}"><i class="bi bi-box-seam-fill"></i> ir para a Nexus Store</a>
+                </li>
         </nav>
 
         <main class="main-layout">
@@ -472,7 +475,7 @@
                         <i class="bi bi-person-circle me-1" style="color: var(--turquesa-brilhante);"></i>
                         Bem-vindo(a), <strong>{{ user.username }}</strong>!
                     </span>
-                    <a href="/logout/" class="logout-btn">Sair</a>
+                    <a href="{% url 'logout_view' %}" class="logout-btn">Sair</a>
                 </div>
                 {% endif %}
             </header>

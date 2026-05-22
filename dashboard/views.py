@@ -19,7 +19,7 @@ from django.contrib import messages
 from django.utils import timezone
 
 from django.conf import settings
-from .models import Produto, ProdutoImagem, Categoria, Loja, Vendedor, Cliente, Pedido, ItemPedido, Carrinho, Venda, Funcionario
+from .models import Produto, ProdutoImagem, Categoria, Loja, Vendedor, Cliente, Pedido, ItemPedido, Carrinho, Venda, Funcionario, Perfil
 from .cart import Cart
 from .forms import LojaForm, ProdutoForm, ClienteForm
 from .decorators import loja_obrigatoria, admin_only_required, vendedor_restrito_required
@@ -62,7 +62,7 @@ def signup_view(request):
             # O sinal 'create_user_profile' em models.py criará o Perfil automaticamente como 'CLIENTE'
             login(request, user)
             messages.success(request, f'Bem-vindo, {user_nome}! Sua conta foi criada.')
-            return redirect('vitrine_produtos')
+            return redirect('vitrine')
             
     return render(request, 'signup.html')
 
@@ -582,27 +582,35 @@ def excluir_cliente(request, pk):
 
 # --- GESTÃO DE LOJA ---
 
-@login_required
+@login_required(login_url='login_view')
 def criar_loja(request):
-    vendedor = get_object_or_404(Vendedor, usuario=request.user)
-    
-    # Se já tiver loja, redireciona para a edição para evitar duplicidade
-    if Loja.objects.filter(vendedor=vendedor).exists():
-        return redirect('editar_loja')
+    # ... (mantenha a lógica de permissão que já tem) ...
 
     if request.method == 'POST':
         form = LojaForm(request.POST)
         if form.is_valid():
-            loja = form.save(commit=False)
-            loja.vendedor = vendedor
-            loja.save()
-            messages.success(request, "Loja criada com sucesso!")
-            return redirect('ver_loja')
+            # commit=False permite modificar o objeto antes de salvar no banco
+            nova_loja = form.save(commit=False)
+            
+            # Aqui está a correção: vinculamos o vendedor logado
+            # Supondo que você use o modelo Vendedor ou Perfil para identificar o dono
+            try:
+                # Se o seu sistema usa 'Vendedor' para lojas:
+                nova_loja.vendedor = Vendedor.objects.get(usuario=request.user)
+                nova_loja.save()
+                
+                messages.success(request, f"Loja '{nova_loja.nome}' criada com sucesso!")
+                return redirect('ver_loja')
+            except Vendedor.DoesNotExist:
+                messages.error(request, "Você precisa estar cadastrado como vendedor para criar uma loja.")
+                return redirect('home')
+        else:
+            # Caso o form seja inválido, ele mostrará os erros no HTML
+            pass 
     else:
         form = LojaForm()
     
-    return render(request, 'editar_loja.html', {'form': form, 'titulo': 'Criar Nova Loja'})
-
+    return render(request, 'criar_loja.html', {'form': form})
 @login_required
 def editar_loja(request):
     vendedor = get_object_or_404(Vendedor, usuario=request.user)

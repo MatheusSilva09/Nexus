@@ -1,0 +1,42 @@
+{% extends 'loja_base.html' %}
+
+{% block title %}Criar Conta | NEXUS Store{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center animate-fade-in" style="margin-top: 30px;">
+    <div class="col-md-5">
+        <div style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); border: 1px solid var(--borda); border-radius: 16px; padding: 40px;">
+            <h2 class="text-center text-white mb-4" style="font-weight: 300; letter-spacing: 1px;">CRIAR <strong style="color: var(--turquesa-brilhante); font-weight: 800;">CADASTRO</strong></h2>
+            
+            {% if error %}
+                <div class="alert alert-danger bg-dark border-danger text-white" style="font-size: 0.9rem;">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label text-white-50" style="font-size: 0.85rem;">Nome de Usuário (Login)</label>
+                    <input type="text" name="username" class="form-control bg-dark text-white border-secondary" style="border-radius: 8px; padding: 10px;" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white-50" style="font-size: 0.85rem;">E-mail</label>
+                    <input type="email" name="email" class="form-control bg-dark text-white border-secondary" style="border-radius: 8px; padding: 10px;" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white-50" style="font-size: 0.85rem;">Senha</label>
+                    <input type="password" name="password" class="form-control bg-dark text-white border-secondary" style="border-radius: 8px; padding: 10px;" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-white-50" style="font-size: 0.85rem;">Confirme a Senha</label>
+                    <input type="password" name="password_confirm" class="form-control bg-dark text-white border-secondary" style="border-radius: 8px; padding: 10px;" required>
+                </div>
+                <button type="submit" class="btn-nexus-checkout w-100">Registrar Conta</button>
+            </form>
+            
+            <div class="text-center mt-4">
+                <p class="mb-0" style="color: var(--texto-muted); font-size: 0.9rem;">Já possui uma conta? <a href="{% url 'loja_login' %}" style="color: var(--turquesa-brilhante); text-decoration: none;">Faça login</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

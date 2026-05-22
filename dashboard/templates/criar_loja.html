@@ -1,23 +1,106 @@
-<div class="card-nexus">
-    <div class="card-header">
-        <i class="fas fa-cog icon-cyan"></i> CRIAR NOVA LOJA
+{% extends 'base.html' %}
+
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block title %}Editar Loja | NEXUS Hub{% endblock %}
+
+{% block content %}
+<div class="container mt-4 fade-in-content">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg"
+                style="background: var(--azul-card); border: 1px solid var(--borda); border-radius: 15px;">
+                <div class="card-header" style="border-bottom: 1px solid var(--nexus-blue-glow); padding: 20px;">
+                    <h4 class="mb-0 text-white" style="letter-spacing: 1px;">
+                        <i class="bi bi-gear-fill me-2" style="color: var(--nexus-blue);"></i>
+                        LOJA
+                    </h4>
+                </div>
+                <div class="card-body" style="padding: 30px;">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold"
+                                style="color: var(--texto-muted); letter-spacing: 1px;">
+                                {{ field.label|upper }}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <div class="text-danger small mt-2">
+                                <i class="bi bi-exclamation-circle me-1"></i> {{ field.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="logout-btn btn-cadastrar"
+                                style="height: 50px; font-size: 0.9rem;">
+                                <i class="bi bi-shield-check me-2"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <form method="post" class="p-4">
-        {% csrf_token %}
-        
-        <div class="form-group mb-4">
-            <label class="label-nexus">NOME</label>
-            {{ form.nome }}
-        </div>
-
-        <div class="form-group mb-4">
-            <label class="label-nexus">DESCRIÇÃO</label>
-            {{ form.descricao }}
-        </div>
-
-        <button type="submit" class="btn-nexus-outline w-100">
-            <i class="fas fa-shield-alt"></i> CADASTRAR
-        </button>
-    </form>
 </div>
+
+<style>
+    /* Ajuste para garantir que os widgets do DjangoForm sigam o estilo Nexus */
+    .form-control {
+        background: rgba(2, 6, 23, 0.5) !important;
+        border: 1px solid var(--borda) !important;
+        color: #fff !important;
+        padding: 12px !important;
+        transition: 0.3s border-color;
+    }
+
+    .form-control:focus {
+        border-color: var(--turquesa-brilhante) !important;
+        box-shadow: 0 0 10px var(--turquesa-glow) !important;
+        outline: none;
+    }
+
+    /* Cor do texto que o usuário digita */
+    .form-control {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+        border: 1px solid #1e293b !important;
+    }
+
+    /* Cor do Placeholder (text-secondary) */
+    .form-control::placeholder {
+        color: #64748b !important;
+        /* Cor secundária do Nexus */
+        opacity: 1;
+    }
+
+    /* Compatibilidade com outros navegadores */
+    .form-control::-webkit-input-placeholder {
+        color: #64748b !important;
+    }
+
+    .form-control::-moz-placeholder {
+        color: #64748b !important;
+    }
+
+    .form-control:-ms-input-placeholder {
+        color: #64748b !important;
+    }
+
+    .btn-cadastrar {
+        color: var(--turquesa-brilhante);
+        border-color: var(--turquesa-brilhante);
+        background: transparent;
+    }
+
+    .btn-cadastrar:hover {
+        background: var(--turquesa-brilhante);
+        color: var(--azul-profundo);
+        box-shadow: 0 0 15px var(--turquesa-glow);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

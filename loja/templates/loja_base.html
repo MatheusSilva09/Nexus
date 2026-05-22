@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NEXUS Store{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --azul-profundo: #020617;
+            --azul-card: #0f172a;
+            --borda: #1e293b;
+            --texto-muted: #94a3b8;
+            --turquesa-brilhante: #00f2fe;
+            --turquesa-glow: rgba(0, 242, 254, 0.2);
+        }
+
+        body {
+            background: radial-gradient(circle at 50% -20%, #1e293b 0%, var(--azul-profundo) 100%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Navbar estilo Glassmorphic Superior */
+        .navbar-nexus {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+            padding: 15px 40px;
+        }
+
+        .brand-store {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--turquesa-brilhante);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .brand-store span { color: #ffffff; font-weight: 300; }
+
+        .cart-icon-btn {
+            position: relative;
+            color: #fff;
+            font-size: 1.4rem;
+            transition: 0.3s;
+        }
+        .cart-icon-btn:hover {
+            color: var(--turquesa-brilhante);
+            filter: drop-shadow(0 0 8px var(--turquesa-brilhante));
+        }
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background: var(--turquesa-brilhante);
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 800;
+            border-radius: 50%;
+            padding: 2px 6px;
+        }
+
+        .content-wrapper {
+            padding: 60px 40px;
+        }
+
+        .footer-store {
+            border-top: 1px solid var(--borda);
+            padding: 30px;
+            text-align: center;
+            background: rgba(2, 6, 23, 0.5);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-nexus sticky-top">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="brand-store" href="{% url 'vitrine' %}">
+                NEXUS<span>Store</span>
+            </a>
+
+            <div class="d-flex align-items-center gap-4">
+    {% if user.is_authenticated %}
+        <span class="text-white d-none d-sm-inline" style="font-size: 0.9rem;">
+            Olá, <strong>{{ user.username }}</strong>
+        </span>
+        <a href="{% url 'loja_meus_pedidos' %}" class="btn btn-sm btn-outline-secondary" style="border-color: var(--borda); color: #ffffff; font-size: 0.8rem;">Meus Pedidos</a>
+        <a href="{% url 'loja_logout' %}" class="btn btn-sm btn-outline-danger" style="font-size: 0.8rem;">Sair</a>
+        
+        {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
+            <a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary" style="border-color: var(--borda); color: var(--texto-muted); font-size: 0.8rem;">Painel Admin</a>
+        {% endif %}
+    {% else %}
+        <a href="{% url 'loja_login' %}" class="btn btn-sm btn-outline-info" style="color: var(--turquesa-brilhante); border-color: var(--turquesa-brilhante); font-size: 0.8rem;">Entrar</a>
+    {% endif %}
+
+    <a href="{% url 'ver_carrinho' %}" class="cart-icon-btn">
+        <i class="bi bi-cart3"></i>
+        <span class="cart-count">{{ total_itens|default:0 }}</span>
+    </a>
+</div>
+        </div>
+    </nav>
+
+    <div class="container content-wrapper">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer class="footer-store">
+        <p style="color: var(--texto-muted); font-size: 0.85rem; margin: 0;">
+            &copy; {% now "Y" %} <strong>NEXUS Store</strong> — Tecnologias Avançadas.
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

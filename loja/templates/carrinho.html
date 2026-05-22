@@ -1,0 +1,238 @@
+{% extends 'loja_base.html' %}
+{% load static %}
+
+{% block title %}Seu Carrinho | NEXUS Store{% endblock %}
+
+{% block content %}
+<style>
+    .nexus-title {
+        font-size: 1.8rem;
+        font-weight: 300;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 40px;
+        color: #ffffff;
+    }
+    .nexus-title strong {
+        color: var(--turquesa-brilhante);
+        font-weight: 800;
+    }
+
+    /* Estrutura de colunas para o Checkout */
+    .cart-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+        align-items: start;
+    }
+
+    @media (max-width: 992px) {
+        .cart-wrapper {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Estilo da Tabela do Carrinho (Inspirado na lista de clientes) */
+    .cart-table-card {
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .cart-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .cart-table th {
+        padding: 18px 20px;
+        color: var(--turquesa-brilhante);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: rgba(0, 242, 254, 0.03);
+        border-bottom: 1px solid var(--borda);
+        text-align: left;
+    }
+
+    .cart-table td {
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        color: #e2e8f0;
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+    /* Resumo Lateral do Pedido */
+    .summary-card {
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        padding: 25px;
+        position: sticky;
+        top: 100px;
+    }
+
+    .summary-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #ffffff;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--borda);
+        padding-bottom: 10px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        color: var(--texto-muted);
+    }
+
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid var(--borda);
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--turquesa-brilhante);
+    }
+
+    /* Botões Operacionais */
+    .btn-nexus-checkout {
+        background-color: var(--turquesa-brilhante) !important;
+        border: none !important;
+        color: #000000 !important;
+        width: 100%;
+        padding: 14px !important;
+        border-radius: 12px !important;
+        font-size: 0.9rem;
+        font-weight: 800 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: 0.2s ease-in-out;
+        text-decoration: none;
+        margin-top: 20px;
+        box-shadow: 0 0 15px var(--turquesa-glow);
+    }
+
+    .btn-nexus-checkout:hover {
+        background-color: #00b8cc !important;
+        box-shadow: 0 0 25px rgba(0, 229, 255, 0.6);
+        transform: translateY(-1px);
+    }
+
+    .btn-remove {
+        color: #ef4444;
+        background: transparent;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-remove:hover {
+        background: #ef4444;
+        color: #ffffff;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    }
+
+    .empty-cart {
+        text-align: center;
+        padding: 60px 20px;
+    }
+</style>
+
+<div class="container animate-fade-in">
+    <h1 class="nexus-title">Seu <strong>Carrinho</strong></h1>
+
+    {% if itens_carrinho %}
+    <div class="cart-wrapper">
+        <div class="cart-table-card">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Preço Unitário</th>
+                        <th>Quantidade</th>
+                        <th>Subtotal</th>
+                        <th style="width: 100px;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itens_carrinho %}
+                    <tr>
+                        <td>
+                            <span class="fw-bold text-white d-block">{{ item.produto.nome }}</span>
+                            <small class="text-muted">{{ item.produto.categoria.nome|default:"Acessório" }}</small>
+                        </td>
+                        <td>R$ {{ item.produto.preco }}</td>
+                        <td class="fw-bold">{{ item.quantidade }}x</td>
+                        <td class="text-white fw-bold">R$ {{ item.subtotal }}</td>
+                        <td>
+                            <a href="{% url 'remover_do_carrinho' item.produto.id %}" class="btn-remove">
+                                <i class="bi bi-trash3"></i> Tirar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary-card">
+            <h2 class="summary-title">Resumo do Pedido</h2>
+            <div class="summary-row">
+                <span>Módulos selecionados</span>
+                <span class="text-white fw-bold">{{ total_itens }}</span>
+            </div>
+            <div class="summary-row">
+                <span>Envio / Entrega</span>
+                <span style="color: #10b981;" class="fw-bold">Grátis (Nexus Link)</span>
+            </div>
+            
+            <div class="summary-total">
+                <span>Total</span>
+                <span>R$ {{ valor_total }}</span>
+            </div>
+
+            <a href="{% url 'finalizar_pedido' %}" class="btn-nexus-checkout">
+                <i class="bi bi-shield-check" style="font-size: 1.1rem;"></i> Finalizar Pedido
+            </a>
+            
+            <a href="{% url 'vitrine' %}" class="d-block text-center mt-3 text-decoration-none backend-link" style="color: var(--texto-muted); font-size: 0.85rem;">
+                <i class="bi bi-arrow-left"></i> Continuar Comprando
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="cart-table-card">
+        <div class="empty-cart">
+            <i class="bi bi-cart-x" style="font-size: 3.5rem; color: var(--texto-muted); display: block; margin-bottom: 15px;"></i>
+            <h3 class="text-white">Seu carrinho está vazio</h3>
+            <p class="text-muted mb-4">Você ainda não adicionou nenhuma tecnologia ao seu terminal.</p>
+            <a href="{% url 'vitrine' %}" class="btn-store-add d-inline-flex" style="max-width: 250px;">
+                Voltar ao Catálogo
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

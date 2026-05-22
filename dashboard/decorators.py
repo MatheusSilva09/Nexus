@@ -37,7 +37,7 @@ def vendedor_aprovado_required(view_func):
             return view_func(request, *args, **kwargs)
         
         messages.error(request, "Seu cadastro de vendedor ainda aguarda aprovação de um administrador.")
-        return redirect('login') # Ou uma página de "Aguarde Aprovação"
+        return redirect('login_view') # Ou uma página de "Aguarde Aprovação"
         
     return _wrapped_view
 
@@ -56,8 +56,8 @@ def vendedor_restrito_required(view_func):
         vendedor = Vendedor.objects.filter(usuario=request.user).first()
         
         if not vendedor or not vendedor.aprovado:
-            messages.error(request, "Acesso negado. Apenas vendedores aprovados podem acessar.")
-            return redirect('login')
+            messages.error(request, "Acesso negado. Apenas vendedores aprovados podem acessar. Contate a administração da Nexus para ativação da sua loja.")
+            return redirect('login_view')
         
         return view_func(request, *args, **kwargs)
     
@@ -81,6 +81,6 @@ def admin_only_required(view_func):
             return redirect('lista_estoque')
         
         messages.error(request, "Acesso negado.")
-        return redirect('login')
+        return redirect('login_view')
     
     return _wrapped_view
