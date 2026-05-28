@@ -21,6 +21,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 from dashboard import views
+from loja import views as loja_views
 
 urlpatterns = [
     # Nova rota customizada para o Nexus Hub Login: http://127.0.0.1:8000/nexushub/
@@ -34,6 +35,9 @@ urlpatterns = [
     path('nexusstore/dashboard/login/', RedirectView.as_view(pattern_name='login_view'), name='old_login_redirect'),
     path('nexusstore/dashboard/', RedirectView.as_view(url='/nexushub/dashboard/'), name='old_dashboard_root_redirect'),
     path('nexusstore/dashboard/<path:extra>', RedirectView.as_view(url='/nexushub/dashboard/%(extra)s'), name='old_dashboard_path_redirect'),
+
+    # Rota específica para cadastro da NEXUS Store
+    path('nexusstore/dashboard/registrar/', loja_views.loja_cadastro_view, name='loja_cadastro_store'),
     
     path('admin/', admin.site.urls),
     path('accounts/profile/', views.profile, name='profile'),

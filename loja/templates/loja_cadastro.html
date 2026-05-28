@@ -1,3 +1,4 @@
+{% load static %}
 {% extends 'loja_base.html' %}
 
 {% block title %}Criar Conta | NEXUS Store{% endblock %}
@@ -6,6 +7,10 @@
 <div class="row justify-content-center animate-fade-in" style="margin-top: 30px;">
     <div class="col-md-5">
         <div style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); border: 1px solid var(--borda); border-radius: 16px; padding: 40px;">
+            <div class="text-center mb-4">
+                <img src="{% static 'Logos/NEXUS STORE.png' %}" alt="NEXUS Store Logo" style="max-width: 100%; height: auto; filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.3));">
+            </div>
+
             <h2 class="text-center text-white mb-4" style="font-weight: 300; letter-spacing: 1px;">CRIAR <strong style="color: var(--turquesa-brilhante); font-weight: 800;">CADASTRO</strong></h2>
             
             {% if error %}

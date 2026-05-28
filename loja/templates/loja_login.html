@@ -1,36 +1,186 @@
-{% extends 'loja_base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
 
-{% block title %}Login | NEXUS Store{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <title>Entrar na Loja - NEXUS Store</title>
+    <link rel="icon" type="image/png" href="{% static 'img/LOGOMARCA FAVICON.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/LOGOMARCA FAVICON.png' %}">
 
-{% block content %}
-<div class="row justify-content-center animate-fade-in" style="margin-top: 50px;">
-    <div class="col-md-5">
-        <div style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); border: 1px solid var(--borda); border-radius: 16px; padding: 40px;">
-            <h2 class="text-center text-white mb-4" style="font-weight: 300; letter-spacing: 1px;">ACESSAR <strong style="color: var(--turquesa-brilhante); font-weight: 800;">CONTA</strong></h2>
-            
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-danger bg-dark border-danger text-white style=font-size: 0.9rem;">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
 
-            <form method="POST">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label text-white-50" style="font-size: 0.85rem;">Usuário ou E-mail</label>
-                    <input type="text" name="username" class="form-control bg-dark text-white border-secondary" style="border-radius: 8px; padding: 12px;" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label text-white-50" style="font-size: 0.85rem;">Senha</label>
-                    <input type="password" name="password" class="form-control bg-dark text-white border-secondary" style="border-radius: 8px; padding: 12px;" required>
-                </div>
-                <button type="submit" class="btn-nexus-checkout w-100" style="margin-top: 10px;">Entrar na Loja</button>
-            </form>
-            
-            <div class="text-center mt-4">
-                <p class="mb-0" style="color: var(--texto-muted); font-size: 0.9rem;">Não tem uma conta? <a href="{% url 'loja_cadastro' %}" style="color: var(--turquesa-brilhante); text-decoration: none;">Cadastre-se aqui</a></p>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1e3a5f 0%, #0f172a 70%, #020617 100%);
+            overflow: hidden;
+        }
+
+        .login-container {
+            background: #0f172a;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 400px;
+            border-top: 5px solid #00f2fe;
+            border: 1px solid rgba(0, 242, 254, 0.1);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .logo img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.3));
+            display: block;
+            margin: 0 auto;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .login-header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            background: #1e293b;
+            border: 1.5px solid #334155;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00f2fe;
+            box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.2);
+            background: #1e293b;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(90deg, #087cb2, #2ab6dc);
+            color: #0f172a;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.15);
+            color: #fca5a5;
+            padding: 0.75rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #334155;
+        }
+
+        .links a {
+            color: #00f2fe;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .links a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <img src="{% static 'Logos/NEXUS STORE.png' %}" alt="Nexus Store Logo">
+        </div>
+        <div class="login-header">
+            <p>Bem-vindo(a) à NEXUS Store</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="error-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" action="{% url 'loja_login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Usuário</label>
+                <input type="text" name="username" placeholder="Seu usuário da loja" required>
             </div>
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" name="password" placeholder="Sua senha" required>
+            </div>
+            <button type="submit" class="login-btn">Entrar na Loja</button>
+        </form>
+
+        <div class="links">
+            <a href="{% url 'loja_cadastro' %}">Ainda não tem conta? Cadastre-se aqui!</a>
+            <br><br>
+            <a href="{% url 'vitrine' %}">Voltar para a Vitrine</a>
         </div>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>
