@@ -394,7 +394,7 @@
                 {% endif %}
 
                 {# --- VISÃO EXCLUSIVA DO CLIENTE (Sem is_superuser ou vendedor misturado) --- #}
-                {% if is_cliente and not is_vendedor and not is_admin %}
+                {% if is_cliente and not is_vendedor or user.is_superuser %}
                 <li class="{% if request.resolver_match.url_name == 'vitrine' %}active{% endif %}">
                     <a href="{% url 'vitrine' %}"><i class="bi bi-shop-window"></i> Vitrine</a>
                 </li>
