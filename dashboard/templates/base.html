@@ -23,7 +23,6 @@
             --turquesa-glow: rgba(0, 242, 254, 0.3);
         }
 
-        
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -88,13 +87,13 @@
         .sidebar-logo {
             max-width: 180px;
             filter: drop-shadow(0 0 8px var(--nexus-blue-glow));
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .sidebar-logo:hover {
             filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.7));
             transform: scale(1.05);
-            transition: all 0.3s ease;
-            cursor: pointer;
         }
 
         .sidebar ul {
@@ -123,7 +122,6 @@
             display: flex;
             justify-content: center;
             margin-right: 14px;
-            /* Espaçamento refinado entre ícone e texto */
             font-size: 1.2rem;
             color: var(--nexus-blue);
             transition: 0.3s;
@@ -301,15 +299,9 @@
         .logo-container a {
             text-decoration: none;
             display: inline-block;
-            /* Garante que o link envolva toda a imagem */
             transition: transform 0.3s ease;
         }
 
-        .sidebar-logo {
-            cursor: pointer;
-        }
-
-        /* Efeito opcional de brilho ao passar o mouse na logo */
         .logo-container a:hover .sidebar-logo {
             filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.8));
             transform: scale(1.02);
@@ -321,133 +313,96 @@
     <div class="app-wrapper">
         <nav class="sidebar">
             <div class="sidebar-brand">
-            <a href="{% url 'home' %}">
-                <img src="{% static 'img/nexushub.png' %}" alt="NEXUS HUB" class="sidebar-logo">
-            </a>
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'img/nexushub.png' %}" alt="NEXUS HUB" class="sidebar-logo">
+                </a>
             </div>
             <ul>
-                {# Links para administradores, gerentes e donos #}
-                {% if user.is_superuser or perfil.nivel == 'ADMIN' or perfil.nivel == 'GERENTE' or perfil.nivel == 'DONO' %}
-                <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
-                    <a href="{% url 'home' %}"><i class="bi bi-house-door-fill"></i> Painel</a>
-                </li>
-                <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
-                    <a href="{% url 'lista_estoque' %}"><i class="bi bi-box-seam-fill"></i> Estoque</a>
+                {# --- VISÃO DO ADMINISTRADOR --- #}
+                {% if is_admin %}
+                <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <a href="{% url 'dashboard' %}"><i class="bi bi-house-door-fill"></i> Painel</a>
                 </li>
                 <li class="{% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
                     <a href="{% url 'lista_clientes' %}"><i class="bi bi-people-fill"></i> Clientes</a>
                 </li>
+                <li class="{% if request.resolver_match.url_name == 'lista_funcionarios' %}active{% endif %}">
+                    <a href="{% url 'lista_funcionarios' %}"><i class="bi bi-person-badge-fill"></i> Funcionários</a>
+                </li>
+                {% endif %}
+
+                {# --- VISÃO DO VENDEDOR OU ADMIN (ESTOQUE E LOJA) --- #}
+                {% if is_admin or is_vendedor %}
+
+                {# Exibição do Estoque Condicionada à existência da Loja #}
+                {% if loja %}
+                <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
+                    <a href="{% url 'lista_estoque' %}"><i class="bi bi-box-seam-fill"></i> Estoque</a>
+                </li>
+                {% else %}
+                {# Se não tem loja, o botão fica desabilitado com o aviso #}
+                <li style="cursor: not-allowed; opacity: 0.5;"
+                    title="Você precisa configurar uma loja antes de acessar o estoque.">
+                    <a href="javascript:void(0)"
+                        onclick="alert('Você precisa configurar uma loja antes de acessar o estoque.')">
+                        <i class="bi bi-box-seam-fill"></i> Estoque <span class="badge bg-warning text-dark"
+                            style="font-size: 0.65rem;">Bloqueado</span>
+                    </a>
+                </li>
+                {% endif %}
+
                 <li class="nav-item dropdown">
                     <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="bi bi-shop"></i> Loja
                     </a>
                     <ul class="dropdown-menu">
-                        {% if is_vendedor %}
-                            {% if loja %} {# Vendedor com loja: mostrar Visualizar, Editar, Funcionários e Excluir #}
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'ver_loja' %}"
-                                    style="color: var(--texto-muted);">
-                                    <i class="bi bi-eye-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                    Visualizar
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'editar_loja' %}"
-                                    style="color: var(--texto-muted);">
-                                    <i class="bi bi-gear-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                    Editar
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'lista_funcionarios' %}"
-                                    style="color: var(--texto-muted);">
-                                    <i class="bi bi-people-fill me-2"
-                                        style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                    Gerenciar Funcionários
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider" style="border-color: var(--borda);">
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)"
-                                    onclick="openNexusModal()" style="color: #ef4444;">
-                                    <i class="bi bi-trash3-fill me-2"></i> Excluir {{ loja.nome }}
-                                </a>
-                            </li>
-                            {% else %} {# Vendedor sem loja: mostrar apenas Criar Loja #}
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'criar_loja' %}"
-                                    style="color: var(--texto-muted);">
-                                    <i class="bi bi-plus-circle me-2"
-                                        style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                    Criar Loja
-                                </a>
-                            </li>
-                            {% endif %}
-                        {% else %} {# Admin: mostrar todas as opções #}
-                            {% if loja %}
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'ver_loja' %}"
-                                    style="color: var(--texto-muted);">
-                                    <i class="bi bi-eye-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                    Visualizar
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'editar_loja' %}"
-                                    style="color: var(--texto-muted);">
-                                    <i class="bi bi-gear-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                    Editar
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'lista_funcionarios' %}"
-                                    style="color: var(--texto-muted);">
-                                    <i class="bi bi-people-fill me-2"
-                                        style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                    Gerenciar Funcionários
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider" style="border-color: var(--borda);">
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)"
-                                    onclick="openNexusModal()" style="color: #ef4444;">
-                                    <i class="bi bi-trash3-fill me-2"></i> Excluir {{ loja.nome }}
-                                </a>
-                            </li>
-                            {% else %}
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'criar_loja' %}"
-                                    style="color: var(--texto-muted);">
-                                    <i class="bi bi-plus-circle me-2"
-                                        style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                    Criar Loja
-                                </a>
-                            </li>
-                            {% endif %}
+                        {% if loja %}
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{% url 'ver_loja' %}"
+                                style="color: var(--texto-muted);">
+                                <i class="bi bi-eye-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
+                                Visualizar
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{% url 'editar_loja' %}"
+                                style="color: var(--texto-muted);">
+                                <i class="bi bi-gear-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
+                                Editar
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider" style="border-color: var(--borda);">
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)"
+                                onclick="openNexusModal()" style="color: #ef4444;">
+                                <i class="bi bi-trash3-fill me-2"></i> Excluir {{ loja.nome }}
+                            </a>
+                        </li>
+                        {% else %}
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{% url 'criar_loja' %}"
+                                style="color: var(--texto-muted);">
+                                <i class="bi bi-plus-circle me-2"
+                                    style="font-size: 1rem; color: var(--nexus-blue);"></i> Criar Loja
+                            </a>
+                        </li>
                         {% endif %}
                     </ul>
                 </li>
-                {% endif %} {# Fim do bloco ADMIN/GERENTE/DONO #}
-                
-                {# Opções para o Cliente e Superusuários (Vitrine, Carrinho, Meus Pedidos, NEXUS Store) #}
-                {% if user.is_superuser or is_cliente %}
+                {% endif %}
+
+                {# --- VISÃO EXCLUSIVA DO CLIENTE (Sem is_superuser ou vendedor misturado) --- #}
+                {% if is_cliente and not is_vendedor and not is_admin %}
                 <li class="{% if request.resolver_match.url_name == 'vitrine' %}active{% endif %}">
                     <a href="{% url 'vitrine' %}"><i class="bi bi-shop-window"></i> Vitrine</a>
                 </li>
                 <li class="{% if request.resolver_match.url_name == 'ver_carrinho' %}active{% endif %}">
-                    <a href="{% url 'ver_carrinho' %}">
-                        <i class="bi bi-cart-fill"></i> Carrinho
-                    </a>
+                    <a href="{% url 'ver_carrinho' %}"><i class="bi bi-cart-fill"></i> Carrinho</a>
                 </li>
-                <li class="{% if request.resolver_match.url_name == 'loja_meus_pedidos' %}active{% endif %}"> {# Assuming 'loja_meus_pedidos' is the correct URL name for client's orders #}
+                <li class="{% if request.resolver_match.url_name == 'loja_meus_pedidos' %}active{% endif %}">
                     <a href="{% url 'loja_meus_pedidos' %}"><i class="bi bi-bag-check-fill"></i> Meus Pedidos</a>
-                </li>
-                <li class="{% if request.resolver_match.url_name == 'vitrine' %}active{% endif %}"> {# General link to the public storefront #}
-                    <a href="{% url 'vitrine' %}"><i class="bi bi-box-seam-fill"></i> NEXUS Store</a>
                 </li>
                 {% endif %}
             </ul>
@@ -487,7 +442,8 @@
 
             <footer class="rodape">
                 <p style="color: var(--texto-muted); font-size: 0.85rem; margin: 0;">
-                    &copy; {% now "Y" %} <strong style="color: #fff;">NEXUS Hub</strong> — Gestão Modular Inteligente | Todos os direitos reservados.
+                    &copy; {% now "Y" %} <strong style="color: #fff;">NEXUS Hub</strong> — Gestão Modular Inteligente |
+                    Todos os direitos reservados.
                 </p>
             </footer>
         </main>
@@ -503,7 +459,7 @@
         });
     </script>
 
-    <div id="nexusDeleteModal" class="nexus-modal-overlay" style="display: none;">
+    <div id="nexusDeleteModal" class="nexus-modal-overlay">
         <div class="nexus-modal-content">
             <div class="modal-header-alert">
                 <i class="bi bi-exclamation-triangle-fill"></i>
@@ -515,7 +471,6 @@
             </div>
             <div class="modal-footer-nexus">
                 <button onclick="closeNexusModal()" class="btn-nexus-cancel">CANCELAR</button>
-
                 <form action="{% url 'excluir_loja' %}" method="POST" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn-nexus-confirm">EXCLUIR LOJA</button>
@@ -542,10 +497,11 @@
     </script>
     <script src="https://unpkg.com/imask"></script>
     <script>
-        // Isso aplica a máscara em todos os campos que você marcar
-        var element = document.getElementById('id_telefone'); // O Django gera IDs com 'id_'
-        var maskOptions = { mask: '(00) 00000-0000' };
-        var mask = IMask(element, maskOptions);
+        var element = document.getElementById('id_telefone');
+        if (element) {
+            var maskOptions = { mask: '(00) 00000-0000' };
+            var mask = IMask(element, maskOptions);
+        }
     </script>
 </body>
 

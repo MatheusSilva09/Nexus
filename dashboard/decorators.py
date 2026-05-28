@@ -82,5 +82,24 @@ def admin_only_required(view_func):
         
         messages.error(request, "Acesso negado.")
         return redirect('login_view')
+    return _wrapped_view
     
+def vendedor_or_admin_required(view_func):
+    """
+    Decorador para permitir acesso a superusuários (administradores)
+    ou a vendedores que foram aprovados.
+    """
+    @login_required(login_url='login_view')
+    def _wrapped_view(request, *args, **kwargs):
+        # Superusuários (administradores) sempre têm acesso
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
+
+        # Verifica se o usuário é um vendedor e se está aprovado
+        vendedor = Vendedor.objects.filter(usuario=request.user).first()
+        if vendedor and vendedor.aprovado:
+            return view_func(request, *args, **kwargs)
+        
+        messages.error(request, "Acesso negado. Apenas vendedores aprovados ou administradores podem acessar esta funcionalidade.")
+        return redirect('login_view') # Redireciona para a página de login ou uma página de acesso negado
     return _wrapped_view

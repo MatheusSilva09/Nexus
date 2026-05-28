@@ -20,9 +20,9 @@ from django.utils import timezone
 
 from django.conf import settings
 from .models import Produto, ProdutoImagem, Categoria, Loja, Vendedor, Cliente, Pedido, ItemPedido, Carrinho, Venda, Funcionario, Perfil
-from .cart import Cart
+from .cart import Cart # This import is not used in dashboard views, only in loja views. Can be removed if not used elsewhere.
 from .forms import LojaForm, ProdutoForm, ClienteForm
-from .decorators import loja_obrigatoria, admin_only_required, vendedor_restrito_required
+from .decorators import loja_obrigatoria, admin_only_required, vendedor_or_admin_required
 
 # --- AUTENTICAÇÃO ---
 
@@ -109,60 +109,28 @@ def dashboard_view(request):
     print(f"Itens: {total_itens} | Valor: {valor_estoque}")
     
     return render(request, 'dashboard.html', context)
+
 @login_required
 def home(request):
-    # 1. Se for cliente (e não admin), vai para a vitrine
+    perfil = getattr(request.user, 'perfil', None)
+    vendedor = Vendedor.objects.filter(usuario=request.user).first()
+
+    # 1. Superuser ou perfil ADMIN vai para o dashboard principal
+    if request.user.is_superuser or (perfil and perfil.nivel == 'ADMIN'):
+        return redirect('dashboard')
+
+    # 2. Vendedor aprovado vai para a lista de estoque
+    if vendedor and vendedor.aprovado:
+        return redirect('lista_estoque')
+
+    # 3. Cliente vai para a vitrine da loja
     perfil = getattr(request.user, 'perfil', None)
     if not request.user.is_superuser and perfil and perfil.nivel == 'CLIENTE':
         return redirect('vitrine')
 
-    # Verifica se é um vendedor aprovado (não admin)
-    vendedor = Vendedor.objects.filter(usuario=request.user).first()
-    if not request.user.is_superuser and vendedor and vendedor.aprovado:
-        # Redireciona vendedor para lista de estoque
-        return redirect('lista_estoque')
-    
-    # Admin continua para o dashboard
-    perfil = getattr(request.user, 'perfil', None)
-    if not perfil:
-        if not request.user.is_superuser:
-            messages.error(request, "Perfil não encontrado. Contate o suporte.")
-            return redirect('logout')
-    
-    if request.user.is_superuser or (perfil and perfil.nivel == 'ADMIN'):
-        produtos_loja = Produto.objects.all()
-        clientes = Cliente.objects.all()
-    else:
-        # Se não for ADMIN, filtramos os dados pela loja do usuário
-        loja = perfil.loja
-        if not loja:
-            vendedor = Vendedor.objects.filter(usuario=request.user).first()
-            loja = Loja.objects.filter(vendedor=vendedor).first()
-            
-        produtos_loja = Produto.objects.filter(loja=loja) if loja else Produto.objects.none()
-        clientes = Cliente.objects.filter(usuario=request.user)
-
-    # Cálculos dinâmicos para o Dashboard
-    # Início do dia no fuso horário configurado (America/Sao_Paulo)
-    hoje_inicio = timezone.localtime(timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
-    
-    total_itens = produtos_loja.aggregate(total=Sum('estoque'))['total'] or 0 # Total em Estoque (Físico)
-    valor_estoque = produtos_loja.aggregate(total=Sum(F('preco') * F('estoque')))['total'] or 0 # Dados Reais (Financeiro)
-    alertas_reposicao = produtos_loja.filter(estoque__lte=F('estoque_minimo')).count() # Baixo Estoque
-    total_clientes_ativos = clientes.count() # Clientes Ativos
-    novos_clientes_hoje = clientes.filter(data_cadastro__gte=hoje_inicio).count() # Novos Clientes (Hoje)
-    
-    context = {
-        'total_itens': total_itens,
-        'valor_estoque': valor_estoque,
-        'alertas_reposicao': alertas_reposicao,
-        'total_clientes_ativos': total_clientes_ativos,
-        'novos_clientes_hoje': novos_clientes_hoje,
-        'produtos': produtos_loja.order_by('-id')[:5],
-        'nivel': perfil.nivel if perfil else 'ADMIN',
-        'hoje': hoje_inicio.date(),
-    }
-    return render(request, 'dashboard.html', context)
+    # 4. Fallback para vendedores não aprovados ou perfis não tratados
+    messages.error(request, "Seu perfil não tem acesso a esta área ou ainda aguarda aprovação.")
+    return redirect('login_view')
 
 def dashboard_faturamento(request):
     dados_vendas = (
@@ -179,6 +147,7 @@ def dashboard_faturamento(request):
     return render(request, 'admin_stats.html', {
         'labels': json.dumps(labels),
         'valores': json.dumps(valores),
+        'titulo_aba': 'Faturamento Diário | NEXUS Hub',
     })
     
 # --- ESTOQUE E PRODUTOS ---
@@ -208,6 +177,7 @@ def lista_estoque(request):
         'total_itens': totais['total_itens'] or 0,
         'valor_estoque': totais['valor_total'] or 0,
         'alertas_reposicao': alertas_count, # Agora a variável existe!
+        'titulo_aba': 'Gerenciamento de Estoque | NEXUS Hub',
     }
     return render(request, 'estoque_lista.html', context)
 
@@ -240,6 +210,7 @@ def vitrine_produtos(request):
         'query': query
     })
 
+@vendedor_or_admin_required
 def cadastrar_categoria(request):
     if request.method == "POST":
         nome = request.POST.get('nome')
@@ -257,7 +228,7 @@ def cadastrar_categoria(request):
         return redirect('cadastrar_produto')
     return render(request, 'categoria_form.html')
 
-@vendedor_restrito_required
+@vendedor_or_admin_required
 def cadastrar_produto(request):
     if request.method == 'POST':
         # 1. Processa os dados básicos do formulário
@@ -310,7 +281,8 @@ def cadastrar_produto(request):
     return render(request, 'produto_form.html', {
         'form': form, 
         'titulo': 'Cadastrar Novo Produto', 
-        'categorias': categorias
+        'categorias': categorias,
+        'titulo_aba': 'Cadastrar Produto | NEXUS Hub'
     })
 
 @login_required
@@ -355,7 +327,8 @@ def editar_produto(request, produto_id):
     # O contexto unificado que você já estava usando
     return render(request, 'editar_produto.html', {
         'produto': produto, 
-        'categorias': categorias
+        'categorias': categorias,
+        'titulo_aba': 'Editar Produto | NEXUS Hub'
     })
 
 @login_required
@@ -377,14 +350,16 @@ def excluir_produto(request, produto_id):
         return redirect('lista_estoque')
         
     return render(request, 'confirmar_exclusao_produto.html', {'produto': produto})
-
-@vendedor_restrito_required
+@vendedor_or_admin_required
 def alternar_status_produto(request, produto_id):
     produto = get_object_or_404(Produto, id=produto_id, loja=request.user.vendedor.loja)
     produto.ativo = not produto.ativo
     produto.save()
     return redirect('gerenciamento_estoque')
 
+# These cart views are for the 'loja' app, not dashboard.
+# They should ideally be in loja/views.py or protected differently if they are meant for dashboard users.
+# For now, I'll assume they are public or client-facing.
 def adicionar_ao_carrinho(request, produto_id):
     cart = Cart(request)
     produto = get_object_or_404(Produto, id=produto_id)
@@ -516,7 +491,8 @@ def detalhe_pedido(request, pedido_id):
     
     return render(request, 'detalhe_pedido.html', {
         'pedido': pedido,
-        'itens': itens
+        'itens': itens,
+        'titulo_aba': 'Detalhes do Pedido | NEXUS Hub',
     })
 @login_required
 def historico_pedidos(request):
@@ -536,11 +512,13 @@ def historico_pedidos(request):
 @login_required
 def profile(request):
     return render(request, "profile.html")
-
-@login_required
+    
+@admin_only_required
 def lista_clientes(request):
     clientes = Cliente.objects.all()
-    return render(request, 'lista_clientes.html', {'clientes': clientes})
+    return render(request, 'lista_clientes.html', {
+        'clientes': clientes,
+        'titulo_aba': 'Lista de Clientes | NEXUS Hub'})
 
 @login_required # Garante que só usuários logados acessem
 def cadastrar_cliente(request):
@@ -578,10 +556,12 @@ def cadastrar_cliente(request):
             messages.error(request, "Erro ao salvar: Verifique se os dados estão repetidos.")
             return render(request, 'cliente_form.html')
 
-    return render(request, 'cliente_form.html')
+    return render(request, 'cliente_form.html', {
+        'titulo_aba': 'Cadastrar Cliente | NEXUS Hub',
+    })
 
-@login_required
-def editar_cliente(request, pk):
+@admin_only_required # Admins edit any client
+def editar_cliente(request, pk): # The 'usuario=request.user' filter should be removed if admins can edit any client.
     cliente = get_object_or_404(Cliente, pk=pk, usuario=request.user)
     
     if request.method == 'POST':
@@ -591,18 +571,21 @@ def editar_cliente(request, pk):
         cliente.endereco = request.POST.get('endereco')
         cliente.save()
         return redirect('lista_clientes')
+    
+    return render(request, 'cliente_form.html', {
+        'cliente': cliente,
+        'titulo_aba': 'Editar Cliente | NEXUS Hub',
+    })
 
-    return render(request, 'cliente_form.html', {'cliente': cliente})
-
-@login_required
+@admin_only_required # Admins delete any client
 def excluir_cliente(request, pk):
-    cliente = get_object_or_404(Cliente, pk=pk, usuario=request.user)
+    cliente = get_object_or_404(Cliente, pk=pk)
     cliente.delete()
     return redirect('lista_clientes')
 
 # --- GESTÃO DE LOJA ---
 
-@login_required(login_url='login_view')
+@vendedor_or_admin_required
 def criar_loja(request):
     # ... (mantenha a lógica de permissão que já tem) ...
 
@@ -630,10 +613,13 @@ def criar_loja(request):
     else:
         form = LojaForm()
     
-    return render(request, 'criar_loja.html', {'form': form})
-@login_required
+    return render(request, 'criar_loja.html', {
+        'form': form,
+        'titulo_aba': 'Criar Loja | NEXUS Hub',
+    })
+@vendedor_or_admin_required
 def editar_loja(request):
-    vendedor = get_object_or_404(Vendedor, usuario=request.user)
+    vendedor = Vendedor.objects.filter(usuario=request.user).first()
     loja = get_object_or_404(Loja, vendedor=vendedor)
 
     if request.method == 'POST':
@@ -646,9 +632,11 @@ def editar_loja(request):
     else:
         form = LojaForm(instance=loja)
     
-    return render(request, 'editar_loja.html', {'form': form, 'loja': loja, 'titulo': 'Editar Informações da Loja'})
-
-@login_required
+    return render(request, 'editar_loja.html', {
+        'form': form, 'loja': loja, 'titulo': 'Editar Informações da Loja',
+        'titulo_aba': 'Editar Loja | NEXUS Hub',
+    })
+@vendedor_or_admin_required
 def ver_loja(request):
     vendedor = Vendedor.objects.filter(usuario=request.user).first()
     loja = Loja.objects.filter(vendedor=vendedor).first()
@@ -657,6 +645,7 @@ def ver_loja(request):
     return render(request, 'ver_loja.html', {'loja': loja})
 
 @login_required
+@vendedor_or_admin_required
 def excluir_loja(request):
     # 1. Busca o vendedor vinculado ao usuário logado
     vendedor = Vendedor.objects.filter(usuario=request.user).first()
@@ -684,7 +673,7 @@ def excluir_loja(request):
         
     return render(request, 'dashboard/confirm_delete.html', {'loja': loja})
 
-@login_required
+@admin_only_required
 def adicionar_funcionario(request):
     if request.method == 'POST':
         nome = request.POST.get('nome')
@@ -706,9 +695,11 @@ def adicionar_funcionario(request):
         messages.success(request, "Funcionário adicionado com sucesso!")
         return redirect('lista_funcionarios') # Ou a página que você preferir
 
-    return render(request, 'funcionario_form.html')
+    return render(request, 'funcionario_form.html', {
+        'titulo_aba': 'Adicionar Funcionário | NEXUS Hub',
+    })
 
-@login_required
+@admin_only_required
 def lista_funcionarios(request):
     # Se for admin, mostra todos os funcionários
     if request.user.is_superuser:
@@ -717,11 +708,12 @@ def lista_funcionarios(request):
         # Se for vendedor, mostra apenas seus funcionários
         funcionarios = Funcionario.objects.filter(usuario_id=request.user)
     
-    return render(request, 'lista_funcionarios.html', {'funcionarios': funcionarios})
-
-@login_required
+    return render(request, 'lista_funcionarios.html', {
+        'funcionarios': funcionarios,
+        'titulo_aba': 'Lista de Funcionários | NEXUS Hub',
+    })
+@admin_only_required
 def editar_funcionario(request, id):
-    # Verifica permissão: admin vê todos, vendedor vê só seus
     if request.user.is_superuser:
         funcionario = get_object_or_404(Funcionario, id=id)
     else:
@@ -741,11 +733,12 @@ def editar_funcionario(request, id):
         funcionario.save()
         return redirect('lista_funcionarios')
     
-    return render(request, 'editar_funcionario.html', {'funcionario': funcionario})
-
-@login_required
+    return render(request, 'editar_funcionario.html', {
+        'funcionario': funcionario,
+        'titulo_aba': 'Editar Funcionário | NEXUS Hub',
+    })
+@admin_only_required
 def excluir_funcionario(request, id):
-    # Verifica permissão: admin deleta todos, vendedor deleta só seus
     if request.user.is_superuser:
         funcionario = get_object_or_404(Funcionario, id=id)
     else:
@@ -756,7 +749,7 @@ def excluir_funcionario(request, id):
     # messages.success(request, f"Funcionário {funcionario.nome} removido com sucesso.")
     return redirect('lista_funcionarios')
 
-@vendedor_restrito_required
+@vendedor_or_admin_required
 @transaction.atomic
 def realizar_venda(request, produto_id):
     produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)

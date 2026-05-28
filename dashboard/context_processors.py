@@ -7,11 +7,11 @@ def dados_loja(request):
             vendedor_perfil = Vendedor.objects.filter(usuario=request.user).first()
             
             # 2. Verifica se é um vendedor aprovado (não admin)
-            is_vendedor = vendedor_perfil and vendedor_perfil.aprovado and not request.user.is_superuser
+            is_vendedor = vendedor_perfil and vendedor_perfil.aprovado and not request.user.is_superuser # Vendedor aprovado que NÃO é superuser
             
-            # 3. Verifica se é um cliente
+            # 3. Verifica o nível do perfil e se é cliente
             perfil = Perfil.objects.filter(usuario=request.user).first()
-            is_cliente = perfil.nivel == 'CLIENTE' if perfil else False
+            is_cliente = perfil and perfil.nivel == 'CLIENTE' and not request.user.is_superuser # Cliente que NÃO é superuser
 
             if vendedor_perfil:
                 # 4. Agora buscamos a loja usando o perfil do vendedor
@@ -20,19 +20,22 @@ def dados_loja(request):
                     'loja': loja,
                     'is_vendedor': is_vendedor,
                     'is_cliente': is_cliente,
-                    'is_admin': request.user.is_superuser,
+                    'is_admin': request.user.is_superuser or (perfil and perfil.nivel == 'ADMIN'), # Superuser OU perfil ADMIN
+                    'perfil': perfil, # Passa o objeto perfil para acesso ao .nivel no template
                 }
         except Exception:
             return {
                 'loja': None,
                 'is_vendedor': False,
                 'is_cliente': False,
-                'is_admin': request.user.is_superuser,
+                'is_admin': request.user.is_superuser, # Fallback para is_admin
+                'perfil': None,
             }
             
     return {
         'loja': None,
         'is_vendedor': False,
         'is_cliente': False,
-        'is_admin': request.user.is_superuser,
+        'is_admin': False, # Default para não autenticados
+        'perfil': None,
     }
