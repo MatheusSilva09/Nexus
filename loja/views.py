@@ -21,6 +21,7 @@ def vitrine_view(request):
     total_itens = sum(carrinho.values())
     
     context = {
+        'titulo_aba': 'NEXUS Store | Gestão Modular Inteligente',
         'produtos': produtos,
         'lojas': Loja.objects.all(), # Para criar um menu de seleção de lojas
         'total_itens': total_itens,
@@ -76,6 +77,7 @@ def ver_carrinho_view(request):
     total_itens = sum(carrinho.values())
             
     context = {
+        'titulo_aba': 'NEXUS Store | Gestão Modular Inteligente',
         'itens_carrinho': itens_carrinho,
         'valor_total': valor_total,
         'total_itens': total_itens,
@@ -229,6 +231,7 @@ def loja_meus_pedidos_view(request):
     total_itens = sum(carrinho.values())
         
     context = {
+        'titulo_aba': 'NEXUS Store | Gestão Modular Inteligente',
         'pedidos': pedidos,
         'total_itens': total_itens,
     }

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load humanize %}
 
-{% block title %}NEXUS Hub | Gestão Inteligente{% endblock %}
+{% block title %}NEXUS Hub | Gestão Modular Inteligente{% endblock %}
 {% block page_title %}Visão Geral do Sistema{% endblock %}
 
 {% block content %}
@@ -129,7 +129,7 @@
                 <h5 class="mb-4" style="color: #00f2fe;">Configuração Rápida</h5>
                 <p class="text-white-50">Gerencie as preferências da sua Loja de forma simplificada.</p>
                 <div class="d-grid gap-2">
-                    <a href="{% url 'criar_loja' %}" class="btn btn-outline-info">Editar Perfil da Loja</a>
+                    <a href="{% url 'editar_loja' %}" class="btn btn-outline-info">Editar Perfil da Loja</a>
                     <a href="{% url 'lista_estoque' %}" class="btn btn-outline-light">Ver Estoque Completo</a>
                 </div>
             </div>

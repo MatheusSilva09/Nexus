@@ -16,16 +16,31 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 from dashboard import views
 
 urlpatterns = [
+    # Nova rota customizada para o Nexus Hub Login: http://127.0.0.1:8000/nexushub/
+    path('nexushub/', views.login_view, name='login_view'),
+
+    # Redireciona a raiz (/) e a rota antiga /login/ para a nova URL personalizada
+    path('', RedirectView.as_view(pattern_name='login_view'), name='index_redirect'),
+    path('login/', RedirectView.as_view(pattern_name='login_view'), name='login_fix'),
+
+    # Redirecionamentos de Legado: Captura a estrutura antiga e joga para a nova
+    path('nexusstore/dashboard/login/', RedirectView.as_view(pattern_name='login_view'), name='old_login_redirect'),
+    path('nexusstore/dashboard/', RedirectView.as_view(url='/nexushub/dashboard/'), name='old_dashboard_root_redirect'),
+    path('nexusstore/dashboard/<path:extra>', RedirectView.as_view(url='/nexushub/dashboard/%(extra)s'), name='old_dashboard_path_redirect'),
+    
     path('admin/', admin.site.urls),
     path('accounts/profile/', views.profile, name='profile'),
-    path('nexus/', include('dashboard.urls')),
-    path('', include('dashboard.urls')),
+    # A NEXUS Store agora possui seu próprio prefixo independente
+    path('nexusstore/', include('loja.urls')),
+    # O ecossistema NEXUS Hub (Dashboard e Gestão) agora fica sob /nexushub/
+    path('nexushub/', include('dashboard.urls')),
 ]
 
 # Serve arquivos de mídia durante o desenvolvimento

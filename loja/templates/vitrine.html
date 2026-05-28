@@ -144,7 +144,7 @@
     <div class="product-grid">
         {% for produto in produtos %}
         <div class="product-card">
-            <small class="text-muted; style="color: #ffffff" >Vendido por: {{ produto.loja.nome }}</small>
+            <small class="text-muted" style="color: #ffffff">Vendido por: {{ produto.loja.nome }}</small>
             <div>
                 <div class="product-img-wrapper">
                     {% if produto.imagens.all %}

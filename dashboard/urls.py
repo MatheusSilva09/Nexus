@@ -4,20 +4,13 @@ from . import views
 
 urlpatterns = [
     # ==========================================
-    # 1. ROTA DA LOJA (E-COMMERCE PÚBLICO)
-    # Deixando vazio '', a Loja assume a página inicial do site!
-    # ==========================================
-    path('', include('loja.urls')),
-
-    # ==========================================
-    # 2. ROTAS INTERNAS DO DASHBOARD / GERENCIAMENTO
+    # 1. ROTAS INTERNAS DO DASHBOARD / GERENCIAMENTO
     # Agrupamos tudo o que é administrativo sob o prefixo 'dashboard/'
     # ==========================================
     path('dashboard/', views.home, name='home'),
     path('dashboard/painel/', views.dashboard_view, name='dashboard'),
     
     # --- Rotas de Autenticação ---
-    path('dashboard/login/', views.login_view, name='login_view'),
     path('dashboard/logout/', views.logout_view, name='logout_view'),
     path('dashboard/signup/', views.signup_view, name='signup_view'),
     path('dashboard/registrar/', views.signup_view, name='registrar'),

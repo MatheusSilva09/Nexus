@@ -86,8 +86,9 @@ def dashboard_view(request):
     # 4. Total de Clientes
     total_clientes_ativos = Cliente.objects.count()
     
-    hoje = timezone.now().date()
-    novos_clientes_hoje = Cliente.objects.filter(data_cadastro__date=hoje).count()
+    # Filtro robusto para 'hoje' considerando o fuso horário local
+    hoje_inicio = timezone.localtime(timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
+    novos_clientes_hoje = Cliente.objects.filter(data_cadastro__gte=hoje_inicio).count()
 
     # 5. Produtos para a tabela de 'Atividade Recente'
     produtos_recentes = Produto.objects.all().order_by('-id')[:5]
@@ -100,7 +101,7 @@ def dashboard_view(request):
         'novos_clientes_hoje': novos_clientes_hoje,
         'produtos': produtos_recentes,
         'loja_status': "Online",
-        'hoje': hoje,
+        'hoje': hoje_inicio.date(),
     }
 
     # Print de teste para confirmar no seu terminal
@@ -110,37 +111,56 @@ def dashboard_view(request):
     return render(request, 'dashboard.html', context)
 @login_required
 def home(request):
-    # 1. Se for cliente, vai para a vitrine
+    # 1. Se for cliente (e não admin), vai para a vitrine
     perfil = getattr(request.user, 'perfil', None)
-    if perfil and perfil.nivel == 'CLIENTE':
-        return redirect('vitrine_produtos')
+    if not request.user.is_superuser and perfil and perfil.nivel == 'CLIENTE':
+        return redirect('vitrine')
 
     # Verifica se é um vendedor aprovado (não admin)
     vendedor = Vendedor.objects.filter(usuario=request.user).first()
-    if vendedor and vendedor.aprovado and not request.user.is_superuser:
+    if not request.user.is_superuser and vendedor and vendedor.aprovado:
         # Redireciona vendedor para lista de estoque
         return redirect('lista_estoque')
     
     # Admin continua para o dashboard
     perfil = getattr(request.user, 'perfil', None)
     if not perfil:
-        messages.error(request, "Perfil não encontrado. Contate o suporte.")
-        return redirect('logout')
+        if not request.user.is_superuser:
+            messages.error(request, "Perfil não encontrado. Contate o suporte.")
+            return redirect('logout')
     
-    if perfil.nivel == 'ADMIN':
+    if request.user.is_superuser or (perfil and perfil.nivel == 'ADMIN'):
         produtos_loja = Produto.objects.all()
+        clientes = Cliente.objects.all()
     else:
-        produtos_loja = Produto.objects.filter(loja=perfil.loja)
+        # Se não for ADMIN, filtramos os dados pela loja do usuário
+        loja = perfil.loja
+        if not loja:
+            vendedor = Vendedor.objects.filter(usuario=request.user).first()
+            loja = Loja.objects.filter(vendedor=vendedor).first()
+            
+        produtos_loja = Produto.objects.filter(loja=loja) if loja else Produto.objects.none()
+        clientes = Cliente.objects.filter(usuario=request.user)
 
-    total_estoque = produtos_loja.aggregate(total=Sum(F('preco') * F('estoque')))['total'] or 0
-    avisos = produtos_loja.filter(estoque__lte=F('estoque_minimo')).count()
+    # Cálculos dinâmicos para o Dashboard
+    # Início do dia no fuso horário configurado (America/Sao_Paulo)
+    hoje_inicio = timezone.localtime(timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    total_itens = produtos_loja.aggregate(total=Sum('estoque'))['total'] or 0 # Total em Estoque (Físico)
+    valor_estoque = produtos_loja.aggregate(total=Sum(F('preco') * F('estoque')))['total'] or 0 # Dados Reais (Financeiro)
+    alertas_reposicao = produtos_loja.filter(estoque__lte=F('estoque_minimo')).count() # Baixo Estoque
+    total_clientes_ativos = clientes.count() # Clientes Ativos
+    novos_clientes_hoje = clientes.filter(data_cadastro__gte=hoje_inicio).count() # Novos Clientes (Hoje)
     
     context = {
-        'receita': total_estoque,
-        'vendas': produtos_loja.count(),
-        'avisos': avisos,
-        'produtos': produtos_loja[:5],
-        'nivel': perfil.nivel,
+        'total_itens': total_itens,
+        'valor_estoque': valor_estoque,
+        'alertas_reposicao': alertas_reposicao,
+        'total_clientes_ativos': total_clientes_ativos,
+        'novos_clientes_hoje': novos_clientes_hoje,
+        'produtos': produtos_loja.order_by('-id')[:5],
+        'nivel': perfil.nivel if perfil else 'ADMIN',
+        'hoje': hoje_inicio.date(),
     }
     return render(request, 'dashboard.html', context)
 
@@ -369,7 +389,7 @@ def adicionar_ao_carrinho(request, produto_id):
     cart = Cart(request)
     produto = get_object_or_404(Produto, id=produto_id)
     cart.add(produto_id=produto.id)
-    return redirect('vitrine_produtos')
+    return redirect('vitrine')
 
 def ver_carrinho(request):
     cart = Cart(request)
@@ -404,7 +424,7 @@ def remover_do_carrinho(request, produto_id):
 def finalizar_pedido(request):
     cart = Cart(request)
     if not cart.cart:
-        return redirect('vitrine_produtos')
+        return redirect('vitrine')
 
     # 1. Recupera o cadastro de Cliente do usuário logado
     cliente = Cliente.objects.filter(usuario=request.user).first()

@@ -326,48 +326,24 @@
             </a>
             </div>
             <ul>
-                {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
+                {# Links para administradores, gerentes e donos #}
+                {% if user.is_superuser or perfil.nivel == 'ADMIN' or perfil.nivel == 'GERENTE' or perfil.nivel == 'DONO' %}
                 <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                     <a href="{% url 'home' %}"><i class="bi bi-house-door-fill"></i> Painel</a>
                 </li>
-                {% endif %}
-                
-                {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
                 <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
                     <a href="{% url 'lista_estoque' %}"><i class="bi bi-box-seam-fill"></i> Estoque</a>
                 </li>
-                {% endif %}
-                
-                {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
                 <li class="{% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
                     <a href="{% url 'lista_clientes' %}"><i class="bi bi-people-fill"></i> Clientes</a>
                 </li>
-                {% endif %}
-                
-                <!-- Opções para o Cliente -->
-                {% if is_cliente %}
-                <!-- <li class="{% if request.resolver_match.url_name == 'vitrine_produtos' %}active{% endif %}">
-                    <a href="{% url 'vitrine_produtos' %}"><i class="bi bi-shop-window"></i> Vitrine</a>
-                </li>
-                <li class="{% if request.resolver_match.url_name == 'ver_carrinho' %}active{% endif %}">
-                    <a href="{% url 'ver_carrinho' %}">
-                        <i class="bi bi-cart-fill"></i> Carrinho
-                    </a>
-                </li>
-                <li class="{% if request.resolver_match.url_name == 'historico_pedidos' %}active{% endif %}">
-                    <a href="{% url 'historico_pedidos' %}"><i class="bi bi-bag-check-fill"></i> Meus Pedidos</a>
-                </li>
-                {% endif %}
-
-                {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
                 <li class="nav-item dropdown">
                     <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="bi bi-shop"></i> Loja
                     </a>
                     <ul class="dropdown-menu">
                         {% if is_vendedor %}
-                            {% if loja %} -->
-                            <!-- Vendedor com loja: mostrar Visualizar, Editar, Funcionários e Excluir -->
+                            {% if loja %} {# Vendedor com loja: mostrar Visualizar, Editar, Funcionários e Excluir #}
                             <li>
                                 <a class="dropdown-item d-flex align-items-center" href="{% url 'ver_loja' %}"
                                     style="color: var(--texto-muted);">
@@ -399,8 +375,7 @@
                                     <i class="bi bi-trash3-fill me-2"></i> Excluir {{ loja.nome }}
                                 </a>
                             </li>
-                            {% else %}
-                            <!-- Vendedor sem loja: mostrar apenas Criar Loja -->
+                            {% else %} {# Vendedor sem loja: mostrar apenas Criar Loja #}
                             <li>
                                 <a class="dropdown-item d-flex align-items-center" href="{% url 'criar_loja' %}"
                                     style="color: var(--texto-muted);">
@@ -410,8 +385,7 @@
                                 </a>
                             </li>
                             {% endif %}
-                        {% else %}
-                            <!-- Admin: mostrar todas as opções -->
+                        {% else %} {# Admin: mostrar todas as opções #}
                             {% if loja %}
                             <li>
                                 <a class="dropdown-item d-flex align-items-center" href="{% url 'ver_loja' %}"
@@ -457,11 +431,26 @@
                         {% endif %}
                     </ul>
                 </li>
+                {% endif %} {# Fim do bloco ADMIN/GERENTE/DONO #}
+                
+                {# Opções para o Cliente e Superusuários (Vitrine, Carrinho, Meus Pedidos, NEXUS Store) #}
+                {% if user.is_superuser or is_cliente %}
+                <li class="{% if request.resolver_match.url_name == 'vitrine' %}active{% endif %}">
+                    <a href="{% url 'vitrine' %}"><i class="bi bi-shop-window"></i> Vitrine</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'ver_carrinho' %}active{% endif %}">
+                    <a href="{% url 'ver_carrinho' %}">
+                        <i class="bi bi-cart-fill"></i> Carrinho
+                    </a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'loja_meus_pedidos' %}active{% endif %}"> {# Assuming 'loja_meus_pedidos' is the correct URL name for client's orders #}
+                    <a href="{% url 'loja_meus_pedidos' %}"><i class="bi bi-bag-check-fill"></i> Meus Pedidos</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'vitrine' %}active{% endif %}"> {# General link to the public storefront #}
+                    <a href="{% url 'vitrine' %}"><i class="bi bi-box-seam-fill"></i> NEXUS Store</a>
+                </li>
                 {% endif %}
             </ul>
-                <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
-                    <a href="{% url 'vitrine' %}"><i class="bi bi-box-seam-fill"></i> ir para a Nexus Store</a>
-                </li>
         </nav>
 
         <main class="main-layout">
@@ -498,8 +487,7 @@
 
             <footer class="rodape">
                 <p style="color: var(--texto-muted); font-size: 0.85rem; margin: 0;">
-                    &copy; {% now "Y" %} <strong style="color: #fff;">NEXUS Hub</strong> — Gestão Inteligente | Todos os
-                    direitos reservados.
+                    &copy; {% now "Y" %} <strong style="color: #fff;">NEXUS Hub</strong> — Gestão Modular Inteligente | Todos os direitos reservados.
                 </p>
             </footer>
         </main>

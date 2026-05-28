@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Cadastrar Novo Cliente | NEXUS Hub{% endblock %}
+{% block title %}{% if cliente %}Editar Informações do Cliente{% else %}Cadastrar Novo Cliente{% endif %} | NEXUS Hub{% endblock %}
 
-{% block page_title %}CADASTRAR NOVO CLIENTE{% endblock %}
+{% block page_title %}{% if cliente %}EDITAR INFORMAÇÕES DO CLIENTE{% else %}CADASTRAR NOVO CLIENTE{% endif %}{% endblock %}
 
 {% block content %}
 <style>
@@ -192,8 +192,8 @@
 
 <div class="nexus-form-container">
     <div class="nexus-form-header">
-        <i class="bi bi-person-plus-fill"></i>
-        <h2>Cliente</h2>
+        <i class="bi {% if cliente %}bi-person-gear{% else %}bi-person-plus-fill{% endif %}"></i>
+        <h2>{% if cliente %}Editar Informações do Cliente{% else %}Cliente{% endif %}</h2>
     </div>
 
     <form method="POST">
@@ -250,7 +250,7 @@
                 <i class="bi bi-x-circle me-1"></i> CANCELAR
             </a>
             <button type="submit" class="btn-nexus-save">
-                <i class="bi bi-check2-circle me-2"></i> CADASTRAR
+                <i class="bi bi-check2-circle me-2"></i> {% if cliente %}SALVAR ALTERAÇÕES{% else %}CADASTRAR{% endif %}
             </button>
         </div>
     </form>
