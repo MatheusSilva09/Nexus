@@ -561,8 +561,8 @@ def cadastrar_cliente(request):
     })
 
 @admin_only_required # Admins edit any client
-def editar_cliente(request, pk): # The 'usuario=request.user' filter should be removed if admins can edit any client.
-    cliente = get_object_or_404(Cliente, pk=pk, usuario=request.user)
+def editar_cliente(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
     
     if request.method == 'POST':
         cliente.nome = request.POST.get('nome')
@@ -580,8 +580,13 @@ def editar_cliente(request, pk): # The 'usuario=request.user' filter should be r
 @admin_only_required # Admins delete any client
 def excluir_cliente(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
-    cliente.delete()
-    return redirect('lista_clientes')
+    
+    if request.method == 'POST':
+        cliente.delete()
+        messages.success(request, f"Cliente {cliente.nome} removido com sucesso.")
+        return redirect('lista_clientes')
+        
+    return render(request, 'confirmar_exclusao_cliente.html', {'cliente': cliente})
 
 # --- GESTÃO DE LOJA ---
 
