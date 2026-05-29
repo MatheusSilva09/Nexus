@@ -7,6 +7,7 @@
     <title>{% block title %}NEXUS Store{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon_nexushub.png' %}">
     <style>
         :root {
             --azul-profundo: #020617;
@@ -23,27 +24,73 @@
             color: #f8fafc;
             font-family: 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Estrutura Master de Layout (Sidebar + Conteúdo) */
+        .page-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Ajustada com menos espaço no topo para subir a Logo */
+        .sidebar-nexus {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(0, 242, 254, 0.2);
+            padding: 10px 20px 20px 20px; /* Reduzido o topo para 10px para deixar a logo mais acima */
             display: flex;
             flex-direction: column;
+            align-items: flex-start;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
         }
 
-        /* Navbar estilo Glassmorphic Superior */
-        .navbar-nexus {
-            background: rgba(15, 23, 42, 0.75);
+        /* Container da Direita que agrupa Topbar, Vitrine e Footer */
+        .main-container {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Topbar de Funcionalidades e Saudações (Alinhada à Direita) */
+        .top-navbar-nexus {
+            background: rgba(15, 23, 42, 0.4);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
-            padding: 15px 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
         }
 
-        .brand-store {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--turquesa-brilhante);
-            text-decoration: none;
-            letter-spacing: 1px;
+        /* Área de Conteúdo da Vitrine */
+        .content-wrapper {
+            padding: 60px 40px;
+            flex: 1;
         }
-        .brand-store span { color: #ffffff; font-weight: 300; }
 
+        /* Estilização e Efeitos Glow Proporcionais da Logo */
+        .brand-logo {
+            width: 100%;
+            max-width: 220px;
+            height: auto;
+            transition: all 0.3s ease-in-out;
+            filter: drop-shadow(0 0 6px rgba(0, 150, 255, 0.3));
+        }
+
+        .brand-logo:hover {
+            transform: scale(1.03);
+            filter: drop-shadow(0 0 12px var(--turquesa-brilhante));
+        }
+
+        /* Botão do Carrinho Superior Direito */
         .cart-icon-btn {
             position: relative;
             color: #fff;
@@ -66,11 +113,6 @@
             padding: 2px 6px;
         }
 
-        .content-wrapper {
-            padding: 60px 40px;
-            flex: 1;
-        }
-
         .footer-store {
             border-top: 1px solid var(--borda);
             padding: 30px;
@@ -82,45 +124,60 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-nexus sticky-top">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
-            <a class="brand-store" href="{% url 'vitrine' %}">
-                <img src="{% static 'Logos/NEXUS STORE.png' %}" alt="NEXUS Store" style="height: 40px; filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.3));">
+    <div class="page-wrapper">
+        <aside class="sidebar-nexus">
+            <a href="{% url 'vitrine' %}" class="d-inline-block">
+                <img src="{% static 'img/nexusstore.png' %}" alt="NEXUS Store" class="brand-logo">
             </a>
+        </aside>
 
-            <div class="d-flex align-items-center gap-4">
-    {% if user.is_authenticated %}
-        <span class="text-white d-none d-sm-inline" style="font-size: 0.9rem;">
-            Olá, <strong>{{ user.username }}</strong>
-        </span>
-        <a href="{% url 'loja_meus_pedidos' %}" class="btn btn-sm btn-outline-secondary" style="border-color: var(--borda); color: #ffffff; font-size: 0.8rem;">Meus Pedidos</a>
-        <a href="{% url 'loja_logout' %}" class="btn btn-sm btn-outline-danger" style="font-size: 0.8rem;">Sair</a>
-        
-        {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
-            <a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary" style="border-color: var(--borda); color: var(--texto-muted); font-size: 0.8rem;">Painel Admin</a>
-        {% endif %}
-    {% else %}
-        <a href="{% url 'loja_login' %}" class="btn btn-sm btn-outline-info" style="color: var(--turquesa-brilhante); border-color: var(--turquesa-brilhante); font-size: 0.8rem;">Entrar</a>
-    {% endif %}
+        <div class="main-container">
+            
+            <header class="top-navbar-nexus">
+                <div class="d-flex align-items-center gap-4">
+                    {% if user.is_authenticated %}
+                        <span class="text-white d-none d-sm-inline" style="font-size: 0.9rem;">
+                            Olá, <strong>{{ user.username }}</strong>
+                        </span>
+                        
+                        <a href="{% url 'loja_meus_pedidos' %}" class="btn btn-sm btn-outline-secondary" style="border-color: var(--borda); color: #ffffff; font-size: 0.8rem;">
+                            Meus Pedidos
+                        </a>
+                        
+                        {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
+                            <a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary" style="border-color: var(--borda); color: var(--texto-muted); font-size: 0.8rem;">
+                                Painel Admin
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'loja_logout' %}" class="btn btn-sm btn-outline-danger" style="font-size: 0.8rem;">
+                            Sair
+                        </a>
+                    {% else %}
+                        <a href="{% url 'loja_login' %}" class="btn btn-sm btn-outline-info" style="color: var(--turquesa-brilhante); border-color: var(--turquesa-brilhante); font-size: 0.8rem;">
+                            Entrar
+                        </a>
+                    {% endif %}
 
-    <a href="{% url 'ver_carrinho' %}" class="cart-icon-btn">
-        <i class="bi bi-cart3"></i>
-        <span class="cart-count">{{ total_itens|default:0 }}</span>
-    </a>
-</div>
+                    <a href="{% url 'ver_carrinho' %}" class="cart-icon-btn">
+                        <i class="bi bi-cart3"></i>
+                        <span class="cart-count">{{ total_itens|default:0 }}</span>
+                    </a>
+                </div>
+            </header>
+
+            <main class="content-wrapper">
+                {% block content %}
+                {% endblock %}
+            </main>
+
+            <footer class="footer-store">
+                <p style="color: var(--texto-muted); font-size: 0.85rem; margin: 0;">
+                    &copy; {% now "Y" %} <strong style="color: #fff;">NEXUS Store</strong> — Gestão Modular Inteligente | Todos os direitos reservados.
+                </p>
+            </footer>
         </div>
-    </nav>
-
-    <div class="container content-wrapper">
-        {% block content %}
-        {% endblock %}
     </div>
-
-    <footer class="footer-store">
-        <p style="color: var(--texto-muted); font-size: 0.85rem; margin: 0;">
-            &copy; {% now "Y" %} <strong style="color: #fff;">NEXUS Store</strong> — Gestão Modular Inteligente | Todos os direitos reservados.
-        </p>
-    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

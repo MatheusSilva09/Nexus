@@ -24,6 +24,9 @@ from dashboard import views
 from loja import views as loja_views
 
 urlpatterns = [
+    # Rota universal e direta para o Favicon (Evita problemas de carregamento no Django 6.0)
+    path('favicon.ico', RedirectView.as_view(url='/static/img/favicon_nexushub.png')),
+
     # Nova rota customizada para o Nexus Hub Login: http://127.0.0.1:8000/nexushub/
     path('nexushub/', views.login_view, name='login_view'),
 
@@ -41,8 +44,10 @@ urlpatterns = [
     
     path('admin/', admin.site.urls),
     path('accounts/profile/', views.profile, name='profile'),
+    
     # A NEXUS Store agora possui seu próprio prefixo independente
     path('nexusstore/', include('loja.urls')),
+    
     # O ecossistema NEXUS Hub (Dashboard e Gestão) agora fica sob /nexushub/
     path('nexushub/', include('dashboard.urls')),
 ]

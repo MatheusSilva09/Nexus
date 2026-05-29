@@ -6,8 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ titulo_aba|default:"NEXUS Hub" }}{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{% static 'img/LOGOMARCA FAVICON.png' %}">
-    <link rel="shortcut icon" type="image/png" href="{% static 'img/LOGOMARCA FAVICON.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon_nexushub.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -82,6 +82,30 @@
             display: flex;
             align-items: center;
             margin-bottom: 20px;
+        }
+
+        .btn-nexus-store-brand {
+            background: linear-gradient(90deg, #087cb2, #2ab6dc);
+            color: #0f172a !important;
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            transition: 0.3s;
+            margin: 15px 10px;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+            border: none;
+        }
+
+        .btn-nexus-store-brand:hover {
+            transform: translateY(-2px);
+            background: var(--turquesa-brilhante) !important;
+            box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
+            color: #0f172a !important;
         }
 
         .sidebar-logo {
@@ -393,18 +417,15 @@
                 </li>
                 {% endif %}
 
-                {# --- VISÃO EXCLUSIVA DO CLIENTE (Sem is_superuser ou vendedor misturado) --- #}
-                {% if is_cliente and not is_vendedor or user.is_superuser %}
-                <li class="{% if request.resolver_match.url_name == 'vitrine' %}active{% endif %}">
-                    <a href="{% url 'vitrine' %}"><i class="bi bi-shop-window"></i> Vitrine</a>
+                {# --- ACESSO À NEXUS STORE --- #}
+                <li class="mt-4">
+                    <a href="{% url 'vitrine' %}" class="btn-nexus-store-brand">
+                        <i class="bi bi-cart4 me-2"
+                            style="color: inherit !important; margin: 0 !important; font-size: 1.1rem;"></i>
+                        NEXUS Store
+                    </a>
                 </li>
-                <li class="{% if request.resolver_match.url_name == 'ver_carrinho' %}active{% endif %}">
-                    <a href="{% url 'ver_carrinho' %}"><i class="bi bi-cart-fill"></i> Carrinho</a>
-                </li>
-                <li class="{% if request.resolver_match.url_name == 'loja_meus_pedidos' %}active{% endif %}">
-                    <a href="{% url 'loja_meus_pedidos' %}"><i class="bi bi-bag-check-fill"></i> Meus Pedidos</a>
-                </li>
-                {% endif %}
+
             </ul>
         </nav>
 
