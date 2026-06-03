@@ -761,10 +761,15 @@
         var priceElement = document.getElementById('id_preco');
         if (priceElement) {
             IMask(priceElement, {
-                mask: 'R$ num',
-                blocks: {
-                    num: { mask: Number, thousandsSeparator: '.', padFractionalZeros: true, normalizeZeros: true, radix: ',' }
-                }
+                mask: Number,
+                scale: 2,
+                signed: false,
+                thousandsSeparator: '.',
+                padFractionalZeros: true,
+                normalizeZeros: true,
+                radix: ',',
+                mapToRadix: ['.'],
+                lazy: true
             });
         }
     </script>
