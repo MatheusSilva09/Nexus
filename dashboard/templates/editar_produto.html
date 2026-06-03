@@ -51,9 +51,14 @@
             {% endfor %}
         </select>
         
-        <a href="{% url 'cadastrar_categoria' %}" style="color: var(--nexus-blue); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block;">
-            <i class="bi bi-plus-circle"></i> Criar nova categoria
-        </a>
+        <div class="d-flex gap-3">
+            <a href="javascript:void(0)" onclick="openCategoryModal()" style="color: var(--nexus-blue); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block; cursor: pointer;">
+                <i class="bi bi-plus-circle"></i> Criar categoria
+            </a>
+            <a href="javascript:void(0)" onclick="openEditCategoryModal()" style="color: var(--turquesa-brilhante); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block; cursor: pointer;">
+                <i class="bi bi-pencil-square"></i> Editar categoria
+            </a>
+        </div>
     </div>
 
     <div class="col-md-6">
@@ -99,6 +104,56 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Nova Categoria -->
+<div id="modalCategoria" class="nexus-modal-backdrop" style="display: none;">
+    <div class="nexus-modal-card" style="border-color: var(--nexus-blue); border-top-color: var(--nexus-blue);">
+        <div class="nexus-modal-icon" style="color: var(--nexus-blue); font-size: 3rem; margin-bottom: 20px;">
+            <i id="modalIcon" class="bi bi-folder-plus"></i>
+        </div>
+        <h2 id="modalTitle" class="nexus-modal-title" style="color: #fff; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px;">NOVA CATEGORIA</h2>
+        <div class="p-3">
+            <div class="input-container-nexus">
+                <i class="bi bi-tag-fill" style="left: 15px; position: absolute; color: var(--nexus-blue); margin-top: 12px;"></i>
+                <input type="text" id="nova_categoria_nome" class="input-nexus" placeholder="Nome da categoria..." style="padding-left: 45px !important;">
+            </div>
+            <div id="categoria_error" class="text-danger small mt-2" style="display: none;"></div>
+        </div>
+        <div class="nexus-modal-footer" style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+            <button type="button" onclick="salvarCategoria()" class="btn-nexus-modal btn-confirm" style="background: var(--nexus-blue) !important; border-color: var(--nexus-blue) !important; color: #fff; min-width: 140px; height: 42px; border-radius: 10px; font-weight: 600; border: none;">
+                <i class="bi bi-check-lg"></i> SALVAR
+            </button>
+            <button type="button" onclick="fecharModalCategoria()" class="btn-nexus-modal btn-cancel" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; min-width: 140px; height: 42px; border-radius: 10px; font-weight: 600;">
+                <i class="bi bi-x-circle"></i> CANCELAR
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Nova/Editar Categoria -->
+<div id="modalCategoria" class="nexus-modal-backdrop" style="display: none;">
+    <div class="nexus-modal-card" style="border-color: var(--nexus-blue); border-top-color: var(--nexus-blue);">
+        <div class="nexus-modal-icon" style="color: var(--nexus-blue); font-size: 3rem; margin-bottom: 20px;">
+            <i id="modalIcon" class="bi bi-folder-plus"></i>
+        </div>
+        <h2 id="modalTitle" class="nexus-modal-title" style="color: #fff; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px;">NOVA CATEGORIA</h2>
+        <div class="p-3">
+            <div class="input-container-nexus">
+                <i class="bi bi-tag-fill" style="left: 15px; position: absolute; color: var(--nexus-blue); margin-top: 12px;"></i>
+                <input type="text" id="nova_categoria_nome" class="input-nexus" placeholder="Nome da categoria..." style="padding-left: 45px !important;">
+            </div>
+            <div id="categoria_error" class="text-danger small mt-2" style="display: none;"></div>
+        </div>
+        <div class="nexus-modal-footer" style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+            <button type="button" onclick="salvarCategoria()" class="btn-nexus-modal btn-confirm" style="background: var(--nexus-blue) !important; border-color: var(--nexus-blue) !important; color: #fff; min-width: 140px; height: 42px; border-radius: 10px; font-weight: 600; border: none;">
+                <i class="bi bi-check-lg"></i> SALVAR
+            </button>
+            <button type="button" onclick="fecharModalCategoria()" class="btn-nexus-modal btn-cancel" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; min-width: 140px; height: 42px; border-radius: 10px; font-weight: 600;">
+                <i class="bi bi-x-circle"></i> CANCELAR
+            </button>
         </div>
     </div>
 </div>
@@ -252,5 +307,122 @@
         40%, 60% { transform: translate3d(4px, 0, 0); }
     }
 
+    /* Modal Styles */
+    .nexus-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(2, 6, 23, 0.85);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .nexus-modal-card {
+        background: #0b1120;
+        border: 1px solid var(--borda);
+        border-top: 4px solid var(--nexus-blue);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(37, 99, 235, 0.15);
+    }
 </style>
+
+<script>
+    let editingCategoryId = null;
+
+    function openCategoryModal() {
+        editingCategoryId = null;
+        document.getElementById('modalTitle').innerText = 'NOVA CATEGORIA';
+        document.getElementById('modalIcon').className = 'bi bi-folder-plus';
+        document.getElementById('nova_categoria_nome').value = '';
+        document.getElementById('modalCategoria').style.display = 'flex';
+        document.getElementById('nova_categoria_nome').focus();
+    }
+
+    function openEditCategoryModal() {
+        const select = document.querySelector('select[name="categoria"]');
+        const selectedId = select.value;
+        
+        if (!selectedId) {
+            alert("Por favor, selecione uma categoria para editar.");
+            return;
+        }
+
+        editingCategoryId = selectedId;
+        const fullText = select.options[select.selectedIndex].text;
+        // Extrai apenas o nome removendo o prefixo "ID - "
+        const nomeAtual = fullText.split(' - ').slice(1).join(' - ');
+
+        document.getElementById('modalTitle').innerText = 'EDITAR CATEGORIA';
+        document.getElementById('modalIcon').className = 'bi bi-pencil-square';
+        document.getElementById('nova_categoria_nome').value = nomeAtual;
+        document.getElementById('modalCategoria').style.display = 'flex';
+        document.getElementById('nova_categoria_nome').focus();
+    }
+
+    function fecharModalCategoria() {
+        document.getElementById('modalCategoria').style.display = 'none';
+        document.getElementById('nova_categoria_nome').value = '';
+        document.getElementById('categoria_error').style.display = 'none';
+        editingCategoryId = null;
+    }
+
+    function salvarCategoria() {
+        const nome = document.getElementById('nova_categoria_nome').value;
+        const errorDiv = document.getElementById('categoria_error');
+        
+        if (!nome) {
+            errorDiv.innerText = "Por favor, digite o nome da categoria.";
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('nome', nome);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        const url = editingCategoryId 
+            ? `/dashboard/categorias/editar-ajax/${editingCategoryId}/`
+            : "{% url 'cadastrar_categoria' %}";
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const select = document.querySelector('select[name="categoria"]');
+                if (editingCategoryId) {
+                    const option = select.querySelector(`option[value="${data.id}"]`);
+                    option.text = `${data.id} - ${data.nome}`;
+                } else {
+                    const option = new Option(`${data.id} - ${data.nome}`, data.id);
+                    select.add(option);
+                    select.value = data.id;
+                }
+                fecharModalCategoria();
+            } else {
+                errorDiv.innerText = data.error || "Erro ao salvar categoria.";
+                errorDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            errorDiv.innerText = "Erro na comunicação com o servidor.";
+            errorDiv.style.display = 'block';
+        });
+    }
+</script>
 {% endblock %}

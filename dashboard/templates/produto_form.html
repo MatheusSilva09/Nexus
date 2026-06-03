@@ -6,22 +6,19 @@
 
 {% block content %}
 <div class="fade-in-content container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="nexus-form-card">
-                <div class="card-header-nexus">
-                    <h5 class="m-0 page-title-glow" style="font-size: 1.1rem;">
-                        <i class="bi bi-plus-circle-fill me-2" style="font-size: 1.3rem;"></i>Produto
-                    </h5>
-                </div>
+    <div class="nexus-form-container">
+        <div class="nexus-form-header">
+            <i class="bi bi-box-seam-fill"></i>
+            <h2>NOVO CADASTRO DE PRODUTO</h2>
+        </div>
 
-                <form method="post" enctype="multipart/form-data" class="p-4 p-md-5" id="formProduto">
+                <form method="post" enctype="multipart/form-data" id="formProduto">
                     {% csrf_token %}
 
                     <div class="row g-4">
                         <div class="col-12">
                             <label class="nexus-label">NOME DO PRODUTO</label>
-                            <div class="input-container-nexus">
+                            <div class="input-wrapper-nexus">
                                 <i class="bi bi-tag-fill"></i>
                                 <input type="text" name="nome" value="{{ form.nome.value|default_if_none:'' }}"
                                     placeholder="Digite o nome do seu produto..." required>
@@ -30,24 +27,24 @@
 
                         <div class="col-12">
                             <label class="nexus-label">DESCRIÇÃO</label>
-                            <div class="input-container-nexus">
+                            <div class="input-wrapper-nexus">
                                 <i class="bi bi-chat-left-text-fill"></i>
                                 <textarea name="descricao" rows="3" placeholder="Descreva seu produto..."
                                     required>{{ form.descricao.value|default_if_none:'' }}</textarea>
                             </div>
                         </div>
 
-                        <div class="col-12 form-group mb-4">
+                        <div class="col-12 mb-2">
                             <label class="nexus-label">CATEGORIA</label>
-                            <select name="categoria" class="form-control select-nexus" required>
+                            <select name="categoria" class="form-control-nexus select-nexus" required>
                                 <option value="">Selecione uma categoria...</option>
                                 {% for cat in categorias %}
                                 <option value="{{ cat.id }}">{{ cat.id }} - {{ cat.nome }}</option>
                                 {% endfor %}
                             </select>
 
-                            <a href="{% url 'cadastrar_categoria' %}"
-                                style="color: var(--nexus-blue); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block;">
+                            <a href="javascript:void(0)" onclick="openCategoryModal()" class="category-link"
+                                style="color: var(--nexus-blue); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block; cursor: pointer;">
                                 <i class="bi bi-plus-circle"></i> Criar nova categoria
                             </a>
                         </div>
@@ -98,6 +95,31 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Nova Categoria -->
+<div id="modalCategoria" class="nexus-modal-backdrop" style="display: none;">
+    <div class="nexus-modal-card" style="border-color: var(--nexus-blue); border-top-color: var(--nexus-blue);">
+        <div class="nexus-modal-icon" style="color: var(--nexus-blue); font-size: 3rem; margin-bottom: 20px;">
+            <i class="bi bi-folder-plus"></i>
+        </div>
+        <h2 class="nexus-modal-title" style="color: #fff; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px;">NOVA CATEGORIA</h2>
+        <div class="p-3">
+            <div class="input-container-nexus">
+                <i class="bi bi-tag-fill" style="left: 15px; position: absolute; color: var(--nexus-blue); margin-top: 12px;"></i>
+                <input type="text" id="nova_categoria_nome" class="input-nexus" placeholder="Nome da categoria..." style="padding-left: 45px !important;">
+            </div>
+            <div id="categoria_error" class="text-danger small mt-2" style="display: none;"></div>
+        </div>
+        <div class="nexus-modal-footer" style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+            <button type="button" onclick="salvarCategoria()" class="btn-nexus-modal btn-confirm" style="background: var(--nexus-blue) !important; border-color: var(--nexus-blue) !important; color: #fff; min-width: 140px; height: 42px; border-radius: 10px; font-weight: 600; border: none;">
+                <i class="bi bi-check-lg"></i> SALVAR
+            </button>
+            <button type="button" onclick="fecharModalCategoria()" class="btn-nexus-modal btn-cancel" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; min-width: 140px; height: 42px; border-radius: 10px; font-weight: 600;">
+                <i class="bi bi-x-circle"></i> CANCELAR
+            </button>
         </div>
     </div>
 </div>
@@ -273,5 +295,88 @@
             transform: translate3d(4px, 0, 0);
         }
     }
+
+    /* Modal Styles */
+    .nexus-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(2, 6, 23, 0.85);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .nexus-modal-card {
+        background: #0b1120;
+        border: 1px solid var(--borda);
+        border-top: 4px solid var(--nexus-blue);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(37, 99, 235, 0.15);
+    }
 </style>
+
+<script>
+    function openCategoryModal() {
+        document.getElementById('modalCategoria').style.display = 'flex';
+        document.getElementById('nova_categoria_nome').focus();
+    }
+
+    function fecharModalCategoria() {
+        document.getElementById('modalCategoria').style.display = 'none';
+        document.getElementById('nova_categoria_nome').value = '';
+        document.getElementById('categoria_error').style.display = 'none';
+    }
+
+    function salvarCategoria() {
+        const nome = document.getElementById('nova_categoria_nome').value;
+        const errorDiv = document.getElementById('categoria_error');
+        
+        if (!nome) {
+            errorDiv.innerText = "Por favor, digite o nome da categoria.";
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('nome', nome);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch("{% url 'cadastrar_categoria' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Adiciona a nova categoria ao select e a seleciona
+                const select = document.querySelector('select[name="categoria"]');
+                const option = new Option(`${data.id} - ${data.nome}`, data.id);
+                select.add(option);
+                select.value = data.id;
+                
+                fecharModalCategoria();
+            } else {
+                errorDiv.innerText = data.error || "Erro ao salvar categoria.";
+                errorDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            errorDiv.innerText = "Erro na comunicação com o servidor.";
+            errorDiv.style.display = 'block';
+        });
+    }
+</script>
 {% endblock %}

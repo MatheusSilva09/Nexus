@@ -10,6 +10,7 @@
     <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon_nexushub.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
     <style>
         /* --- Estética Cyberpunk Corporativo Mantida --- */
         :root {
@@ -21,6 +22,78 @@
             --texto-muted: #94a3b8;
             --turquesa-brilhante: #00f2fe;
             --turquesa-glow: rgba(0, 242, 254, 0.3);
+            /* Variáveis padrão para o modo Dark */
+            --bg-principal: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 100%);
+            --texto-principal: #f8fafc;
+            --sotaque-glow: var(--turquesa-brilhante);
+            --bg-alert: #1e293b;
+            --border-alert: #0ea5e9;
+        }
+
+        /* --- ESTILOS GLOBAIS DE BOTÕES DE AÇÃO (TABELAS) --- */
+        .action-buttons {
+            display: flex;
+            gap: 18px; /* Espaçamento reorganizado conforme solicitado */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-action {
+            font-size: 1.15rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            color: var(--texto-muted);
+        }
+
+        .btn-action.edit {
+            color: var(--nexus-blue) !important; /* Azul padrão Nexus para Edição */
+        }
+
+        .btn-action.edit:hover {
+            color: var(--turquesa-brilhante) !important;
+            filter: drop-shadow(0 0 8px var(--turquesa-glow));
+        }
+
+        .btn-action.delete:hover {
+            color: #ef4444 !important;
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4));
+        }
+
+        html.light-mode {
+            --bg-principal: #f8fafc;
+            --bg-card: #ffffff;
+            --texto-principal: #0f172a;
+            --texto-secundario: #475569;
+            --sotaque-glow: #0891b2;
+            --border-color: #e2e8f0;
+            --shadow-effect: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --borda: #cbd5e1;
+            --texto-muted: #64748b;
+            --bg-alert: #e0f2fe;
+            --border-alert: #38bdf8;
+        }
+
+        /* --- ESTILOS DO BOTÃO DE ALTERNÂNCIA --- */
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--sotaque-glow);
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+            font-size: 1.25rem; /* Tamanho do ícone ajustado */
+        }
+
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         @keyframes fadeInUp {
@@ -28,7 +101,6 @@
                 opacity: 0;
                 transform: translateY(15px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -49,10 +121,11 @@
         html,
         body {
             height: 100%;
-            background: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 100%);
+            background: var(--bg-principal);
             background-attachment: fixed;
-            color: #f8fafc;
+            color: var(--texto-principal);
             overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .app-wrapper {
@@ -61,7 +134,7 @@
             width: 100%;
         }
 
-        /* Sidebar Glassmorphism com o Novo Espaçamento */
+        /* Sidebar Glassmorphism */
         .sidebar {
             width: 240px;
             flex-shrink: 0;
@@ -75,6 +148,10 @@
             top: 0;
             height: 100vh;
             z-index: 1000;
+        }
+
+        html.light-mode .sidebar {
+            background: rgba(241, 245, 249, 0.95);
         }
 
         .sidebar-brand {
@@ -125,7 +202,6 @@
             padding: 0;
         }
 
-        /* Estilo dos Links com Espaçamento de Ícone Melhorado */
         .sidebar li a,
         .sidebar .dropdown-toggle {
             color: var(--texto-muted);
@@ -139,7 +215,6 @@
             margin-bottom: 4px;
         }
 
-        /* Reversão dos Ícones: Largura fixa e cores originais */
         .sidebar li a i,
         .sidebar .dropdown-toggle i {
             width: 1.5rem;
@@ -154,29 +229,32 @@
         .sidebar li a:hover,
         .sidebar .dropdown-toggle:hover {
             background: rgba(37, 99, 235, 0.1);
-            color: var(--turquesa-brilhante);
+            color: var(--sotaque-glow);
             border-color: rgba(0, 242, 254, 0.2);
         }
 
         .sidebar li a:hover i,
         .sidebar .dropdown-toggle:hover i {
-            color: var(--turquesa-brilhante);
+            color: var(--sotaque-glow);
             filter: drop-shadow(0 0 5px var(--turquesa-glow));
         }
 
         .sidebar li.active a {
             background: linear-gradient(90deg, rgba(37, 99, 235, 0.2) 0%, transparent 100%);
-            border-left: 4px solid var(--turquesa-brilhante);
-            color: #fff;
+            border-left: 4px solid var(--sotaque-glow);
+            color: var(--texto-principal);
             box-shadow: -5px 0 15px rgba(0, 242, 254, 0.1);
         }
 
-        /* Dropdown e Header */
         .dropdown-menu {
             background: #0f172a !important;
             border: 1px solid var(--borda) !important;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
+        }
+        
+        html.light-mode .dropdown-menu {
+            background: #ffffff !important;
         }
 
         .main-layout {
@@ -197,10 +275,15 @@
             padding: 0 40px;
         }
 
+        html.light-mode .header {
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid var(--borda);
+        }
+
         .page-title-glow {
             font-size: 1.2rem;
             font-weight: 800;
-            background: linear-gradient(90deg, var(--turquesa-brilhante), #fff);
+            background: linear-gradient(90deg, var(--sotaque-glow), var(--texto-principal));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 5px var(--turquesa-glow));
@@ -209,8 +292,8 @@
         }
 
         .logout-btn {
-            border: 1px solid var(--turquesa-brilhante);
-            color: var(--turquesa-brilhante);
+            border: 1px solid var(--sotaque-glow);
+            color: var(--sotaque-glow);
             padding: 6px 20px;
             border-radius: 8px;
             text-decoration: none;
@@ -221,16 +304,48 @@
         }
 
         .logout-btn:hover {
-            background: var(--turquesa-brilhante);
-            color: var(--azul-profundo);
+            background: var(--sotaque-glow);
+            color: #fff;
             box-shadow: 0 0 15px var(--turquesa-glow);
             transform: translateY(-2px);
         }
 
         .nexus-main-content {
-            flex: 1 0 auto;
-            padding: 40px;
-            opacity: 0;
+            flex: 1 1 auto;
+             padding: 40px;
+            width: 100%;
+        }
+
+        /* --- Refinamento Global de Formulários (Diagramação) --- */
+        label {
+            color: var(--texto-muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control, .form-select {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid var(--borda) !important;
+            color: var(--texto-principal) !important;
+            padding: 12px 16px !important;
+            border-radius: 10px !important;
+            transition: 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--sotaque-glow) !important;
+            box-shadow: 0 0 15px var(--turquesa-glow) !important;
+            background: rgba(15, 23, 42, 0.8) !important;
+        }
+
+        html.light-mode .form-control, html.light-mode .form-select {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
         }
 
         .rodape {
@@ -238,6 +353,33 @@
             text-align: center;
             background: linear-gradient(0deg, rgba(2, 6, 23, 0.9) 0%, transparent 100%);
             border-top: 1px solid var(--borda);
+        }
+
+        .rodape p {
+            color: var(--texto-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        .footer-brand {
+            color: var(--sotaque-glow);
+            text-shadow: 0 0 8px var(--turquesa-glow);
+        }
+
+        html.light-mode .rodape {
+            background: #ffffff !important;
+            border-top: 1px solid #e2e8f0 !important;
+        }
+
+        html.light-mode .rodape p {
+            color: #475569 !important;
+        }
+
+        html.light-mode .footer-brand {
+            color: #2563eb !important;
+            text-shadow: none !important;
         }
 
         /* --- Modal de Exclusão Nexus --- */
@@ -256,32 +398,51 @@
         }
 
         .nexus-modal-content {
-            background: #0f172a;
+            background: #0b1120;
             border: 1px solid #ef4444;
+            border-top: 4px solid #ef4444;
             border-radius: 15px;
             width: 90%;
             max-width: 400px;
             overflow: hidden;
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.2);
             animation: fadeInUp 0.3s ease-out forwards;
+        }
+
+        html.light-mode .nexus-modal-overlay {
+            background: rgba(241, 245, 249, 0.5) !important;
+            backdrop-filter: blur(8px) !important;
+        }
+
+        html.light-mode .nexus-modal-content {
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(12px) !important;
+            border: 1px solid #fecaca !important;
+            border-top: 4px solid #ef4444 !important;
         }
 
         .modal-header-alert {
             background: rgba(239, 68, 68, 0.1);
             padding: 15px;
             color: #ef4444;
-            font-weight: 800;
+            font-weight: 600;
             border-bottom: 1px solid rgba(239, 68, 68, 0.2);
             display: flex;
             align-items: center;
             gap: 10px;
             font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .modal-body-nexus {
             padding: 25px;
             text-align: center;
             color: #94a3b8;
+        }
+
+        html.light-mode .modal-body-nexus {
+            color: #475569 !important;
         }
 
         .modal-footer-nexus {
@@ -299,8 +460,22 @@
             padding: 8px 15px;
             border-radius: 6px;
             font-size: 0.8rem;
-            font-weight: 700;
+            font-weight: 600;
+            text-transform: uppercase;
             transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        html.light-mode .btn-nexus-cancel {
+            border-color: #cbd5e1 !important;
+            color: #64748b !important;
+        }
+
+        html.light-mode .btn-nexus-confirm {
+            background: #ef4444 !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
         }
 
         .btn-nexus-confirm {
@@ -310,9 +485,14 @@
             padding: 8px 15px;
             border-radius: 6px;
             font-size: 0.8rem;
-            font-weight: 700;
+            font-weight: 600;
+            text-transform: uppercase;
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
             transition: 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .btn-nexus-confirm:hover {
@@ -326,11 +506,39 @@
             transition: transform 0.3s ease;
         }
 
+        /* --- MENSAGEM DE BOAS-VINDAS REAGINADA --- */
+        .user-welcome-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--texto-principal);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-welcome-text i {
+            font-size: 1.25rem;
+            color: var(--sotaque-glow);
+            filter: drop-shadow(0 0 5px var(--turquesa-glow));
+        }
+
         .logo-container a:hover .sidebar-logo {
             filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.8));
             transform: scale(1.02);
         }
+
+        html.light-mode .user-welcome-text {
+            color: #334155 !important;
+        }
     </style>
+    <!-- Script preventivo para evitar flickering (tela piscar branca/escura no load) -->
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.classList.add('light-mode');
+        }
+    </script>
 </head>
 
 <body>
@@ -342,7 +550,6 @@
                 </a>
             </div>
             <ul>
-                {# --- VISÃO DO ADMINISTRADOR --- #}
                 {% if is_admin %}
                 <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                     <a href="{% url 'dashboard' %}"><i class="bi bi-house-door-fill"></i> Painel</a>
@@ -355,22 +562,15 @@
                 </li>
                 {% endif %}
 
-                {# --- VISÃO DO VENDEDOR OU ADMIN (ESTOQUE E LOJA) --- #}
                 {% if is_admin or is_vendedor %}
-
-                {# Exibição do Estoque Condicionada à existência da Loja #}
                 {% if loja %}
                 <li class="{% if request.resolver_match.url_name == 'lista_estoque' %}active{% endif %}">
                     <a href="{% url 'lista_estoque' %}"><i class="bi bi-box-seam-fill"></i> Estoque</a>
                 </li>
                 {% else %}
-                {# Se não tem loja, o botão fica desabilitado com o aviso #}
-                <li style="cursor: not-allowed; opacity: 0.5;"
-                    title="Você precisa configurar uma loja antes de acessar o estoque.">
-                    <a href="javascript:void(0)"
-                        onclick="alert('Você precisa configurar uma loja antes de acessar o estoque.')">
-                        <i class="bi bi-box-seam-fill"></i> Estoque <span class="badge bg-warning text-dark"
-                            style="font-size: 0.65rem;">Bloqueado</span>
+                <li style="cursor: not-allowed; opacity: 0.5;" title="Você precisa configurar uma loja antes de acessar o estoque.">
+                    <a href="javascript:void(0)" onclick="alert('Você precisa configurar uma loja antes de acessar o estoque.')">
+                        <i class="bi bi-box-seam-fill"></i> Estoque <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Bloqueado</span>
                     </a>
                 </li>
                 {% endif %}
@@ -382,34 +582,27 @@
                     <ul class="dropdown-menu">
                         {% if loja %}
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="{% url 'ver_loja' %}"
-                                style="color: var(--texto-muted);">
-                                <i class="bi bi-eye-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                Visualizar
+                            <a class="dropdown-item d-flex align-items-center" href="{% url 'ver_loja' %}" style="color: var(--texto-muted);">
+                                <i class="bi bi-eye-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i> Visualizar
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="{% url 'editar_loja' %}"
-                                style="color: var(--texto-muted);">
-                                <i class="bi bi-gear-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i>
-                                Editar
+                            <a class="dropdown-item d-flex align-items-center" href="{% url 'editar_loja' %}" style="color: var(--texto-muted);">
+                                <i class="bi bi-gear-fill me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i> Editar
                             </a>
                         </li>
                         <li>
                             <hr class="dropdown-divider" style="border-color: var(--borda);">
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)"
-                                onclick="openNexusModal()" style="color: #ef4444;">
+                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)" onclick="openNexusModal()" style="color: #ef4444;">
                                 <i class="bi bi-trash3-fill me-2"></i> Excluir {{ loja.nome }}
                             </a>
                         </li>
                         {% else %}
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="{% url 'criar_loja' %}"
-                                style="color: var(--texto-muted);">
-                                <i class="bi bi-plus-circle me-2"
-                                    style="font-size: 1rem; color: var(--nexus-blue);"></i> Criar Loja
+                            <a class="dropdown-item d-flex align-items-center" href="{% url 'criar_loja' %}" style="color: var(--texto-muted);">
+                                <i class="bi bi-plus-circle me-2" style="font-size: 1rem; color: var(--nexus-blue);"></i> Criar Loja
                             </a>
                         </li>
                         {% endif %}
@@ -417,15 +610,11 @@
                 </li>
                 {% endif %}
 
-                {# --- ACESSO À NEXUS STORE --- #}
                 <li class="mt-4">
                     <a href="{% url 'vitrine' %}" class="btn-nexus-store-brand">
-                        <i class="bi bi-cart4 me-2"
-                            style="color: inherit !important; margin: 0 !important; font-size: 1.1rem;"></i>
-                        NEXUS Store
+                        <i class="bi bi-cart4 me-2" style="color: inherit !important; margin: 0 !important; font-size: 1.1rem;"></i> NEXUS Store
                     </a>
                 </li>
-
             </ul>
         </nav>
 
@@ -434,23 +623,30 @@
                 <div class="page-title-glow">
                     {% block page_title %}Dashboard{% endblock %}
                 </div>
-                {% if user.is_authenticated %}
-                <div class="user-info d-flex align-items-center gap-4">
-                    <span style="color: #e2e8f0; font-size: 0.9rem;">
-                        <i class="bi bi-person-circle me-1" style="color: var(--turquesa-brilhante);"></i>
-                        Bem-vindo(a), <strong>{{ user.username }}</strong>!
-                    </span>
-                    <a href="{% url 'logout_view' %}" class="logout-btn">Sair</a>
+                
+                <div class="header-actions d-flex align-items-center gap-3">
+                    <!-- BOTÃO DE ALTERNÂNCIA INSERIDO AQUI -->
+                    <button id="theme-toggle" class="theme-toggle-btn" title="Alternar Tema">
+                        <i id="theme-icon" class="bi bi-sun-fill"></i>
+                    </button>
+
+                    {% if user.is_authenticated %}
+                    <div class="user-info d-flex align-items-center gap-4">
+                        <div class="user-welcome-text">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Bem-vindo(a), <span style="color: var(--sotaque-glow);">{{ user.username }}</span>!</span>
+                        </div>
+                        <a href="{% url 'logout_view' %}" class="logout-btn">Sair</a>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </header>
 
-            <main class="nexus-main-content" id="main-content">
+        <div class="nexus-main-content" id="main-content">
                 {% if messages %}
-                <div class="messages-container" style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+                <div class="messages-container" style="padding: 0 0 20px 0; width: 100%;">
                     {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}"
-                        style="background: #1e293b; color: #38bdf8; border: 1px solid #0ea5e9; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                    <div class="alert alert-{{ message.tags }}" style="background: var(--bg-alert); color: var(--sotaque-glow); border: 1px solid var(--border-alert); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                         {{ message }}
                     </div>
                     {% endfor %}
@@ -459,18 +655,17 @@
 
                 {% block content %}
                 {% endblock %}
-            </main>
+        </div>
 
             <footer class="rodape">
-                <p style="color: var(--texto-muted); font-size: 0.85rem; margin: 0;">
-                    &copy; {% now "Y" %} <strong style="color: #fff;">NEXUS Hub</strong> — Gestão Modular Inteligente |
-                    Todos os direitos reservados.
-                </p>
+                <p>&copy; {% now "Y" %} <span class="footer-brand">NEXUS Hub</span> — Gestão Modular Inteligente | Todos os direitos reservados.</p>
             </footer>
         </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script de Animação de Entrada do Conteúdo -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const content = document.getElementById('main-content');
@@ -480,6 +675,40 @@
         });
     </script>
 
+    <!-- LOGICA SCRIPT DO BOTÃO ALTERNADOR DE TEMA -->
+    <script>
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+
+        // Define o ícone correto baseado no estado inicial da página
+        function updateIcon() {
+            if (document.documentElement.classList.contains('light-mode')) {
+                themeIcon.className = 'bi bi-moon-stars-fill'; // Ícone de lua para mudar para o dark
+            } else {
+                themeIcon.className = 'bi bi-sun-fill'; // Ícone de sol para mudar para o light
+            }
+        }
+
+        // Executa ao carregar a página
+        updateIcon();
+
+        themeToggleBtn.addEventListener('click', function() {
+            // Alterna a classe na tag HTML
+            document.documentElement.classList.toggle('light-mode');
+            
+            // Salva a preferência no localStorage do navegador
+            if (document.documentElement.classList.contains('light-mode')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            // Atualiza o ícone do botão
+            updateIcon();
+        });
+    </script>
+
+    <!-- Modal de Exclusão -->
     <div id="nexusDeleteModal" class="nexus-modal-overlay">
         <div class="nexus-modal-content">
             <div class="modal-header-alert">
@@ -487,14 +716,17 @@
                 <span>CONFIRMAR EXCLUSÃO</span>
             </div>
             <div class="modal-body-nexus">
-                <p>Aviso: Esta ação é irreversível. O acesso à loja e todos os dados serão excluídos permanentemente.
-                    Deseja continuar?</p>
+                <p>Aviso: Esta ação é irreversível. O acesso à loja e todos os dados serão excluídos permanentemente. Deseja continuar?</p>
             </div>
             <div class="modal-footer-nexus">
-                <button onclick="closeNexusModal()" class="btn-nexus-cancel">CANCELAR</button>
+                <button onclick="closeNexusModal()" class="btn-nexus-cancel">
+                    <i class="bi bi-x-circle"></i> CANCELAR
+                </button>
                 <form action="{% url 'excluir_loja' %}" method="POST" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn-nexus-confirm">EXCLUIR LOJA</button>
+                    <button type="submit" class="btn-nexus-confirm">
+                        <i class="bi bi-trash"></i> SIM, EXCLUIR
+                    </button>
                 </form>
             </div>
         </div>
@@ -505,6 +737,7 @@
             document.getElementById('nexusDeleteModal').style.display = 'flex';
         }
 
+        // Fecha modal
         function closeNexusModal() {
             document.getElementById('nexusDeleteModal').style.display = 'none';
         }
@@ -522,6 +755,17 @@
         if (element) {
             var maskOptions = { mask: '(00) 00000-0000' };
             var mask = IMask(element, maskOptions);
+        }
+
+        // Máscara Dinâmica para Preço
+        var priceElement = document.getElementById('id_preco');
+        if (priceElement) {
+            IMask(priceElement, {
+                mask: 'R$ num',
+                blocks: {
+                    num: { mask: Number, thousandsSeparator: '.', padFractionalZeros: true, normalizeZeros: true, radix: ',' }
+                }
+            });
         }
     </script>
 </body>

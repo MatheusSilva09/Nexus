@@ -5,29 +5,17 @@
 {% block content %}
 
 <style>
-    /* Estilos Padronizados Nexus */
-    .btn-nexus-add {
-        background-color: #00e5ff !important;
-        border: none !important;
-        color: #000000 !important;
-        padding: 10px 24px !important;
-        border-radius: 12px !important;
-        text-decoration: none !important;
-        font-size: 0.95rem;
-        font-weight: 800 !important;
-        text-transform: uppercase;
+    /* Estilo para unificar o botão de Novo Funcionário com o padrão Slim do Dashboard e Clientes */
+    .btn-header-nexus {
+        min-width: 180px;
+        height: 42px;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        transition: 0.3s ease-in-out;
-        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
-        cursor: pointer;
-    }
-
-    .btn-nexus-add:hover {
-        background-color: #00b8cc !important;
-        transform: translateY(-1px);
-        box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+        justify-content: center;
+        font-size: 0.85rem !important;
+        text-decoration: none;
+        box-sizing: border-box;
+        gap: 15px; /* Espaçamento elegante reorganizado */
     }
 
     .nexus-container {
@@ -45,11 +33,12 @@
     }
 
     .nexus-title {
-        font-size: 1.4rem !important;
-        font-weight: 400 !important;
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
         text-transform: uppercase !important;
         letter-spacing: 1.5px !important;
         margin: 0 !important;
+        color: #ffffff !important;
     }
 
     .nexus-table-wrapper {
@@ -65,13 +54,14 @@
     }
 
     .nexus-table th {
-        padding: 15px 20px;
+        padding: 18px 20px;
         color: #00d1ff;
         font-size: 0.8rem;
         text-transform: uppercase;
-        background: rgba(0, 209, 255, 0.05);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        text-align: left;
+        background: rgba(30, 41, 59, 0.4);
+        border-bottom: 1px solid rgba(0, 209, 255, 0.2);
+        font-weight: 600;
+        letter-spacing: 0.5px;
     }
 
     .nexus-table td {
@@ -81,6 +71,101 @@
         font-size: 0.9rem;
     }
 
+    /* --- BOTOES DE AÇÃO REFINADOS (ÍCONES AMPLIADOS E CENTRALIZADOS) --- */
+    .actions-cell {
+        display: flex;
+        gap: 18px; 
+        align-items: center;
+        justify-content: center; /* Centraliza os ícones horizontalmente na célula */
+    }
+
+    .btn-action-icon {
+        font-size: 1.2rem;
+        transition: transform 0.2s ease, color 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-edit-icon {
+        color: var(--nexus-blue) !important; /* Azul padrão Nexus para Edição */
+    }
+
+    .btn-edit-icon:hover { 
+        color: var(--turquesa-brilhante) !important; 
+        transform: scale(1.15);
+    }
+    
+    .btn-delete-icon { 
+        color: #ef4444 !important; /* Excluir sempre vermelho por padrão */
+    }
+    
+    .btn-delete-icon:hover { 
+        color: #ff0000 !important; 
+        transform: scale(1.15);
+    }
+
+    /* --- COMPORTAMENTO NO LIGHT MODE --- */
+    html.light-mode .nexus-title {
+        color: #2563eb !important;
+    }
+
+    html.light-mode .btn-edit-icon {
+        color: #2563eb !important;
+    }
+
+    html.light-mode .btn-edit-icon:hover {
+        color: #1d4ed8 !important; /* Azul escuro consistente com a tela de Clientes */
+    }
+
+    html.light-mode .bi-people-fill {
+        color: #2563eb !important;
+    }
+
+    /* --- BOTÃO NO LIGHT MODE (Padrão solid blue do Dashboard) --- */
+    html.light-mode .btn-header-nexus {
+        background-color: #2563EB !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+    }
+
+    html.light-mode .nexus-table-wrapper {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-left: 4px solid #2563EB !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important;
+        backdrop-filter: none !important;
+    }
+
+    html.light-mode .nexus-table thead th {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+        font-weight: 600 !important;
+    }
+
+    html.light-mode .nexus-table td {
+        color: #334155 !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+
+    html.light-mode .nexus-table tbody tr:nth-child(odd) td {
+        background-color: #ffffff !important;
+    }
+
+    html.light-mode .nexus-table tbody tr:nth-child(even) td {
+        background-color: #f4f7fa !important;
+    }
+
+    html.light-mode .nexus-table tbody tr:hover td {
+        background-color: #e2e8f0 !important;
+    }
+
+    html.light-mode .nexus-table tbody tr td:first-child {
+        color: #0f172a !important;
+        font-weight: 600;
+    }
+
     /* Modal de Exclusão */
     .nexus-modal-backdrop {
         position: fixed;
@@ -88,7 +173,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(2, 6, 23, 0.85);
+        backdrop-filter: blur(10px);
         display: none; /* Começa escondido */
         align-items: center;
         justify-content: center;
@@ -97,32 +183,68 @@
 
     .nexus-modal-card {
         background: #0b1120;
-        border: 1px solid #ff4444;
-        border-radius: 15px;
+        border: 1px solid #ef4444;
+        border-top: 4px solid #ef4444;
+        border-radius: 20px;
         padding: 40px;
-        width: 500px;
+        max-width: 450px;
+        width: 90%;
         text-align: center;
+        box-shadow: 0 0 40px rgba(239, 68, 68, 0.2);
     }
 
-    .nexus-modal-title { color: #ff4444; font-weight: 800; margin-bottom: 15px; }
-    .nexus-modal-text { color: #ffffff; margin-bottom: 30px; }
-    .nexus-highlight { color: #00d9ff; font-weight: bold; }
+    .nexus-modal-title { color: #ef4444; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; }
+    .nexus-modal-text { color: #94a3b8; margin-bottom: 30px; }
+    .nexus-highlight { color: #00d9ff; font-weight: 600; }
     .nexus-modal-footer { display: flex; gap: 15px; justify-content: center; }
 
-    .btn-nexus-modal { padding: 12px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; cursor: pointer; border: 1px solid; }
-    .btn-confirm { border-color: #ff4444; color: #ff4444; background: transparent; }
-    .btn-confirm:hover { background: #ff4444; color: white; }
-    .btn-cancel { border-color: #00d9ff; color: #00d9ff; background: transparent; }
-    .btn-cancel:hover { background: #00d9ff; color: #0b1120; }
+    .btn-nexus-modal { 
+        min-width: 180px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        transition: 0.3s;
+        text-decoration: none;
+        cursor: pointer;
+        border: 1px solid;
+    }
+    .btn-confirm { border: none !important; background: #ef4444 !important; color: #fff !important; }
+    .btn-confirm:hover { background: #dc2626 !important; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+    .btn-cancel-modal { border-color: var(--texto-muted) !important; color: #fff !important; background: transparent !important; }
+    .btn-cancel-modal:hover { background: rgba(255,255,255,0.05) !important; border-color: #fff !important; }
+
+    html.light-mode .nexus-modal-backdrop {
+        background: rgba(241, 245, 249, 0.5) !important;
+        backdrop-filter: blur(8px) !important;
+    }
+
+    html.light-mode .nexus-modal-card {
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid #fecaca !important;
+        border-top: 4px solid #ef4444 !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    html.light-mode .nexus-modal-text { color: #475569 !important; }
+    html.light-mode .btn-cancel-modal { border-color: #cbd5e1 !important; color: #64748b !important; }
+    html.light-mode .btn-cancel-modal:hover { background: #f8fafc !important; }
 </style>
 
 <div class="nexus-container">
     <header class="nexus-header">
         <div class="nexus-title-wrapper" style="display: flex; align-items: center; gap: 12px;">
             <i class="bi bi-people-fill" style="color: #00d1ff; font-size: 1.5rem;"></i>
-            <h1 class="nexus-title">Equipe / Funcionários</h1>
+            <h1 class="nexus-title">Funcionários</h1>
         </div>
-        <a href="{% url 'adicionar_funcionario' %}" class="btn-nexus-add">
+        <a href="{% url 'adicionar_funcionario' %}" class="logout-btn btn-header-nexus">
             <i class="bi bi-plus-lg"></i> NOVO FUNCIONÁRIO
         </a>
     </header>
@@ -133,7 +255,7 @@
                 <tr>
                     <th>Nome</th>
                     <th>Cargo</th>
-                    <th style="width: 250px;">Ações</th>
+                    <th style="width: 120px; text-align: center;">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -141,18 +263,20 @@
                 <tr>
                     <td>{{ f.nome }}</td>
                     <td>{{ f.cargo }}</td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            {% if f.id %}
-                                <a href="{% url 'editar_funcionario' id=f.id %}" class="btn-action btn-edit">
-                                    <i class="bi bi-pencil-square"></i> EDITAR
-                                </a>
-                                <a href="javascript:void(0)" onclick="abrirModalExclusao('{{ f.id }}', '{{ f.nome }}')" class="btn-action btn-delete">
-                                    <i class="bi bi-trash3"></i> EXCLUIR
-                                </a>
-                            {% endif %}
-                        </div>
+                    <td class="actions-cell">
+                        {% if f.id %}
+                            <a href="{% url 'editar_funcionario' id=f.id %}" class="btn-action-icon btn-edit-icon" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="javascript:void(0)" onclick="abrirModalExclusao('{{ f.id }}', '{{ f.nome }}')" class="btn-action-icon btn-delete-icon" title="Excluir">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        {% endif %}
                     </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="empty-row">Nenhum funcionário registrado na base de dados.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -167,7 +291,7 @@
         <p class="nexus-modal-text">Deseja realmente remover <span id="modalFuncionarioNome" class="nexus-highlight"></span> da equipe?</p>
         <div class="nexus-modal-footer">
             <a id="btnConfirmarExclusao" href="#" class="btn-nexus-modal btn-confirm"><i class="bi bi-trash"></i> SIM, EXCLUIR</a>
-            <button onclick="fecharModalNexus()" class="btn-nexus-modal btn-cancel"><i class="bi bi-x-circle"></i> CANCELAR</button>
+            <button onclick="fecharModalNexus()" class="btn-nexus-modal btn-cancel-modal"><i class="bi bi-x-circle"></i> CANCELAR</button>
         </div>
     </div>
 </div>

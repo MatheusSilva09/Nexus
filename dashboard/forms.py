@@ -24,7 +24,7 @@ class ClienteForm(forms.ModelForm):
         fields = ['nome', 'telefone', 'email', 'endereco']
         widgets = {
             'telefone': forms.TextInput(attrs={
-                'class': 'form-control-nexus',
+                'class': 'form-control',
                 'placeholder': '(00) 00000-0000',
                 'style': 'padding-left: 45px;',
             }),
@@ -36,13 +36,14 @@ class ProdutoForm(forms.ModelForm):
         fields = ['nome', 'descricao', 'preco', 'estoque', 'categoria']
         
         widgets = {
-            'nome': forms.TextInput(attrs={'placeholder': 'Ex: Digite o nome do produto...'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Digite o nome do produto...'}),
             'descricao': forms.Textarea(attrs={
+                'class': 'form-control',
                 'placeholder': 'Descreva seu produto...',
                 'rows': 3
             }),
-            'preco': forms.TextInput(attrs={'id': 'id_preco', 'placeholder': 'R$ 0,00'}),
-            'estoque': forms.NumberInput(attrs={'placeholder': '0'}),
+            'preco': forms.TextInput(attrs={'class': 'form-control', 'id': 'id_preco', 'placeholder': 'R$ 0,00'}),
+            'estoque': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
             'categoria': forms.Select(attrs={'class': 'form-control select-nexus'}),
         }
 

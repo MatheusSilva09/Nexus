@@ -1,27 +1,123 @@
 {% extends 'base.html' %}
 
 {% block title %}Confirmar Exclusão | NEXUS Hub{% endblock %}
+{% block page_title %}Confirmar Exclusão{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card bg-dark text-white border-danger shadow">
-                <div class="card-header border-danger">
-                    <h4 class="text-danger mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Exclusão</h4>
-                </div>
-                <div class="card-body py-4">
-                    <p>Tem certeza que deseja excluir o cliente <strong>{{ cliente.nome }}</strong>?</p>
-                    <p class="text-muted small">Esta ação não pode ser desfeita e removerá os registros vinculados.</p>
-                </div>
-                <div class="card-footer d-flex justify-content-end gap-2 border-danger">
-                    <a href="{% url 'lista_clientes' %}" class="btn btn-outline-light">Cancelar</a>
-                    <form method="POST">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
-                    </form>
-                </div>
-            </div>
+<style>
+    /* --- ESTRUTURA DO CARD DE EXCLUSÃO --- */
+    .delete-confirm-container {
+        min-height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .delete-confirm-card {
+        background: rgba(15, 23, 42, 0.6) !important;
+        backdrop-filter: blur(15px);
+        border: 1px solid #ef4444 !important;
+        border-top: 4px solid #ef4444 !important;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.15);
+        max-width: 550px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .delete-title {
+        color: #ef4444;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 25px;
+        font-size: 1.8rem;
+    }
+
+    .delete-text {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        margin-bottom: 35px;
+        line-height: 1.6;
+    }
+
+    .highlight-name {
+        color: var(--turquesa-brilhante);
+        font-weight: 600;
+        text-decoration: underline;
+    }
+
+    .btn-nexus-modal { 
+        min-width: 200px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        transition: 0.3s;
+        text-decoration: none;
+        cursor: pointer;
+        border: 1px solid;
+    }
+
+    .btn-confirm { border: none !important; background: #ef4444 !important; color: #fff !important; }
+    .btn-confirm:hover { background: #dc2626 !important; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+    
+    .btn-cancel-delete { border-color: var(--turquesa-brilhante) !important; color: var(--turquesa-brilhante) !important; background: transparent !important; }
+    .btn-cancel-delete:hover { background: var(--turquesa-brilhante) !important; color: #020617 !important; }
+
+    /* --- LIGHT MODE PADRONIZADO --- */
+    html.light-mode .delete-confirm-container {
+        background: rgba(241, 245, 249, 0.7) !important;
+        backdrop-filter: blur(8px) !important;
+        border-radius: 20px;
+    }
+
+    html.light-mode .delete-confirm-card {
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid #fecaca !important;
+        border-top: 4px solid #ef4444 !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    html.light-mode .delete-title { color: #b91c1c !important; }
+    html.light-mode .delete-text { color: #475569 !important; }
+    
+    html.light-mode .btn-cancel-delete {
+        border-color: #cbd5e1 !important;
+        color: #64748b !important;
+    }
+    html.light-mode .btn-cancel-delete:hover { background: #f8fafc !important; }
+</style>
+
+<div class="delete-confirm-container">
+    <div class="delete-confirm-card">
+        <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #ef4444; display: block; margin-bottom: 15px;"></i>
+        
+        <h2 class="delete-title">Confirmar Exclusão</h2>
+
+        <p class="delete-text">
+            Deseja realmente excluir o cliente 
+            <span class="highlight-name">{{ cliente.nome }}</span>?
+        </p>
+
+        <div class="d-flex justify-content-center gap-3">
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-nexus-modal btn-confirm">
+                    <i class="bi bi-trash-fill"></i>SIM, EXCLUIR
+                </button>
+            </form>
+            <a href="{% url 'lista_clientes' %}" class="btn-nexus-modal btn-cancel-delete">
+                <i class="bi bi-x-circle"></i>CANCELAR
+            </a>
         </div>
     </div>
 </div>

@@ -1,49 +1,58 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Gerenciamento de Estoque | NEXUS Hub{% endblock %}
 
 {% block page_title %}Gerenciamento de Estoque{% endblock %}
 
 {% block content %}
-<div class="row g-4 mb-5"><div class="row g-4 mb-5">
-    <!-- Card 1: Total de Itens (Dinâmico) -->
+<div class="row g-4 mb-5">
+    <!-- Card 1: Produtos no Inventário -->
     <div class="col-md-3">
         <div class="stat-card">
-            <span class="stat-label">Total de Itens</span>
-            <div class="stat-value">{{ total_itens }}</div>
-            <span class="trend-up">↑ 5% este mês</span>
+            <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
+            <div class="stat-content">
+                <span class="stat-label">Produtos em Estoque</span>
+                <div class="stat-value">{{ total_itens|intcomma }}</div>
+                <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i> Dados Reais</span>
+            </div>
         </div>
     </div>
 
-    <!-- Card 2: Valor em Estoque (Dinâmico) -->
+    <!-- Card 2: Patrimônio em Gôndola -->
     <div class="col-md-3">
         <div class="stat-card">
-            <span class="stat-label">Valor em Estoque</span>
-            <div class="stat-value" style="font-size: 1.4rem;">
-                R$ {{ valor_estoque|floatformat:2 }}
+            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+            <div class="stat-content">
+                <span class="stat-label">Valor Total de Produtos</span>
+                <div class="stat-value" style="font-size: 1.4rem;">
+                    R$ {{ valor_estoque|intcomma }}
+                </div>
+                <span class="stat-trend text-info">Disponível</span>
             </div>
-            <span class="trend-up">Patrimônio Ativo</span>
         </div>
     </div>
 
-    <!-- Card 3: Alertas de Reposição (Dinâmico) -->
+    <!-- Card 3: Rupturas e Alertas -->
     <div class="col-md-3">
-        <div class="stat-card" style="border-color: rgba(239, 68, 68, 0.3);">
-            <span class="stat-label">Alertas de Reposição</span>
-            <div class="stat-value" style="color: #ef4444;">
-                {{ alertas_reposicao|stringformat:"02d" }}
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="bi bi-exclamation-octagon"></i></div>
+            <div class="stat-content">
+                <span class="stat-label">Alerta Crítico</span>
+                <div class="stat-value" style="color: #ef4444;">
+                    {{ alertas_criticos|stringformat:"01d" }}
+                </div>
+                <span class="stat-trend text-alert-red">Ruptura (Estoque Zero)</span>
             </div>
-            <span class="trend-alert">Abaixo do mínimo</span>
         </div>
     </div>
 
-    <!-- Card 4: Botão Novo Produto (Original) -->
+    <!-- Card 4: Botão Novo Produto (Clone do Novo Cliente) -->
     <div class="col-md-3">
-        <div class="d-flex flex-column h-100 justify-content-center">
-            <a href="{% url 'cadastrar_produto' %}" class="logout-btn text-center py-3 w-100"
-                style="font-size: 0.9rem;">
-                <i class="bi bi-plus-lg me-2"></i> Novo Produto
+        <div class="d-flex flex-column h-100 justify-content-center align-items-center">
+            <a href="{% url 'cadastrar_produto' %}" class="logout-btn btn-header-nexus">
+                <i class="bi bi-plus-lg"></i> NOVO PRODUTO
             </a>
         </div>
     </div>
@@ -51,8 +60,8 @@
 
 <div class="table-responsive-nexus">
     <div class="p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <h5 class="m-0" style="font-weight: 600; letter-spacing: 2px; color: #fff;">
-            <i class="bi bi-layers-half me-2 text-info"></i>LISTA DE PRODUTOS
+        <h5 class="m-0 nexus-title-inventory" style="font-weight: 600; font-size: 1.5rem; letter-spacing: 1.5px; color: #fff; text-transform: uppercase; margin: 0 !important;">
+            <i class="bi bi-layers-half me-2"></i>Lista de Produtos
         </h5>
 
         <div class="search-container">
@@ -119,7 +128,7 @@
                     <a href="{% url 'editar_produto' produto.id %}" class="btn-action edit" title="Editar">
                         <i class="bi bi-pencil-square"></i>
                     </a>
-                    <a href="{% url 'excluir_produto' produto.id %}" class="btn-action delete" title="Excluir">
+                    <a href="javascript:void(0)" onclick="abrirModalExclusao('{{ produto.id }}', '{{ produto.nome }}')" class="btn-action delete" title="Excluir">
                         <i class="bi bi-trash3-fill"></i>
                     </a>
                 </div>
@@ -136,6 +145,19 @@
 
 <style>
     /* --- Ajustes de Visibilidade e Estilo Cyber --- */
+
+    /* Botão Unificado (Clone Novo Cliente) */
+    .btn-header-nexus {
+        min-width: 180px; /* Padronizado com o botão de Clientes */
+        height: 42px; /* Padronizado com o botão de Clientes */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem !important;
+        text-decoration: none;
+        box-sizing: border-box;
+        gap: 15px;
+    }
 
     /* SKU: Fonte mono com brilho sutil para ser legível */
     .sku-highlight {
@@ -168,7 +190,8 @@
         border-radius: 30px;
         padding: 10px 20px 10px 45px;
         color: #fff !important;
-        font-size: 0.85rem;
+        font-size: 1rem;
+        font-family: 'Segoe UI', system-ui, sans-serif;
         transition: 0.3s all;
         outline: none;
     }
@@ -181,22 +204,77 @@
 
     .nexus-input::placeholder {
         color: var(--texto-muted);
-        opacity: 0.8;
+        opacity: 0.9;
+        font-weight: 500;
     }
 
-    /* Cards e Tabela Glassmorphism */
+    /* =========================================================================
+       --- CONFIGURAÇÕES PADRÃO & MODO ESCURO (DARK MODE) ---
+       ========================================================================= */
+
+    /* Estrutura dos Cards Superiores - Dark */
     .stat-card {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-left: 4px solid var(--nexus-blue, #2563eb);
+        gap: 20px;
         background: var(--azul-card);
         border: 1px solid var(--borda);
-        border-radius: 12px;
-        padding: 20px;
+        border-radius: 16px;
+        padding: 24px;
         transition: 0.3s;
     }
+    .stat-card {
+        display: flex;
+        align-items: flex-start; /* Alinhado com o Dashboard */
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
+    }
 
+    .stat-icon {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--nexus-blue, #2563eb);
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
     .stat-card:hover {
-        border-color: var(--nexus-blue);
-        box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);
         transform: translateY(-5px);
+        border-color: rgba(37, 99, 235, 0.4);
+        border-color: var(--nexus-blue);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        transform: translateY(-5px);
+    }
+
+    .stat-label {
+        color: var(--texto-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px; /* Alinhado com o Dashboard */
+        display: block;
+    }
+
+    .stat-trend {
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .stat-trend.trend-up { color: #4ade80 !important; text-shadow: 0 0 8px rgba(74, 222, 128, 0.3); }
+
+    .stat-card.warning {
+        border-left: 4px solid #ef4444;
+    }
+    
+    .stat-card.warning .stat-icon {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
     }
 
     .stat-value {
@@ -205,22 +283,28 @@
         color: #fff;
         margin: 5px 0;
     }
-
-    .stat-label {
-        color: var(--texto-muted);
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+    .stat-value {
+        font-size: 2rem; /* Alinhado com o Dashboard */
+        font-weight: 600; /* Alinhado com o Dashboard */
+        text-shadow: 0 0 10px rgba(248, 250, 252, 0.1); /* Alinhado com o Dashboard */
     }
 
-    .trend-up {
-        color: #22c55e;
-        font-size: 0.8rem;
+    /* --- CARDS DE BAIXO ESTOQUE (MODO AVISO - LARANJA) --- */
+    .stat-card.low-stock {
+        background: rgba(245, 158, 11, 0.1) !important;
+        border: 1px solid rgba(245, 158, 11, 0.25) !important;
+        border-left: 4px solid #f59e0b !important;
     }
-
-    .trend-alert {
-        color: #ef4444;
-        font-size: 0.8rem;
+    .stat-card.low-stock .stat-icon {
+        background: rgba(245, 158, 11, 0.2) !important;
+        color: #f59e0b !important;
+    }
+    .stat-card.low-stock .stat-value {
+        color: #f59e0b !important;
+    }
+    .text-alert-red {
+        color: #fca5a5 !important; /* Vermelho claro para leitura no escuro */
+        font-weight: 600;
     }
 
     .table-responsive-nexus {
@@ -287,23 +371,6 @@
         color: var(--texto-muted);
     }
 
-    .btn-action {
-        font-size: 1.1rem;
-        transition: 0.2s;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .btn-action.edit:hover {
-        color: var(--turquesa-brilhante) !important;
-        filter: drop-shadow(0 0 5px var(--turquesa-glow));
-    }
-
-    .btn-action.delete:hover {
-        color: #ef4444 !important;
-        filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.5));
-    }
-
     .status-badge {
         padding: 4px 12px;
         border-radius: 20px;
@@ -322,7 +389,252 @@
         color: #facc15;
         border: 1px solid #eab308;
     }
+
+    /* Light Mode Tipografia para Título do Estoque */
+    html.light-mode .nexus-title-inventory {
+        color: #2563eb !important;
+    }
+    html.light-mode .bi-layers-half {
+        color: #2563eb !important;
+    }
+
+    /* --- PADRONIZAÇÃO LIGHT MODE --- */
+    html.light-mode .btn-header-nexus {
+        background-color: #2563EB !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+        font-weight: 600 !important;
+    }
+
+    html.light-mode .btn-header-nexus:hover {
+        background-color: #1d4ed8 !important;
+        transform: translateY(-2px);
+    }
+
+    /* --- PADRONIZAÇÃO LIGHT MODE --- */
+    html.light-mode .nexus-title-inventory {
+        color: #2563eb !important;
+    }
+
+    /* --- PADRONIZAÇÃO DA TABELA NO MODO LIGHT --- */
+    html.light-mode .table-responsive-nexus {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-left: 4px solid #2563EB !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important;
+        backdrop-filter: none !important;
+    }
+
+    html.light-mode .table-nexus th {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-weight: 600 !important; /* Alinhado com o Dashboard */
+    }
+
+    html.light-mode .table-nexus td {
+        color: #334155 !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-weight: 500; /* Alinhado com o Dashboard */
+    }
+
+    html.light-mode .table-nexus tbody tr:nth-child(even) td {
+        background-color: #f4f7fa !important;
+    }
+
+    html.light-mode .table-nexus tbody tr:hover td {
+        background: rgba(37, 99, 235, 0.05) !important;
+    }
+
+    html.light-mode .text-white, 
+    html.light-mode .fw-bold.text-white {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+        font-family: 'Segoe UI', system-ui, sans-serif; /* Alinhado com o Dashboard */
+    }
+
+    html.light-mode .text-white-50 {
+        color: #64748b !important;
+        font-weight: 500;
+        font-family: 'Segoe UI', system-ui, sans-serif; /* Alinhado com o Dashboard */
+    }
+
+    html.light-mode .sku-highlight {
+        color: #2563eb !important;
+        text-shadow: none !important;
+        font-weight: 700 !important;
+    }
+    html.light-mode .bi-layers-half { color: #2563eb !important; }
+
+    html.light-mode .badge-category {
+        background: #f1f5f9 !important;
+        color: #475569 !important;
+    }
+
+
+    /* Cards no Light Mode */
+    html.light-mode .stat-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-left: 4px solid #2563EB !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    html.light-mode .stat-card:hover {
+        background: #f8fafc !important;
+        border-color: #2563eb !important;
+    }
+
+    html.light-mode .stat-label { color: #475569 !important; }
+    html.light-mode .stat-value { color: #0f172a !important; }
+    html.light-mode .stat-trend.trend-up { color: #166534 !important; }
+    html.light-mode .stat-trend.text-info { color: #1d4ed8 !important; }
+
+    html.light-mode .stat-card.warning {
+        background: #fff5f5 !important;
+        border-left: 4px solid #ef4444 !important;
+    }
+    html.light-mode .stat-trend.text-alert-red { color: #b91c1c !important; }
+
+    html.light-mode .nexus-input {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+        font-size: 1.05rem !important;
+    }
+
+    html.light-mode .nexus-input:focus {
+        border-color: #2563eb !important;
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.1) !important;
+        background: #ffffff !important;
+    }
+
+    html.light-mode .nexus-input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    html.light-mode .search-icon {
+        color: #2563eb !important;
+    }
+
+    /* --- REPAGINAÇÃO DOS BOTÕES DE AÇÃO NO MODO LIGHT --- */
+    html.light-mode .btn-action {
+        font-size: 1.35rem !important; /* Proporção aumentada conforme solicitado */
+    }
+
+    html.light-mode .btn-action.details { color: #3b82f6 !important; }
+    html.light-mode .btn-action.edit { color: #2563eb !important; }
+
+    html.light-mode .btn-action.details:hover,
+    html.light-mode .btn-action.edit:hover {
+        color: #1d4ed8 !important;
+        filter: none !important; /* Remove efeitos de glow turquesa */
+    }
+
+    html.light-mode .btn-action.delete { color: #dc2626 !important; }
+    html.light-mode .btn-action.delete:hover {
+        color: #b91c1c !important;
+        filter: none !important;
+    }
+
+    /* --- MODAL DE EXCLUSÃO (CLONE PADRONIZADO) --- */
+    .nexus-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(2, 6, 23, 0.85);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .nexus-modal-card {
+        background: #0b1120;
+        border: 1px solid #ef4444;
+        border-top: 4px solid #ef4444;
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 0 40px rgba(239, 68, 68, 0.2);
+    }
+
+    .nexus-modal-icon { font-size: 3rem; color: #ef4444; margin-bottom: 20px; }
+    .nexus-modal-title { color: #ef4444; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; }
+    .nexus-modal-text { color: #94a3b8; margin-bottom: 30px; }
+    .nexus-highlight { color: #00f2fe; font-weight: 600; }
+    .nexus-modal-footer { display: flex; gap: 15px; justify-content: center; }
+
+    .btn-nexus-modal { 
+        min-width: 180px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        transition: 0.3s;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .btn-confirm { border: none !important; background: #ef4444 !important; color: #fff !important; }
+    .btn-confirm:hover { background: #dc2626 !important; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+    .btn-cancel-modal { border: 1px solid var(--texto-muted) !important; color: #fff !important; background: transparent !important; }
+    .btn-cancel-modal:hover { background: rgba(255,255,255,0.05) !important; border-color: #fff !important; }
+
+    html.light-mode .nexus-modal-backdrop {
+        background: rgba(241, 245, 249, 0.7) !important;
+        backdrop-filter: blur(8px) !important;
+    }
+
+    html.light-mode .nexus-modal-card {
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid #fecaca !important;
+        border-top: 4px solid #ef4444 !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    html.light-mode .nexus-modal-text { color: #475569 !important; }
+    html.light-mode .btn-cancel-modal { border-color: #cbd5e1 !important; color: #64748b !important; }
+    html.light-mode .btn-cancel-modal:hover { background: #f8fafc !important; }
 </style>
+
+<div id="nexusDeleteProdutoModal" class="nexus-modal-backdrop">
+    <div class="nexus-modal-card">
+        <div class="nexus-modal-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h2 class="nexus-modal-title">CONFIRMAR EXCLUSÃO</h2>
+        <p class="nexus-modal-text">
+            Deseja realmente excluir o produto <span id="modalProdutoNome" class="nexus-highlight"></span>?
+        </p>
+
+        <div class="nexus-modal-footer">
+            <form id="formExcluirProduto" method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-nexus-modal btn-confirm">
+                    <i class="bi bi-trash-fill"></i> SIM, EXCLUIR
+                </button>
+            </form>
+            <button onclick="fecharModalNexus()" class="btn-nexus-modal btn-cancel-modal">
+                <i class="bi bi-x-circle"></i> CANCELAR
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
     // Filtro dinâmico da tabela em tempo real
@@ -334,5 +646,22 @@
             row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
         });
     });
+
+    function abrirModalExclusao(id, nome) {
+        document.getElementById('modalProdutoNome').innerText = nome;
+        document.getElementById('formExcluirProduto').action = "{% url 'lista_estoque' %}excluir/" + id + "/";
+        document.getElementById('nexusDeleteProdutoModal').style.display = 'flex';
+    }
+
+    function fecharModalNexus() {
+        document.getElementById('nexusDeleteProdutoModal').style.display = 'none';
+    }
+
+    window.onclick = function (event) {
+        const modal = document.getElementById('nexusDeleteProdutoModal');
+        if (event.target == modal) {
+            fecharModalNexus();
+        }
+    }
 </script>
 {% endblock %}

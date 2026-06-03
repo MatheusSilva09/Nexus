@@ -11,33 +11,33 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        padding: 20px;
     }
 
     .delete-confirm-card {
-        background: rgba(15, 23, 42, 0.6) !important;
+        background: rgba(15, 23, 42, 0.8) !important;
         backdrop-filter: blur(15px);
-        border: 1px solid #ff4444 !important;
-        /* Borda de alerta */
+        border: 1px solid #ef4444 !important;
+        border-top: 4px solid #ef4444 !important;
         border-radius: 20px;
         padding: 40px;
-        box-shadow: 0 0 30px rgba(255, 68, 68, 0.15);
+        box-shadow: 0 0 40px rgba(239, 68, 68, 0.2);
         max-width: 550px;
         width: 100%;
         text-align: center;
     }
 
     .delete-title {
-        color: #ff4444;
-        font-weight: 800;
+        color: #ef4444;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        text-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
+        letter-spacing: 1.5px;
         margin-bottom: 25px;
         font-size: 1.8rem;
     }
 
     .delete-text {
-        color: #e2e8f0;
+        color: #94a3b8;
         font-size: 1.1rem;
         margin-bottom: 35px;
         line-height: 1.6;
@@ -45,7 +45,7 @@
 
     .product-name-highlight {
         color: var(--turquesa-brilhante);
-        font-weight: 800;
+        font-weight: 600;
         text-decoration: underline;
     }
 
@@ -59,7 +59,7 @@
         background: transparent;
         padding: 0 20px;
         border-radius: 8px;
-        font-weight: 800;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 1px;
         transition: 0.3s;
@@ -67,6 +67,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        gap: 15px;
         cursor: pointer;
         box-sizing: border-box;
         font-size: 0.85rem;
@@ -105,30 +106,62 @@
         gap: 20px;
         flex-wrap: wrap;
     }
+
+    /* --- LIGHT MODE PADRONIZADO --- */
+    html.light-mode .delete-confirm-container {
+        background: rgba(241, 245, 249, 0.7) !important;
+        backdrop-filter: blur(12px) !important;
+        border-radius: 20px;
+    }
+
+    html.light-mode .delete-confirm-card {
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid #fecaca !important;
+        border-top: 4px solid #ef4444 !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    html.light-mode .delete-title {
+        color: #b91c1c !important;
+        text-shadow: none !important;
+    }
+
+    html.light-mode .delete-text {
+        color: #475569 !important;
+    }
+
+    html.light-mode .btn-cancel-delete {
+        border-color: #cbd5e1 !important;
+        color: #64748b !important;
+    }
+    html.light-mode .btn-cancel-delete:hover {
+        background: #f8fafc !important;
+    }
 </style>
 
 <div class="delete-confirm-container">
     <div class="delete-confirm-card">
         <i class="bi bi-exclamation-triangle"
-            style="font-size: 3rem; color: #ff4444; display: block; margin-bottom: 15px;"></i>
+            style="font-size: 3rem; color: #ef4444; display: block; margin-bottom: 15px;"></i>
 
         <h2 class="delete-title">Confirmar Exclusão</h2>
 
         <p class="delete-text">
-            Deseja realmente excluir o produto</strong>
-                <span class="product-name-highlight">{{ produto.nome }}</span>?
+            Deseja realmente excluir o produto 
+            <span class="product-name-highlight">{{ produto.nome }}</span>?
         </p>
 
         <div class="delete-actions">
             <form method="post" style="display: inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn-delete-confirm">
-                    <i class="bi bi-trash-fill me-2"></i>Sim, excluir produto
+                    <i class="bi bi-trash-fill"></i> SIM, EXCLUIR
                 </button>
             </form>
 
             <a href="{% url 'lista_estoque' %}" class="btn-cancel-delete">
-                <i class="bi bi-x-circle me-2"></i>Cancelar
+                <i class="bi bi-x-circle"></i> CANCELAR
             </a>
         </div>
     </div>

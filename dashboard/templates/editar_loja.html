@@ -16,7 +16,7 @@
                     </h4>
                 </div>
                 <div class="card-body" style="padding: 30px;">
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         {% for field in form %}
@@ -33,6 +33,22 @@
                             {% endif %}
                         </div>
                         {% endfor %}
+
+                        <!-- Novos Campos de Imagem (Manuais para garantir estética) -->
+                        <div class="row g-4">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label small fw-bold" style="color: var(--texto-muted);">LOGO / FOTO DE PERFIL</label>
+                                <div class="input-container-nexus">
+                                    <input type="file" name="foto_perfil" class="form-control" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label small fw-bold" style="color: var(--texto-muted);">FOTO DE CAPA</label>
+                                <div class="input-container-nexus">
+                                    <input type="file" name="foto_capa" class="form-control" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="d-grid mt-5">
                             <button type="submit" class="logout-btn btn-cadastrar"

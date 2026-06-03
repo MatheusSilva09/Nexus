@@ -12,7 +12,7 @@ from django.db.models.functions import TruncDay
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.utils.text import slugify
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage, send_mail, mail_admins
 from django.contrib import messages
@@ -80,11 +80,18 @@ def dashboard_view(request):
         total=Sum(F('preco') * F('estoque'))
     )['total'] or 0
 
-    # 3. Alertas de reposição
-    alertas_reposicao = Produto.objects.filter(estoque__lte=F('estoque_minimo')).count()
+    # 3. Diferenciação de Alertas
+    # Baixo estoque: Itens entre 1 e o limite mínimo
+    baixo_estoque = Produto.objects.filter(estoque__gt=0, estoque__lte=F('estoque_minimo')).count()
+    
+    # Alertas críticos: Itens com estoque ZERO (Esgotados)
+    alertas_criticos = Produto.objects.filter(estoque__lte=0).count()
 
     # 4. Total de Clientes
     total_clientes_ativos = Cliente.objects.count()
+
+    # 5. Total de Funcionários (Equipe)
+    total_funcionarios = Funcionario.objects.filter(usuario_id=request.user).count()
     
     # Filtro robusto para 'hoje' considerando o fuso horário local
     hoje_inicio = timezone.localtime(timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -96,8 +103,10 @@ def dashboard_view(request):
     context = {
         'total_itens': total_itens,
         'valor_estoque': valor_estoque,
-        'alertas_reposicao': alertas_reposicao,
+        'baixo_estoque': baixo_estoque,
+        'alertas_criticos': alertas_criticos,
         'total_clientes_ativos': total_clientes_ativos,
+        'total_funcionarios': total_funcionarios,
         'novos_clientes_hoje': novos_clientes_hoje,
         'produtos': produtos_recentes,
         'loja_status': "Online",
@@ -219,63 +228,83 @@ def cadastrar_categoria(request):
             
             # Verifica se já existe uma categoria com este slug para evitar o IntegrityError
             if not Categoria.objects.filter(slug=novo_slug).exists():
-                Categoria.objects.create(nome=nome, slug=novo_slug)
+                categoria = Categoria.objects.create(nome=nome, slug=novo_slug)
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'id': categoria.id, 'nome': categoria.nome})
             else:
-                # Opcional: Adicionar uma mensagem de aviso que a categoria já existe
-                from django.contrib import messages
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'error': "Esta categoria já está cadastrada."}, status=400)
                 messages.warning(request, "Esta categoria já está cadastrada.")
-                
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': "O nome da categoria é obrigatório."}, status=400)
+
         return redirect('cadastrar_produto')
     return render(request, 'categoria_form.html')
 
 @vendedor_or_admin_required
-def cadastrar_produto(request):
-    if request.method == 'POST':
-        # 1. Processa os dados básicos do formulário
+def editar_categoria_ajax(request, categoria_id):
+    categoria = get_object_or_404(Categoria, id=categoria_id)
+    if request.method == "POST":
         nome = request.POST.get('nome')
-        descricao = request.POST.get('descricao')
-        preco = request.POST.get('preco')
-        estoque = request.POST.get('estoque')
-        categoria_id = request.POST.get('categoria')
-        
-        # 2. BUSCA DE INSTÂNCIAS (O Ponto Crítico)
-        # Primeiro, pegamos o perfil de Vendedor do usuário logado
-        vendedor_perfil = Vendedor.objects.filter(usuario=request.user).first()
-        
-        # Agora, buscamos a Loja vinculada a esse perfil de Vendedor
-        loja_do_usuario = None
-        if vendedor_perfil:
-            loja_do_usuario = Loja.objects.filter(vendedor=vendedor_perfil).first()
+        if nome:
+            novo_slug = slugify(nome)
+            # Verifica duplicidade excluindo a própria categoria
+            if not Categoria.objects.filter(slug=novo_slug).exclude(id=categoria_id).exists():
+                categoria.nome = nome
+                categoria.slug = novo_slug
+                categoria.save()
+                return JsonResponse({'success': True, 'id': categoria.id, 'nome': categoria.nome})
+            else:
+                return JsonResponse({'success': False, 'error': "Esta categoria já está cadastrada."}, status=400)
+        return JsonResponse({'success': False, 'error': "O nome da categoria é obrigatório."}, status=400)
+    return JsonResponse({'success': False, 'error': "Método não permitido."}, status=405)
 
-        # 3. VALIDAÇÃO E CRIAÇÃO
-        if loja_do_usuario:
-            novo_produto = Produto.objects.create(
-                nome=nome,
-                descricao=descricao,
-                preco=preco,
-                estoque=estoque,
-                categoria_id=categoria_id,
-                loja=loja_do_usuario, # Passa a instância correta da Loja
-            )
+@loja_obrigatoria
+@vendedor_or_admin_required
+def cadastrar_produto(request):
+    # 1. Busca a loja vinculada ao usuário
+    vendedor_perfil = Vendedor.objects.filter(usuario=request.user).first()
+    loja_do_usuario = Loja.objects.filter(vendedor=vendedor_perfil).first()
 
-            # 4. FUNÇÃO PARA MÚLTIPLAS IMAGENS
-            imagens = request.FILES.getlist('imagens_galeria')
-            print(f"DEBUG: Imagens recebidas: {len(imagens)}")  # Debug temporário
-            for img in imagens:
-                print(f"DEBUG: Salvando imagem: {img.name}")  # Debug temporário
-                ProdutoImagem.objects.create(produto=novo_produto, imagem=img)
+    # 2. Caso para administradores ou recuperação de falha
+    if not loja_do_usuario and request.user.is_superuser:
+        loja_do_usuario = Loja.objects.first()
 
-            messages.success(request, f"Produto '{nome}' cadastrado com sucesso!")
-            return redirect('lista_estoque')
-        
+    if not loja_do_usuario:
+        messages.error(request, "Erro crítico: Nenhuma loja vinculada ao seu perfil encontrada.")
+        return redirect('criar_loja')
+
+    if request.method == 'POST':
+        form = ProdutoForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # 1. Instancia o produto sem salvar ainda para vincular a loja
+                    novo_produto = form.save(commit=False)
+                    novo_produto.loja = loja_do_usuario
+                    
+                    # 2. Tratamento robusto de preço (limpeza de máscara de moeda R$)
+                    preco_raw = request.POST.get('preco', '0')
+                    preco_limpo = preco_raw.replace('R$', '').replace('.', '').replace(',', '.').strip()
+                    novo_produto.preco = Decimal(preco_limpo)
+                    
+                    novo_produto.save()
+
+                    # 3. Processamento da Galeria de Imagens
+                    imagens = request.FILES.getlist('imagens_galeria')
+                    for img in imagens:
+                        ProdutoImagem.objects.create(produto=novo_produto, imagem=img)
+
+                    messages.success(request, f"Produto '{novo_produto.nome}' cadastrado com sucesso!")
+                    return redirect('lista_estoque')
+            except Exception as e:
+                messages.error(request, f"Erro interno ao salvar: {str(e)}")
         else:
-            # Caso o vendedor não tenha loja cadastrada no Admin
-            messages.error(request, "Erro: Nenhuma loja vinculada ao seu perfil. Contate o administrador.")
-            return redirect('cadastrar_produto')
-
+            messages.error(request, "Erro ao validar formulário. Verifique os dados inseridos.")
     else:
         form = ProdutoForm()
-        
+
     categorias = Categoria.objects.all() # Garante que as categorias apareçam no select
     
     return render(request, 'produto_form.html', {
@@ -629,7 +658,7 @@ def editar_loja(request):
 
     if request.method == 'POST':
         # O segredo da edição é o parâmetro 'instance'
-        form = LojaForm(request.POST, instance=loja)
+        form = LojaForm(request.POST, request.FILES, instance=loja)
         if form.is_valid():
             form.save()
             messages.success(request, "Configurações da loja atualizadas!")

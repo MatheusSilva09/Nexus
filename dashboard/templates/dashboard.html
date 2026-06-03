@@ -7,29 +7,29 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="dashboard-header mb-4">
-        <p class="text-white-50">Métricas em tempo real do NEXUS Hub</p>
+        <p class="text-muted-dynamic">Métricas em tempo real do NEXUS Hub</p>
     </div>
 
     <!-- BLOCO 1: Cards com Ícones (Dinâmicos) -->
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mb-2">
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
                 <div class="stat-content">
-                    <span class="stat-label">Total em Estoque</span>
-                    <h3 class="stat-value">{{ total_itens }}</h3>
+                    <span class="stat-label">Produtos em Estoque</span>
+                    <h3 class="stat-value">{{ total_itens|intcomma }}</h3>
                     <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i> Dados Reais</span>
                 </div>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="stat-card warning">
-                <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="stat-card low-stock">
+                <div class="stat-icon"><i class="bi bi-graph-down"></i></div>
                 <div class="stat-content">
                     <span class="stat-label">Baixo Estoque</span>
-                    <h3 class="stat-value">{{ alertas_reposicao }}</h3>
-                    <span class="stat-trend text-warning">Itens abaixo do limite</span>
+                    <h3 class="stat-value">{{ baixo_estoque }}</h3>
+                    <span class="stat-trend text-alert-red">Sugerir Reposição</span>
                 </div>
             </div>
         </div>
@@ -51,7 +51,7 @@
                 <div class="stat-content">
                     <span class="stat-label">Status da Loja</span>
                     <h3 class="stat-value">{{ loja_status|default:"Online" }}</h3>
-                    <span class="text-white-50">NEXUS Central Hub</span>
+                    <span class="stat-subtitle">E-commerce disponível</span>
                 </div>
             </div>
         </div>
@@ -61,31 +61,30 @@
     <div class="row g-4 mb-5">
         <div class="col-md-3">
             <div class="metric-card">
-                <div class="metric-label">Valor Total Estoque</div>
-                <div class="metric-value">R$ {{ valor_estoque|floatformat:2 }}</div>
-                <div class="text-info" style="font-size: 0.8rem;">Patrimônio Ativo</div>
+                <div class="metric-label">Valor Total de Produtos</div>
+                <div class="metric-value">R$ {{ valor_estoque|intcomma }}</div>
+                <div class="text-info">Disponível</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card warning">
+                <div class="metric-label">Alerta Crítico</div>
+                <div class="metric-value" style="color: #ef4444;">{{ alertas_criticos|stringformat:"01d" }}</div>
+                <div class="text-alert-red">Ruptura (Estoque Zero)</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="metric-card">
                 <div class="metric-label">Novos Clientes</div>
                 <div class="metric-value">{{ novos_clientes_hoje|default:"0" }}</div>
-                <div class="text-info" style="font-size: 0.8rem;">Cadastrados hoje</div>
+                <div class="text-info">Cadastrados hoje</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="metric-card">
-                <div class="metric-label">Sincronização</div>
-                <div class="mt-2">
-                    <span class="badge-nexus badge-online">Ativa & Sincronizada</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="metric-card">
-                <div class="metric-label">Alertas Críticos</div>
-                <div class="metric-value" style="color: #f59e0b;">{{ alertas_reposicao|stringformat:"02d" }}</div>
-                <div class="text-warning" style="font-size: 0.8rem;">Abaixo do estoque mínimo</div>
+                <div class="metric-label">Equipe da Loja</div>
+                <div class="metric-value">{{ total_funcionarios|default:"0" }}</div>
+                <div class="text-info">Funcionários ativos</div>
             </div>
         </div>
     </div>
@@ -94,7 +93,7 @@
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="metric-card h-100">
-                <h5 class="mb-4" style="color: #00f2fe;">Atividade Recente</h5>
+                <h5 class="mb-4 dashboard-section-title">Atividade Recente</h5>
                 <div class="table-responsive">
                     <table class="table nexus-table mb-0">
                         <thead>
@@ -126,8 +125,8 @@
 
         <div class="col-lg-4">
             <div class="metric-card h-100">
-                <h5 class="mb-4" style="color: #00f2fe;">Configuração Rápida</h5>
-                <p class="text-white-50">Gerencie as preferências da sua Loja de forma simplificada.</p>
+                <h5 class="mb-4 dashboard-section-title">Configuração Rápida</h5>
+                <p class="nexus-config-subtitle">Gerencie as preferências da sua Loja de forma simplificada.</p>
                 <div class="d-grid gap-2">
                     <a href="{% url 'editar_loja' %}" class="btn btn-outline-info">Editar Perfil da Loja</a>
                     <a href="{% url 'lista_estoque' %}" class="btn btn-outline-light">Ver Estoque Completo</a>
@@ -138,117 +137,83 @@
 </div>
 
 <style>
-    /* Estilos específicos do Dashboard para manter a paleta Turquesa */
-    .metric-card {
-        background: rgba(15, 23, 42, 0.8);
-        /* Azul Card com transparência */
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(0, 242, 254, 0.1);
-        border-radius: 16px;
-        padding: 1.5rem;
-        transition: transform 0.3s ease, border-color 0.3s ease;
-    }
+    /* =========================================================================
+       --- CONFIGURAÇÕES PADRÃO & MODO ESCURO (DARK MODE) ---
+       ========================================================================= */
 
-    .metric-card:hover {
-        transform: translateY(-5px);
-        border-color: rgba(0, 242, 254, 0.4);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .metric-value {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #00f2fe;
-        /* Turquesa principal */
-        margin: 0.5rem 0;
-    }
-
-    .metric-label {
-        color: #94a3b8;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    /* Badges de Status Turquesa */
+    /* --- BADGES E STATUS (DARK MODE) --- */
     .badge-nexus {
-        padding: 0.5em 1em;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.75rem;
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        display: inline-block;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
     }
 
     .badge-online {
-        background: rgba(0, 242, 254, 0.1);
+        background: rgba(0, 242, 254, 0.08);
         color: #00f2fe;
-        border: 1px solid rgba(0, 242, 254, 0.3);
+        border: 1px solid rgba(0, 242, 254, 0.25);
+        text-shadow: 0 0 8px rgba(0, 242, 254, 0.2);
     }
 
-    .badge-alerta {
-        background: rgba(245, 158, 11, 0.1);
-        color: #f59e0b;
-        border: 1px solid rgba(245, 158, 11, 0.3);
+    /* --- CARDS DE BAIXO ESTOQUE (MODO AVISO - LARANJA) --- */
+    .stat-card.low-stock {
+        background: rgba(245, 158, 11, 0.1) !important;
+        border: 1px solid rgba(245, 158, 11, 0.25) !important;
+        border-left: 4px solid #f59e0b !important;
     }
 
-    /* Tabela Estilizada */
-    .nexus-table {
-        background: #020617;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid #1e293b;
-        width: 100%;
+    .stat-card.low-stock .stat-icon {
+        background: rgba(245, 158, 11, 0.2) !important;
+        color: #f59e0b !important;
     }
 
-    .nexus-table thead th {
-        background-color: #020617;
-        /* Azul mais profundo para o topo */
-        color: #00f2fe;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 1px;
-        border-bottom: 2px solid #1e293b;
+    .stat-card.low-stock .stat-value {
+        color: #f59e0b !important;
     }
 
-    /* Estilização base das colunas (Corpo) */
-    /* Estilização base das colunas (Corpo) */
-    .nexus-table tbody td {
-        color: #94a3b8;
-        border-bottom: 1px solid #1e293b;
-        padding: 12px 15px;
+    html.light-mode .stat-card.low-stock {
+        background: #fffbef !important;
+        border-color: #f59e0b !important;
     }
 
-    /* Linhas Ímpares (Fundo Principal) */
-    .nexus-table tbody tr:nth-child(odd) td {
-        background-color: #0f172a;
-        /* Azul escuro profundo padrão */
+    html.light-mode .stat-card.low-stock .stat-trend {
+        color: #b45309 !important;
     }
 
-    /* Linhas Pares (O efeito Zebra) */
-    .nexus-table tbody tr:nth-child(even) td {
-        background-color: #161e31;
-        /* Um azul levemente mais claro para contraste */
+    /* --- CARDS DE ALERTA (DARK MODE) --- */
+    .stat-card.warning,
+    .metric-card.warning {
+        background: rgba(220, 38, 38, 0.1) !important;
+        border: 1px solid rgba(239, 68, 68, 0.25) !important;
+        border-left: 4px solid #ef4444 !important;
+        box-shadow: 0 10px 30px -15px rgba(239, 68, 68, 0.2) !important;
     }
 
-    /* Efeito de Hover (Aumenta o brilho da linha inteira) */
-    .nexus-table tbody tr:hover td {
-        background-color: #1e293b !important;
-        /* Azul médio para destaque */
-        color: #ffffff;
-        /* Texto brilha no hover */
-        transition: all 0.2s ease;
+    .stat-card.warning .stat-icon {
+        background: rgba(239, 68, 68, 0.2) !important;
+        color: #ef4444 !important;
     }
 
-    /* Ajuste na primeira coluna (Produto) para destaque */
-    .nexus-table tbody tr td:first-child {
-        color: #e2e8f0;
-        font-weight: 500;
+    .stat-card.warning .stat-value {
+        color: #ef4444 !important;
+        text-shadow: 0 0 10px rgba(239, 68, 68, 0.2) !important;
     }
 
-    /* Container de Estatísticas */
+    .text-alert-red {
+        color: #fca5a5 !important; /* Vermelho claro para leitura no escuro */
+        font-weight: 600;
+    }
+
+    /* Estrutura dos Cards Superiores - Dark */
     .stat-card {
-        background: linear-gradient(145deg, #0f172a, #020617);
-        border: 1px solid rgba(37, 99, 235, 0.2);
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-left: 4px solid var(--nexus-blue, #2563eb);
         border-radius: 16px;
         padding: 24px;
         display: flex;
@@ -260,18 +225,33 @@
         box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
     }
 
-    /* Efeito de Glow no Hover */
-    .stat-card:hover {
-        transform: translateY(-5px);
-        border-color: var(--nexus-blue);
-        box-shadow: 0 0 20px rgba(37, 99, 235, 0.15),
-            inset 0 0 15px rgba(37, 99, 235, 0.05);
+    /* Estrutura dos Cards Inferiores - Dark */
+    .metric-card {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-left: 4px solid var(--nexus-blue, #2563eb);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
     }
 
-    /* Ícones dos Cards */
+    /* Efeito Hover Individual - Dark */
+    .stat-card:hover,
+    .metric-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(37, 99, 235, 0.4);
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5),
+                    0 0 15px rgba(0, 242, 254, 0.1);
+    }
+
+    /* Elementos Internos Base - Dark */
     .stat-icon {
         background: rgba(37, 99, 235, 0.1);
-        color: var(--nexus-blue);
+        color: var(--nexus-blue, #2563eb);
         width: 48px;
         height: 48px;
         border-radius: 12px;
@@ -282,9 +262,9 @@
         filter: drop-shadow(0 0 5px rgba(37, 99, 235, 0.3));
     }
 
-    /* Textos e Valores */
-    .stat-label {
-        color: var(--texto-muted);
+    .stat-label,
+    .metric-label {
+        color: #94a3b8;
         font-size: 0.85rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -293,37 +273,339 @@
         margin-bottom: 4px;
     }
 
-    .stat-value {
-        font-size: 1.75rem;
-        font-weight: 800;
+    .stat-value,
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 600;
         color: #f8fafc;
         margin: 0;
+        text-shadow: 0 0 10px rgba(248, 250, 252, 0.1);
     }
 
-    .stat-trend {
-        font-size: 0.8rem;
-        font-weight: 500;
-        display: block;
-        margin-top: 8px;
+    .dashboard-section-title {
+        color: var(--turquesa-brilhante);
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
     }
 
+    .stat-trend,
+    .stat-subtitle,
+    .text-info,
+    .text-alert-red,
+    .text-muted-dynamic,
+    .nexus-config-subtitle {
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Cor vibrante para trends positivos no Modo Escuro */
     .trend-up {
-        color: #10b981;
+        color: #4ade80 !important;
+        text-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
     }
 
-    /* Variação para Alertas (Glow Vermelho Sutil) */
-    .stat-card.warning {
-        border-color: rgba(239, 68, 68, 0.2);
+    /* Alinhamento da tipografia dos botões com os stat-values */
+    .metric-card .btn {
+        font-weight: 600 !important;
+        letter-spacing: 0.3px;
     }
 
-    .stat-card.warning .stat-icon {
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
+
+    /* =========================================================================
+       --- COMPORTAMENTO DO MODO CLARO (LIGHT MODE) - TOTALMENTE ISOLADO ---
+       ========================================================================= */
+
+    /* --- COR DE FUNDO UNIFICADA (IDENTIDADE VISUAL COESA) --- */
+    html.light-mode .stat-card,
+    html.light-mode .metric-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-left: 4px solid #2563EB !important; /* Destaque lateral para manter o DNA Nexus */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
+        backdrop-filter: none !important;
     }
 
-    .stat-card.warning:hover {
-        border-color: #ef4444;
-        box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+    /* --- EFEITO HOVER --- */
+    html.light-mode .stat-card:hover,
+    html.light-mode .metric-card:hover {
+        transform: translateY(-5px) !important;
+        border-color: #2563EB !important;
+        background: #C4D4F5 !important;
+        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.18) !important;
+    }
+
+    /* Ajuste de Contraste para os Títulos dos Cards */
+    html.light-mode .stat-label,
+    html.light-mode .metric-label {
+        color: #334155 !important;
+        font-weight: 600 !important; /* Suavizado para alinhar com o peso visual do Dark Mode */
+    }
+
+    /* Cores dos Valores Numéricos */
+    html.light-mode .stat-value,
+    html.light-mode .metric-value {
+        color: #0f172a !important;
+    }
+
+
+    /* =========================================================================
+       --- SELEÇÃO CIRÚRGICA DE CORES DOS SUBTÍTULOS (LIGHT MODE) ---
+       ========================================================================= */
+
+    /* Regra para indicadores positivos e informativos (Verde/Azul) */
+    html.light-mode .stat-trend,
+    html.light-mode .stat-subtitle,
+    html.light-mode .stat-trend.trend-up {
+        color: #166534 !important; /* Verde escuro para legibilidade no fundo claro */
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        display: inline-block !important;
+    }
+
+    html.light-mode .stat-card.low-stock {
+        background: #fffbef !important;
+        border-color: #f59e0b !important;
+        border-left: 4px solid #f59e0b !important;
+    }
+
+    html.light-mode .stat-card.low-stock .stat-trend {
+        color: #b45309 !important;
+    }
+
+    /* Força o ícone a manter seu tamanho original em todos os cards */
+    html.light-mode .stat-icon {
+        flex: 0 0 48px !important;
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+    }
+
+    /* Ajuste específico para o card de Clientes Ativos (se necessário) */
+    html.light-mode .stat-card .stat-content {
+        overflow: hidden;
+    }
+
+    /* Alvos: "Disponível" e "Cadastrados hoje" */
+    html.light-mode .metric-card .text-info {
+        color: #2D68C4 !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        display: block !important;
+    }
+
+    html.light-mode .metric-card .badge-online {
+        color: #2D68C4 !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        text-transform: none !important;
+        opacity: 1 !important;
+        background: rgba(45, 104, 196, 0.08) !important;
+        border: 1px solid rgba(45, 104, 196, 0.35) !important;
+        padding: 4px 10px !important;
+        border-radius: 8px !important;
+        display: inline-block !important;
+    }
+
+    html.light-mode .metric-card .text-warning,
+    html.light-mode .text-alert-red {
+        color: #b91c1c !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        display: block !important;
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    html.light-mode .nexus-config-subtitle {
+        color: #475569 !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.5px !important;
+        text-transform: none !important;
+        opacity: 1 !important;
+        margin-bottom: 1rem !important;
+    }
+
+
+    /* =========================================================================
+       --- TRATAMENTO DO CARD DE ALERTA CRÍTICO (BAIXO ESTOQUE) ---
+       ========================================================================= */
+
+    html.light-mode .stat-card.warning,
+    html.light-mode .metric-card.warning {
+        background: #fff5f5 !important; /* Tom avermelhado sutil para alerta */
+        border: 1px solid #fecaca !important;
+        border-left: 4px solid #ef4444 !important;
+    }
+
+    html.light-mode .stat-card.warning:hover,
+    html.light-mode .metric-card.warning:hover {
+        border-color: #ef4444 !important;
+        box-shadow: 0 12px 25px rgba(239, 68, 68, 0.1) !important;
+    }
+
+    html.light-mode .stat-card.warning .stat-icon {
+        background: rgba(220, 38, 38, 0.12) !important;
+        color: #dc2626 !important;
+    }
+
+    /* Itens abaixo do limite (Card superior) e valor numérico 01 */
+    html.light-mode .stat-card.warning .stat-trend,
+    html.light-mode .metric-card:has(.text-warning) .metric-value,
+    html.light-mode .text-warning-value {
+        color: #b91c1c !important;
+    }
+
+
+    /* =========================================================================
+       --- BOTÕES DA CONFIGURAÇÃO RÁPIDA ---
+       ========================================================================= */
+
+    /* Botão Principal (Destaque) */
+    html.light-mode .metric-card .btn-outline-info {
+        background: #2563EB !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 10px 20px !important;
+        width: 100% !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+        transition: all 0.2s ease-in-out !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        cursor: pointer !important;
+    }
+
+    /* Botão Secundário (Outline) */
+    html.light-mode .metric-card .btn-outline-light {
+        background: transparent !important;
+        color: #2563EB !important;
+        border: 1px solid #2563EB !important;
+        font-weight: 600 !important;
+        border-radius: 10px !important;
+        padding: 10px 20px !important;
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
+    }
+
+    html.light-mode .metric-card .btn-outline-info:hover {
+        background: #1d4ed8 !important;
+        transform: translateY(-2px) !important;
+    }
+
+    html.light-mode .metric-card .btn-outline-light:hover {
+        background: rgba(37, 99, 235, 0.05) !important;
+        transform: translateY(-2px) !important;
+    }
+
+
+    /* =========================================================================
+       --- COMPONENTES ADICIONAIS (TABELAS & SEÇÕES) ---
+       ========================================================================= */
+
+    html.light-mode h4,
+    html.light-mode .card-title,
+    html.light-mode .section-title,
+    html.light-mode .dashboard-section-title {
+        color: #334155 !important;
+        font-weight: 600 !important;
+        text-shadow: none !important;
+    }
+
+    .nexus-table {
+        background: rgba(2, 6, 23, 0.4) !important;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #1e293b;
+        width: 100%;
+    }
+
+    html.light-mode .nexus-table {
+        background: #ffffff !important;
+        border-color: #6A89A7 !important;
+    }
+
+    .nexus-table thead th {
+        background-color: rgba(30, 41, 59, 0.5);
+        color: #00f2fe;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        border-bottom: 2px solid var(--nexus-blue);
+        padding: 15px;
+        font-weight: 600;
+    }
+
+    html.light-mode .nexus-table thead th {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+        font-weight: 600 !important; /* Unificado com o padrão do sistema */
+    }
+
+    .nexus-table tbody td {
+        color: #94a3b8;
+        border-bottom: 1px solid #1e293b;
+        padding: 12px 15px;
+    }
+
+    html.light-mode .nexus-table tbody td {
+        color: #334155 !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+
+    /* --- STATUS "CONCLUÍDO" COM VERDE ESMERALDA E CONTORNO TRANSLÚCIDO --- */
+    html.light-mode .nexus-table tbody tr td .badge-nexus.badge-online {
+        color: #166534 !important;
+        background-color: rgba(16, 185, 129, 0.08) !important;
+        border: 1px solid rgba(16, 185, 129, 0.35) !important;
+        padding: 5px 12px !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        display: inline-block !important;
+    }
+
+    html.light-mode .nexus-table tbody tr td [class*="concluido"] *,
+    html.light-mode .nexus-table tbody tr td [class*="Concluído"] * {
+        color: #166534 !important;
+    }
+
+    .nexus-table tbody tr:nth-child(odd) td {
+        background-color: #0f172a;
+    }
+
+    html.light-mode .nexus-table tbody tr:nth-child(odd) td {
+        background-color: #ffffff !important;
+    }
+
+    .nexus-table tbody tr:nth-child(even) td {
+        background-color: #161e31;
+    }
+
+    html.light-mode .nexus-table tbody tr:nth-child(even) td {
+        background-color: #f4f7fa !important;
+    }
+
+    .nexus-table tbody tr:hover td {
+        background-color: #1e293b !important;
+        color: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+    html.light-mode .nexus-table tbody tr:hover td {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
     }
 </style>
 {% endblock %}

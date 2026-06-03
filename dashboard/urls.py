@@ -29,6 +29,7 @@ urlpatterns = [
     path('dashboard/estoque/excluir/<int:produto_id>/', views.excluir_produto, name='excluir_produto'),
     path('dashboard/estoque/vender/<int:produto_id>/', views.realizar_venda, name='realizar_venda'),
     path('dashboard/cadastrar-categoria/', views.cadastrar_categoria, name='cadastrar_categoria'),
+    path('dashboard/categorias/editar-ajax/<int:categoria_id>/', views.editar_categoria_ajax, name='editar_categoria_ajax'),
     
     # --- Rotas de Gerenciamento da Loja ---
     path('dashboard/loja/', views.ver_loja, name='ver_loja'),
