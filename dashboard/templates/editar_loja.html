@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Editar Loja | NEXUS Hub{% endblock %}
-{% block page_title %}CONFIGURAÇÕES DA LOJA{% endblock %}
+{% block title %}Editar Informações da Loja | NEXUS Hub{% endblock %}
+{% block page_title %}EDITAR INFORMAÇÕES DA LOJA{% endblock %}
 
 {% block content %}
 <div class="fade-in-content container-fluid">
@@ -10,8 +10,11 @@
         <div class="nexus-form-header">
             <i class="bi bi-shop"></i>
             <div>
-                <h2 style="color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">EDITAR INFORMAÇÕES DA LOJA</h2>
-                <p style="color: rgba(255,255,255,0.5); margin: 0; font-size: 0.9rem;">Atualize a identidade visual e dados da sua empresa</p>
+                <h2
+                    style="color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">
+                    LOJA</h2>
+                <p style="color: rgba(255,255,255,0.5); margin: 0; font-size: 0.9rem;">Atualize a identidade visual e
+                    dados da sua empresa</p>
             </div>
         </div>
 
@@ -22,8 +25,8 @@
                 <label class="label-nexus">NOME DA LOJA</label>
                 <div class="input-wrapper-nexus">
                     <i class="bi bi-building"></i>
-                    <input type="text" name="nome" value="{{ form.nome.value|default:'' }}" 
-                           placeholder="Digite o nome da sua loja..." required>
+                    <input type="text" name="nome" value="{{ form.nome.value|default:'' }}"
+                        placeholder="Digite o nome da sua loja..." required>
                 </div>
                 {% if form.nome.errors %}<small class="text-danger">{{ form.nome.errors.0 }}</small>{% endif %}
             </div>
@@ -32,7 +35,8 @@
                 <label class="label-nexus">DESCRIÇÃO DA LOJA</label>
                 <div class="input-wrapper-nexus">
                     <i class="bi bi-card-text" style="top: 15px;"></i>
-                    <textarea name="descricao" rows="4" placeholder="Fale um pouco sobre sua loja...">{{ form.descricao.value|default:'' }}</textarea>
+                    <textarea name="descricao" rows="4"
+                        placeholder="Fale um pouco sobre sua loja...">{{ form.descricao.value|default:'' }}</textarea>
                 </div>
             </div>
 
@@ -41,27 +45,31 @@
                     <label class="label-nexus">LOGO / FOTO DE PERFIL</label>
                     <div class="input-wrapper-nexus">
                         <i class="bi bi-person-bounding-box"></i>
-                        <input type="file" name="foto_perfil" class="form-control-nexus" accept="image/*" style="padding: 10px 15px 10px 45px !important;">
+                        <input type="file" name="foto_perfil" class="form-control-nexus" accept="image/*"
+                            style="padding: 10px 15px 10px 45px !important;">
                     </div>
-                    <small class="text-secondary" style="font-size: 0.7rem; display: block; margin-top: 5px;">Recomendado: 400x400px</small>
+                    <small class="text-secondary"
+                        style="font-size: 0.7rem; display: block; margin-top: 5px;">Recomendado: 400x400px</small>
                 </div>
 
                 <div style="flex: 1;">
                     <label class="label-nexus">FOTO DE CAPA</label>
                     <div class="input-wrapper-nexus">
                         <i class="bi bi-image"></i>
-                        <input type="file" name="foto_capa" class="form-control-nexus" accept="image/*" style="padding: 10px 15px 10px 45px !important;">
+                        <input type="file" name="foto_capa" class="form-control-nexus" accept="image/*"
+                            style="padding: 10px 15px 10px 45px !important;">
                     </div>
-                    <small class="text-secondary" style="font-size: 0.7rem; display: block; margin-top: 5px;">Recomendado: 1200x400px</small>
+                    <small class="text-secondary"
+                        style="font-size: 0.7rem; display: block; margin-top: 5px;">Recomendado: 1200x400px</small>
                 </div>
             </div>
 
-            <div class="nexus-form-footer">
-                <a href="{% url 'ver_loja' %}" class="btn-nexus-cancel">
-                    <i class="bi bi-x-circle me-1"></i> CANCELAR
+            <div class="d-flex justify-content-end gap-3 mt-4">
+                <a href="{% url 'dashboard' %}" class="btn-nexus-cancel">
+                    <i class="bi bi-x-circle"></i> <span>CANCELAR</span>
                 </a>
                 <button type="submit" class="btn-nexus-save">
-                    <i class="bi bi-shield-check me-2"></i> SALVAR ALTERAÇÕES
+                    <i class="bi bi-shield-check"></i> <span>SALVAR</span>
                 </button>
             </div>
         </form>
@@ -91,7 +99,11 @@
         border-bottom: 1px solid rgba(0, 229, 255, 0.1);
     }
 
-    .nexus-form-header i { color: #00e5ff; font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.4)); }
+    .nexus-form-header i {
+        color: #00e5ff;
+        font-size: 1.8rem;
+        filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.4));
+    }
 
     /* Labels e Inputs */
     .label-nexus {
@@ -135,7 +147,7 @@
         transition: 0.3s all ease;
     }
 
-    .input-wrapper-nexus input:focus, 
+    .input-wrapper-nexus input:focus,
     .input-wrapper-nexus textarea:focus {
         border-color: #00e5ff !important;
         background: rgba(0, 229, 255, 0.05) !important;
@@ -161,10 +173,16 @@
         padding: 12px 25px;
         border: 1px solid rgba(255, 77, 77, 0.3);
         border-radius: 8px;
-        display: flex; align-items: center; gap: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
         transition: 0.3s;
     }
-    .btn-nexus-cancel:hover { background: rgba(255, 77, 77, 0.1); border-color: #ff4d4d; }
+
+    .btn-nexus-cancel:hover {
+        background: rgba(255, 77, 77, 0.1);
+        border-color: #ff4d4d;
+    }
 
     .btn-nexus-save {
         background: #00e5ff !important;
@@ -180,6 +198,7 @@
         align-items: center;
         gap: 10px;
     }
+
     .btn-nexus-save:hover {
         background: #00f2ff !important;
         box-shadow: 0 0 25px rgba(0, 229, 255, 0.4) !important;
@@ -194,32 +213,72 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
         backdrop-filter: none;
     }
-    html.light-mode .nexus-form-header { border-bottom: 1px solid #e2e8f0; }
-    html.light-mode .nexus-form-header h2 { color: #0f172a !important; font-weight: 600 !important; }
-    html.light-mode .nexus-form-header i { color: #2563eb; filter: none; }
-    html.light-mode .label-nexus { color: #475569 !important; }
-    html.light-mode .input-wrapper-nexus i { color: #2563eb !important; }
-    html.light-mode .input-wrapper-nexus input, 
+
+    html.light-mode .nexus-form-header {
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    html.light-mode .nexus-form-header h2 {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+    }
+
+    html.light-mode .nexus-form-header i {
+        color: #2563eb;
+        filter: none;
+    }
+
+    html.light-mode .label-nexus {
+        color: #475569 !important;
+    }
+
+    html.light-mode .input-wrapper-nexus i {
+        color: #2563eb !important;
+    }
+
+    html.light-mode .input-wrapper-nexus input,
     html.light-mode .input-wrapper-nexus textarea,
     html.light-mode .form-control-nexus {
         background: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         color: #0f172a !important;
     }
-    html.light-mode .input-wrapper-nexus input:focus { border-color: #2563EB !important; box-shadow: 0 0 10px rgba(37, 99, 235, 0.15) !important; }
+
+    html.light-mode .input-wrapper-nexus input:focus {
+        border-color: #2563EB !important;
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.15) !important;
+    }
 
     html.light-mode .btn-nexus-save {
         background-color: #2563EB !important;
         color: #ffffff !important;
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
     }
-    html.light-mode .btn-nexus-save:hover { background-color: #1d4ed8 !important; }
-    html.light-mode .btn-nexus-cancel { border-color: #dc2626; color: #dc2626; }
-    html.light-mode .btn-nexus-cancel:hover { background: #dc2626; color: #ffffff; }
+
+    html.light-mode .btn-nexus-save:hover {
+        background-color: #1d4ed8 !important;
+    }
+
+    html.light-mode .btn-nexus-cancel {
+        border-color: #dc2626;
+        color: #dc2626;
+    }
+
+    html.light-mode .btn-nexus-cancel:hover {
+        background: #dc2626;
+        color: #ffffff;
+    }
 
     @media (max-width: 768px) {
-        .form-row-nexus { flex-direction: column; gap: 25px !important; }
-        .nexus-form-container { padding: 25px; margin: 20px 10px; }
+        .form-row-nexus {
+            flex-direction: column;
+            gap: 25px !important;
+        }
+
+        .nexus-form-container {
+            padding: 25px;
+            margin: 20px 10px;
+        }
     }
 </style>
 {% endblock %}

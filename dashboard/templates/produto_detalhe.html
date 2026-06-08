@@ -2,433 +2,405 @@
 {% load static %}
 
 {% block title %}Detalhes do Produto | NEXUS Hub{% endblock %}
-
-{% block page_title %}Detalhes do Produto{% endblock %}
+{% block page_title %}DETALHES DO PRODUTO{% endblock %}
 
 {% block content %}
-<div class="produto-detalhe-container">
-    <section class="produto-topo">
-        <div class="produto-header-info">
-            <div>
-                <span class="produto-chip">SKU #{{ produto.id|stringformat:"04d" }}</span>
-                <span class="produto-chip produto-chip-secondary">Categoria: {% if produto.categoria %}{{ produto.categoria.nome }}{% else %}Sem categoria{% endif %}</span>
-                {% if produto.estoque <= 0 %}
-                    <span class="produto-badge produto-badge-danger">Esgotado</span>
-                {% elif produto.estoque <= produto.estoque_minimo %}
-                    <span class="produto-badge produto-badge-warning">Estoque Baixo</span>
-                {% else %}
-                    <span class="produto-badge produto-badge-success">À Venda</span>
-                {% endif %}
+<div class="fade-in-content container-fluid">
+    <div class="nexus-form-container">
+        <div class="nexus-form-header">
+            <i class="bi bi-box-seam-fill"></i>
+            <div class="flex-grow-1">
+                <h2 class="form-title-nexus">PRODUTO #{{ produto.id|stringformat:"04d" }}</h2>
+                <p class="form-subtitle-nexus">Visualizando detalhes de <span class="highlight-nexus">{{ produto.nome }}</span></p>
             </div>
-            <div class="produto-actions">
-                <a href="{% url 'lista_estoque' %}" class="logout-btn btn-voltar">Voltar</a>
-                <a href="{% url 'editar_produto' produto.id %}" class="logout-btn btn-editar">Editar Produto</a>
+            <div class="d-flex gap-3 align-items-center">
+                <a href="{% url 'lista_estoque' %}" class="btn-nexus-cancel">
+                    <i class="bi bi-arrow-left-short"></i> <span>VOLTAR</span>
+                </a>
+                <a href="{% url 'editar_produto' produto.id %}" class="btn-nexus-save">
+                    <i class="bi bi-pencil-square"></i> <span>EDITAR</span>
+                </a>
             </div>
         </div>
 
-        <div class="produto-titulo-wrapper">
-            <h2>{{ produto.nome }}</h2>
-            <p class="produto-subtitulo">Detalhes completos do produto para o seu controle de estoque no NEXUS Hub.</p>
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-tag-fill"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-label">Preço Sugerido</span>
+                        <h3 class="stat-value">R$ {{ produto.preco|floatformat:2 }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card {% if produto.estoque <= produto.estoque_minimo %}low-stock{% endif %}">
+                    <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-label">Estoque Atual</span>
+                        <h3 class="stat-value">{{ produto.estoque }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-label">Estoque Mínimo</span>
+                        <h3 class="stat-value">{{ produto.estoque_minimo }}</h3>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="produto-resumo">
-            <div class="resumo-card">
-                <span>Preço</span>
-                <strong>R$ {{ produto.preco|floatformat:2 }}</strong>
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="detail-card-nexus">
+                    <div class="card-header-nexus">
+                        <h5 class="m-0"><i class="bi bi-info-circle-fill me-2"></i>Informações Gerais</h5>
+                    </div>
+                    <div class="card-body-nexus p-4">
+                        <div class="info-row">
+                            <span class="info-label">NOME DO PRODUTO</span>
+                            <span class="info-value">{{ produto.nome }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">CATEGORIA</span>
+                            <span class="info-value">{% if produto.categoria %}{{ produto.categoria.nome }}{% else %}Sem categoria{% endif %}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">STATUS</span>
+                            <span class="info-value">
+                                {% if produto.estoque <= 0 %}
+                                    <span class="badge bg-danger">Esgotado</span>
+                                {% elif produto.estoque <= produto.estoque_minimo %}
+                                    <span class="badge bg-warning text-dark">Estoque Baixo</span>
+                                {% else %}
+                                    <span class="badge bg-success">À Venda</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">DATA DE CADASTRO</span>
+                            <span class="info-value">{{ produto.data_criacao|date:'d/m/Y H:i' }}</span>
+                        </div>
+                        <div class="info-row border-0 mt-3">
+                            <div class="w-100">
+                                <span class="info-label d-block mb-2">DESCRIÇÃO</span>
+                                <p class="info-text-description">{{ produto.descricao|linebreaksbr }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="resumo-card">
-                <span>Estoque atual</span>
-                <strong>{{ produto.estoque }}</strong>
-            </div>
-            <div class="resumo-card">
-                <span>Estoque mínimo</span>
-                <strong>{{ produto.estoque_minimo }}</strong>
-            </div>
-        </div>
-    </section>
 
-    <section class="produto-main-grid">
-        <article class="produto-card detalhe-card">
-            <div class="card-header">
-                <h5>Informações do Produto</h5>
-            </div>
-            <div class="campo-item">
-                <span>Nome</span>
-                <strong>{{ produto.nome }}</strong>
-            </div>
-            <div class="campo-item">
-                <span>Preço de Venda</span>
-                <strong>R$ {{ produto.preco|floatformat:2 }}</strong>
-            </div>
-            <div class="campo-item">
-                <span>Estoque Atual</span>
-                <strong>{{ produto.estoque }}</strong>
-            </div>
-            <div class="campo-item">
-                <span>Estoque Mínimo</span>
-                <strong>{{ produto.estoque_minimo }}</strong>
-            </div>
-            <div class="campo-item campo-descricao">
-                <span>Descrição</span>
-                <p>{{ produto.descricao|linebreaksbr }}</p>
-            </div>
-            <div class="campo-item">
-                <span>Data de Criação</span>
-                <strong>{{ produto.data_criacao|date:'d/m/Y H:i' }}</strong>
-            </div>
-        </article>
-
-        <article class="produto-card galeria-card">
-            <div class="card-header">
-                <h5>Galeria de Imagens</h5>
-            </div>
+            <div class="col-lg-5">
+                <div class="detail-card-nexus">
+                    <div class="card-header-nexus">
+                        <h5 class="m-0"><i class="bi bi-images me-2"></i>Galeria</h5>
+                    </div>
+                    <div class="card-body-nexus p-4">
             {% if imagens %}
                 <div class="galeria-imagens">
                     {% for imagem in imagens %}
                         <div class="galeria-item">
                             <button type="button" class="lightbox-thumb" data-image-src="{{ imagem.imagem.url }}" data-index="{{ forloop.counter0 }}">
-                                <img src="{{ imagem.imagem.url }}" alt="Imagem do produto {{ produto.nome }}">
+                                <img src="{{ imagem.imagem.url }}" alt="Imagem do produto">
                             </button>
                         </div>
                     {% endfor %}
                 </div>
-                <div id="lightboxModal" class="lightbox-modal" aria-hidden="true">
-                    <div class="lightbox-backdrop"></div>
-                    <div class="lightbox-content" role="dialog" aria-modal="true" aria-label="Visualização da imagem do produto">
-                        <button type="button" class="lightbox-close" aria-label="Fechar">×</button>
-                        <button type="button" class="lightbox-nav lightbox-prev" aria-label="Imagem anterior">‹</button>
-                        <img id="lightboxImage" src="" alt="Imagem ampliada do produto {{ produto.nome }}">
-                        <button type="button" class="lightbox-nav lightbox-next" aria-label="Próxima imagem">›</button>
-                    </div>
-                </div>
             {% else %}
                 <div class="sem-imagem-card">
-                    <p>Nenhuma imagem cadastrada para este produto.</p>
+                    <i class="bi bi-image-fill d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                    <p class="m-0">Nenhuma imagem cadastrada.</p>
                 </div>
             {% endif %}
-        </article>
-    </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="lightboxModal" class="lightbox-modal" aria-hidden="true">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-content" role="dialog" aria-modal="true" aria-label="Visualização da imagem do produto">
+        <button type="button" class="lightbox-close" aria-label="Fechar">×</button>
+        <button type="button" class="lightbox-nav lightbox-prev" aria-label="Imagem anterior">‹</button>
+        <img id="lightboxImage" src="" alt="Imagem ampliada do produto">
+        <button type="button" class="lightbox-nav lightbox-next" aria-label="Próxima imagem">›</button>
+    </div>
 </div>
 
 <style>
-.produto-detalhe-container {
-    background: linear-gradient(135deg, rgba(2, 12, 29, 0.95), rgba(8, 18, 38, 0.95));
-    border: 1px solid rgba(37, 99, 235, 0.22);
-    border-radius: 24px;
-    padding: 32px;
-    box-shadow: 0 24px 90px rgba(0, 0, 0, 0.35);
-}
-.produto-topo {
-    margin-bottom: 28px;
-}
-.produto-header-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 22px;
-}
-.produto-header-info div {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-.produto-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #cbd5e1;
-    background: rgba(15, 23, 42, 0.75);
-    border: 1px solid rgba(71, 85, 105, 0.3);
-}
-.produto-chip-secondary {
-    color: #94a3b8;
-}
-.produto-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 16px;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-}
-.produto-badge-success {
-    background: rgba(16, 185, 129, 0.15);
-    color: #a7f3d0;
-    border: 1px solid rgba(16, 185, 129, 0.25);
-}
-.produto-badge-warning {
-    background: rgba(234, 179, 8, 0.15);
-    color: #facc15;
-    border: 1px solid rgba(234, 179, 8, 0.25);
-}
-.produto-badge-danger {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fecaca;
-    border: 1px solid rgba(239, 68, 68, 0.25);
-}
-.produto-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-.btn-editar,
-.btn-voltar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 140px;
-    padding: 13px 26px;
-    border-radius: 999px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
-}
-.btn-editar {
-    background: transparent;
-    color: var(--turquesa-brilhante);
-    border: 1px solid var(--turquesa-brilhante);
-    box-shadow: 0 12px 24px rgba(0, 242, 254, 0.18);
-}
-.btn-editar:hover {
-    transform: translateY(-2px);
-    background: var(--turquesa-brilhante);
-    color: #0f172a;
-    box-shadow: 0 0 15px rgba(0, 242, 254, 0.45);
-    border-color: var(--turquesa-brilhante);
-}
-.btn-voltar {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
-    color: #ffffff !important;
-    border: 1px solid rgba(148, 163, 184, 0.35);
-}
-.btn-voltar:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(15, 23, 42, 0.98));
-}
-.produto-titulo-wrapper h2 {
-    margin: 0 0 10px;
-    font-size: 2.3rem;
-    color: #ffffff;
-}
-.produto-subtitulo {
-    margin: 0;
-    color: #94a3b8;
-    max-width: 760px;
-}
-.produto-resumo {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-}
-.resumo-card {
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(37, 99, 235, 0.18);
-    border-radius: 18px;
-    padding: 20px;
-    color: #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.resumo-card span {
-    font-size: 0.9rem;
-    color: #94a3b8;
-}
-.resumo-card strong {
-    font-size: 1.7rem;
-    color: #ffffff;
-}
-.produto-main-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 24px;
-}
-.produto-card {
-    background: rgba(7, 16, 34, 0.96);
-    border: 1px solid rgba(37, 99, 235, 0.18);
-    border-radius: 22px;
-    padding: 26px;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
-}
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 22px;
-}
-.card-header h5 {
-    margin: 0;
-    color: #38bdf8;
-    font-size: 1.15rem;
-}
-.campo-item {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 0;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.07);
-}
-.campo-item span {
-    color: #94a3b8;
-    font-size: 0.95rem;
-}
-.campo-item strong {
-    color: #e2e8f0;
-    font-size: 1.05rem;
-}
-.campo-descricao {
-    grid-template-columns: 1fr;
-}
-.campo-descricao p {
-    margin: 0.5rem 0 0;
-    color: #cbd5e1;
-    line-height: 1.8;
-}
-.galeria-imagens {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-}
-.galeria-item {
-    overflow: hidden;
-    border-radius: 18px;
-    border: 1px solid rgba(56, 189, 248, 0.16);
-    background: linear-gradient(180deg, rgba(15,23,42,0.96), rgba(15,23,42,0.8));
-}
-.galeria-item button {
-    background: transparent;
-    border: none;
-    padding: 0;
-    width: 100%;
-    cursor: pointer;
-}
-.galeria-item img {
-    display: block;
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    transition: transform 0.25s ease, filter 0.25s ease;
-}
-.galeria-item button:hover img {
-    transform: scale(1.05);
-    filter: brightness(0.95);
-}
-.sem-imagem-card {
-    min-height: 220px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 18px;
-    border: 1px dashed rgba(148, 163, 184, 0.3);
-    background: rgba(15, 23, 42, 0.85);
-    color: #94a3b8;
-    text-align: center;
-    padding: 24px;
-}
-.lightbox-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1050;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-}
-.lightbox-modal.active {
-    display: flex;
-}
-.lightbox-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.82);
-}
-.lightbox-content {
-    position: relative;
-    max-width: 95%;
-    max-height: 95%;
-    z-index: 1;
-    border-radius: 22px;
-    overflow: hidden;
-    background: rgba(8, 14, 28, 0.98);
-    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
-}
-.lightbox-content img {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-height: 90vh;
-    object-fit: contain;
-    background: #081124;
-}
-.lightbox-close {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: rgba(15, 23, 42, 0.9);
-    color: #ffffff;
-    border: none;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    font-size: 1.4rem;
-    cursor: pointer;
-    z-index: 2;
-}
-.lightbox-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.88);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    font-size: 1.45rem;
-    cursor: pointer;
-    z-index: 2;
-    transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
-    opacity: 0.78;
-    backdrop-filter: blur(8px);
-}
-.lightbox-nav:hover {
-    transform: translateY(-50%) scale(1.05);
-    background: rgba(255, 255, 255, 0.2);
-    opacity: 1;
-}
-.lightbox-prev {
-    left: 16px;
-}
-.lightbox-next {
-    right: 16px;
-}
-@media (max-width: 900px) {
-    .produto-resumo,
-    .produto-main-grid {
-        grid-template-columns: 1fr;
+    /* --- Container & Header (Identidade Nexus Padrão Dark) --- */
+    .nexus-form-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(0, 229, 255, 0.1);
+        border-radius: 16px;
+        padding: 40px;
+        backdrop-filter: blur(15px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
     }
-    .produto-header-info {
-        align-items: stretch;
+
+    .nexus-form-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 35px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(0, 229, 255, 0.1);
     }
-    .produto-actions {
-        width: 100%;
-        justify-content: flex-start;
+
+    .nexus-form-header i { color: #00e5ff; font-size: 1.8rem; }
+    .form-title-nexus { color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
+    .form-subtitle-nexus { color: rgba(255,255,255,0.5); margin: 0; font-size: 0.9rem; }
+    .highlight-nexus { color: #00e5ff; font-weight: 700; }
+
+    /* --- Stat Cards --- */
+    .stat-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-left: 4px solid #2563eb;
+        border-radius: 12px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        transition: 0.3s;
     }
-    .produto-titulo-wrapper h2 {
-        font-size: 1.85rem;
+    .stat-icon {
+        background: rgba(37, 99, 235, 0.1);
+        color: #2563eb;
+        width: 48px; height: 48px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem;
     }
-}
+    .stat-label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 4px; }
+    .stat-value { color: #ffffff; font-size: 1.6rem; font-weight: 600; margin: 0; }
+
+    .stat-card.low-stock { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
+    .stat-card.low-stock .stat-icon { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+    .stat-card.low-stock .stat-value { color: #f59e0b; }
+
+    /* --- Detail Card Nexus Style --- */
+    .detail-card-nexus {
+        background: rgba(15, 23, 42, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        overflow: hidden;
+        height: 100%;
+    }
+    .card-header-nexus {
+        background: rgba(30, 41, 59, 0.4);
+        padding: 18px 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: #00e5ff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .info-label { color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    .info-value { color: #e2e8f0; font-weight: 600; font-size: 1rem; }
+    .info-text-description { color: #94a3b8; line-height: 1.7; font-size: 0.95rem; margin: 0; }
+
+    /* --- Galeria --- */
+    .galeria-imagens {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 15px;
+    }
+    .galeria-item {
+        overflow: hidden;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .galeria-item button { background: none; border: none; padding: 0; width: 100%; cursor: pointer; }
+    .galeria-item img { display: block; width: 100%; height: 130px; object-fit: cover; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .galeria-item button:hover img { transform: scale(1.1); filter: brightness(0.8); }
+
+    .sem-imagem-card {
+        padding: 50px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        color: #64748b;
+        text-align: center;
+    }
+
+    /* --- Botões Base (Dark Mode) --- */
+    .btn-nexus-save {
+        background: #00e5ff !important;
+        color: #000 !important;
+        border: none !important;
+        padding: 0 28px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        font-size: 0.85rem !important;
+        height: 42px !important;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        transition: 0.3s;
+    }
+    .btn-nexus-save:hover { background: #00f2ff !important; box-shadow: 0 0 25px rgba(0, 229, 255, 0.4) !important; transform: translateY(-2px); }
+
+    .btn-nexus-cancel {
+        color: #ff4d4d;
+        text-decoration: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        padding: 0 24px;
+        height: 42px;
+        border: 1px solid rgba(255, 77, 77, 0.3);
+        border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        transition: 0.3s;
+    }
+    .btn-nexus-cancel:hover { background: rgba(255, 77, 77, 0.1); border-color: #ff4d4d; }
+
+    /* =======================================================
+       HERANÇA DE ALTA PRECISÃO PARA O MODO CLARO (LIGHT-MODE)
+       ======================================================= */
+    html.light-mode .nexus-form-container {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+    }
+    html.light-mode .nexus-form-header { border-bottom-color: #e2e8f0 !important; }
+    html.light-mode .form-title-nexus { color: #0f172a !important; }
+    html.light-mode .form-subtitle-nexus { color: #64748b !important; }
+    html.light-mode .nexus-form-header i { color: #2563eb !important; }
+    html.light-mode .highlight-nexus { color: #2563eb !important; }
+    
+    html.light-mode .stat-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-left: 4px solid #2563eb !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    }
+    html.light-mode .stat-icon { background: rgba(37, 99, 235, 0.1) !important; color: #2563eb !important; }
+    html.light-mode .stat-label { color: #475569 !important; }
+    html.light-mode .stat-value { color: #0f172a !important; }
+    
+    html.light-mode .stat-card.low-stock { border-left-color: #f59e0b !important; background: rgba(245, 158, 11, 0.05) !important; }
+    html.light-mode .stat-card.low-stock .stat-icon { color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; }
+    html.light-mode .stat-card.low-stock .stat-value { color: #f59e0b !important; }
+
+    html.light-mode .detail-card-nexus { background: #ffffff !important; border-color: #e2e8f0 !important; }
+    html.light-mode .card-header-nexus { background: #f8fafc !important; border-bottom-color: #e2e8f0 !important; color: #0f172a !important; }
+    html.light-mode .info-label { color: #64748b !important; }
+    html.light-mode .info-value { color: #0f172a !important; }
+    html.light-mode .info-row { border-bottom-color: #f1f5f9 !important; }
+    html.light-mode .info-text-description { color: #334155 !important; }
+    
+    html.light-mode .galeria-item { border-color: #cbd5e1 !important; }
+    html.light-mode .sem-imagem-card { border-color: #cbd5e1 !important; color: #64748b !important; }
+
+    /* =======================================================
+       AJUSTES FINOS DE DIAGRAMAÇÃO E CONTRASTE DOS BOTÕES
+       ======================================================= */
+
+    /* BOTÃO EDITAR (LIGHT MODE) */
+    html.light-mode .btn-nexus-save { 
+        background: #2563eb !important; 
+        color: #ffffff !important; 
+        border: none !important; 
+        padding: 0 28px !important; 
+        border-radius: 8px !important; 
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        font-weight: 600 !important; 
+        font-size: 0.85rem !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        height: 42px !important;
+        display: inline-flex !important; 
+        align-items: center !important; 
+        justify-content: center !important;
+        gap: 8px !important; 
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
+        transition: all 0.25s ease-in-out !important; 
+    }
+    html.light-mode .btn-nexus-save i {
+        color: #ffffff !important;
+        font-size: 1.05rem !important;
+        line-height: 1 !important;
+        display: inline-block !important;
+    }
+    html.light-mode .btn-nexus-save:hover { 
+        background-color: #1d4ed8 !important; 
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35) !important;
+        transform: translateY(-2px) !important; 
+    }
+    
+    /* BOTÃO VOLTAR (LIGHT MODE) */
+    html.light-mode .btn-nexus-cancel { 
+        background: #f8fafc !important; 
+        color: #dc2626 !important; 
+        border: 1px solid #dc2626 !important; 
+        padding: 0 24px !important; 
+        border-radius: 8px !important; 
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        height: 42px !important;
+        display: inline-flex !important; 
+        align-items: center !important; 
+        justify-content: center !important;
+        gap: 4px !important; 
+        box-shadow: none !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    html.light-mode .btn-nexus-cancel i {
+        color: #dc2626 !important;
+        font-size: 1.35rem !important; /* Ícone short levemente maior para melhor proporção */
+        line-height: 1 !important;
+        display: inline-block !important;
+        transition: color 0.2s;
+    }
+    html.light-mode .btn-nexus-cancel:hover { 
+        background: #dc2626 !important; 
+        border-color: #dc2626 !important;
+        color: #ffffff !important; 
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2) !important;
+        transform: translateY(-2px) !important;
+    }
+    html.light-mode .btn-nexus-cancel:hover i {
+        color: #ffffff !important;
+    }
+
+    /* Lightbox Styles */
+    .lightbox-modal { display: none; position: fixed; inset: 0; z-index: 1050; align-items: center; justify-content: center; padding: 24px; }
+    .lightbox-modal.active { display: flex; }
+    .lightbox-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.82); }
+    .lightbox-content { position: relative; max-width: 95%; max-height: 95%; z-index: 1; border-radius: 22px; overflow: hidden; background: rgba(8, 14, 28, 0.98); box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55); }
+    .lightbox-content img { display: block; width: 100%; height: auto; max-height: 90vh; object-fit: contain; background: #081124; }
+    .lightbox-close { position: absolute; top: 16px; right: 16px; background: rgba(15, 23, 42, 0.9); color: #ffffff; border: none; width: 42px; height: 42px; border-radius: 50%; font-size: 1.4rem; cursor: pointer; z-index: 2; }
+    .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.88); border: 1px solid rgba(255, 255, 255, 0.18); width: 48px; height: 48px; border-radius: 50%; font-size: 1.45rem; cursor: pointer; z-index: 2; transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease; opacity: 0.78; backdrop-filter: blur(8px); }
+    .lightbox-nav:hover { transform: translateY(-50%) scale(1.05); background: rgba(255, 255, 255, 0.2); opacity: 1; }
+    .lightbox-prev { left: 16px; } .lightbox-next { right: 16px; }
+
+    @media (max-width: 900px) {
+        .nexus-form-header { flex-direction: column; align-items: stretch; gap: 20px; }
+        .nexus-form-header .d-flex { justify-content: flex-start; width: 100%; }
+        .btn-nexus-save, .btn-nexus-cancel { flex-grow: 1; }
+    }
 </style>
 
 <script>
@@ -484,16 +456,10 @@
         });
 
         document.addEventListener('keydown', function (event) {
-            if (!lightbox.classList.contains('active')) {
-                return;
-            }
-            if (event.key === 'Escape') {
-                closeLightbox();
-            } else if (event.key === 'ArrowLeft') {
-                showPrevious();
-            } else if (event.key === 'ArrowRight') {
-                showNext();
-            }
+            if (!lightbox.classList.contains('active')) return;
+            if (event.key === 'Escape') closeLightbox();
+            else if (event.key === 'ArrowLeft') showPrevious();
+            else if (event.key === 'ArrowRight') showNext();
         });
     });
 </script>

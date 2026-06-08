@@ -8,8 +8,8 @@
     <div class="nexus-form-header">
         <i class="bi bi-person-badge-fill"></i>
         <div>
-            <h2 style="color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">FUNCIONÁRIO</h2>
-            <p style="color: rgba(255,255,255,0.5); margin: 0; font-size: 0.9rem;">Atualize as informações de <span style="color: #00e5ff;">{{ funcionario.nome }}</span></p>
+            <h2 class="form-title-nexus">FUNCIONÁRIO</h2>
+            <p class="form-subtitle-nexus">Atualize as informações de <span class="highlight-nexus">{{ funcionario.nome }}</span></p>
         </div>
     </div>
 
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div class="form-group-nexus" style="margin-bottom: 25px;">
+        <div class="form-group-nexus-mb">
             <label class="label-nexus">ENDEREÇO / COMPLEMENTO</label>
             <div class="input-wrapper-nexus">
                 <i class="bi bi-geo-alt-fill"></i>
@@ -80,36 +80,170 @@
                 <i class="bi bi-x-circle"></i> CANCELAR
             </a>
             <button type="submit" class="btn-nexus-save">
-                <i class="bi bi-check2-circle"></i> SALVAR ALTERAÇÕES
+                <i class="bi bi-check2-circle"></i> SALVAR
             </button>
         </div>
     </form>
 </div>
 
 <style>
-    /* Estilos preservados do seu modelo base */
+    /* Estilos base do container do formulário */
     .nexus-form-container {
         max-width: 900px;
         margin: 40px auto;
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(0, 229, 255, 0.1);
+        background: #ffffff; 
+        border: 1px solid #e2e8f0; 
         border-radius: 16px;
         padding: 40px;
-        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
     }
-    .nexus-form-header { display: flex; align-items: center; gap: 15px; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid rgba(0, 229, 255, 0.1); }
-    .nexus-form-header i { color: #00e5ff; font-size: 1.8rem; }
-    .label-nexus { color: #00e5ff; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; display: block; }
-    .input-wrapper-nexus { position: relative; display: flex; align-items: center; }
-    .input-wrapper-nexus i { position: absolute; left: 15px; color: rgba(0, 229, 255, 0.5); font-size: 1.1rem; }
-    .form-control-nexus { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 12px 12px 12px 45px; color: #ffffff; transition: 0.3s; }
-    .form-control-nexus:focus { border-color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); outline: none; }
+    
+    .nexus-form-header { 
+        display: flex; 
+        align-items: center; 
+        gap: 15px; 
+        margin-bottom: 35px; 
+        padding-bottom: 20px; 
+        border-bottom: 1px solid #e2e8f0; 
+    }
+    .nexus-form-header i { 
+        color: #2563eb; 
+        font-size: 1.8rem; 
+    }
+    
+    .form-title-nexus {
+        color: #0f172a; 
+        margin: 0; 
+        font-size: 1.5rem; 
+        font-weight: 600; 
+        text-transform: uppercase; 
+        letter-spacing: 1.5px;
+    }
+    .form-subtitle-nexus {
+        color: #64748b; 
+        margin: 0; 
+        font-size: 0.9rem;
+    }
+    .highlight-nexus {
+        color: #2563eb; 
+        font-weight: 600;
+    }
+
+    .label-nexus { 
+        color: #475569; 
+        font-size: 0.75rem; 
+        font-weight: 750; 
+        letter-spacing: 1px; 
+        margin-bottom: 8px; 
+        display: block; 
+    }
+    
+    .input-wrapper-nexus { 
+        position: relative; 
+        display: flex; 
+        align-items: center; 
+    }
+    .input-wrapper-nexus i { 
+        position: absolute; 
+        left: 15px; 
+        color: #2563eb; 
+        font-size: 1.1rem; 
+    }
+    
+    .form-control-nexus { 
+        width: 100%; 
+        background: #ffffff; 
+        border: 1px solid #cbd5e1; 
+        border-radius: 10px; 
+        padding: 12px 12px 12px 45px; 
+        color: #0f172a; 
+        transition: 0.3s; 
+    }
+    .form-control-nexus::placeholder {
+        color: #94a3b8; 
+    }
+    .form-control-nexus:focus { 
+        background: #ffffff;
+        border-color: #2563eb; 
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); 
+        outline: none; 
+    }
+    
     .form-group-nexus { margin-bottom: 20px; }
-    .nexus-form-footer { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
-    .btn-nexus-save { background: #00e5ff; color: #000; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 800; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
-    .btn-nexus-save:hover { background: #00b8cc; transform: translateY(-2px); }
-    .btn-nexus-cancel { background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 12px 25px; border-radius: 10px; text-decoration: none; display: flex; align-items: center; gap: 8px; }
-    .btn-nexus-cancel:hover { background: rgba(255,255,255,0.05); color: #ff4444; border-color: #ff4444; }
+    .form-group-nexus-mb { margin-bottom: 25px; }
+    
+    .nexus-form-footer { 
+        display: flex; 
+        justify-content: flex-end; 
+        align-items: center;
+        gap: 20px; 
+        margin-top: 30px; 
+        padding-top: 30px; 
+        border-top: 1px solid #e2e8f0; 
+    }
+    
+    /* =======================================================
+       APLICAÇÃO DIRETA E FIXA PARA O MODO CLARO (LIGHT-MODE)
+       ======================================================= */
+    
+    /* BOTÃO SALVAR (PADRÃO BLUE DO SYSTEM) */
+    html.light-mode .btn-nexus-save { 
+        background: #2563eb !important; 
+        color: #ffffff !important; 
+        border: none !important; 
+        padding: 0 35px !important; 
+        border-radius: 8px !important; 
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        font-weight: 600 !important; 
+        font-size: 0.85rem !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        height: 42px !important;
+        min-width: 180px !important;
+        display: inline-flex !important; 
+        align-items: center !important; 
+        justify-content: center !important;
+        gap: 10px !important; 
+        cursor: pointer !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+        transition: all 0.25s ease-in-out !important; 
+    }
+    
+    html.light-mode .btn-nexus-save:hover { 
+        background-color: #1d4ed8 !important; 
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4) !important;
+        transform: translateY(-2px) !important; 
+    }
+    
+    /* BOTÃO CANCELAR CORRIGIDO (Borda Vermelha e Texto Vermelho igual à tela Nova Categoria) */
+    html.light-mode .btn-nexus-cancel { 
+        background: transparent !important; 
+        color: #dc2626 !important; /* Texto em vermelho corporativo */
+        border: 1px solid #dc2626 !important; /* Linha de contorno em vermelho */
+        padding: 0 25px !important; 
+        border-radius: 8px !important; 
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        height: 42px !important;
+        min-width: 180px !important;
+        display: inline-flex !important; 
+        align-items: center !important; 
+        justify-content: center !important;
+        gap: 8px !important; 
+        text-decoration: none !important; 
+        transition: all 0.2s ease-in-out !important;
+    }
+    
+    html.light-mode .btn-nexus-cancel:hover { 
+        background: #dc2626 !important; /* Preenchimento total no hover */
+        border-color: #dc2626 !important;
+        color: #ffffff !important; /* Texto inverte para branco */
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.25) !important;
+        transform: translateY(-2px) !important;
+    }
 </style>
 
 {% endblock %}

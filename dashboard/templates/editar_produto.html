@@ -22,8 +22,7 @@
                 <label class="label-nexus">NOME DO PRODUTO</label>
                 <div class="input-wrapper-nexus">
                     <i class="bi bi-tag-fill"></i>
-                    <input type="text" name="nome" value="{{ produto.nome|default:'' }}"
-                        placeholder="Digite o nome do seu produto..." required>
+                    <input type="text" name="nome" value="{{ produto.nome|default:'' }}" placeholder="Digite o nome do seu produto..." required>
                 </div>
             </div>
 
@@ -31,8 +30,7 @@
                 <label class="label-nexus">DESCRIÇÃO</label>
                 <div class="input-wrapper-nexus">
                     <i class="bi bi-chat-left-text-fill" style="top: 15px;"></i>
-                    <textarea name="descricao" rows="3" placeholder="Descreva seu produto..."
-                        required>{{ produto.descricao|default:'' }}</textarea>
+                    <textarea name="descricao" rows="3" placeholder="Descreva seu produto..." required>{{ produto.descricao|default:'' }}</textarea>
                 </div>
             </div>
 
@@ -51,12 +49,10 @@
                         </select>
                     </div>
                     <div class="d-flex gap-3 mt-2">
-                        <a href="javascript:void(0)" onclick="openCategoryModal()" class="category-link"
-                            style="font-size: 0.85rem; text-decoration: none; display: inline-block; cursor: pointer; font-weight: 700;">
+                        <a href="javascript:void(0)" onclick="openCategoryModal()" class="category-link" style="font-size: 0.85rem; text-decoration: none; display: inline-block; cursor: pointer; font-weight: 700;">
                             <i class="bi bi-plus-circle"></i> Criar Nova Categoria
                         </a>
-                        <a href="javascript:void(0)" onclick="openEditCategoryModal()" class="category-link"
-                            style="font-size: 0.85rem; text-decoration: none; display: inline-block; cursor: pointer; font-weight: 700;">
+                        <a href="javascript:void(0)" onclick="openEditCategoryModal()" class="category-link" style="font-size: 0.85rem; text-decoration: none; display: inline-block; cursor: pointer; font-weight: 700;">
                             <i class="bi bi-pencil-square"></i> Editar Categoria
                         </a>
                     </div>
@@ -77,8 +73,7 @@
                     <label class="label-nexus">PREÇO SUGERIDO</label>
                     <div class="input-wrapper-nexus">
                         <span class="currency-prefix">R$</span>
-                        <input type="text" name="preco" id="id_preco"
-                            value="{{ produto.preco|stringformat:".2f" }}" placeholder="0,00" required style="padding-left: 45px !important;">
+                        <input type="text" name="preco" id="id_preco" value="{{ produto.preco|stringformat:'.2f' }}" placeholder="0,00" required style="padding-left: 45px !important;">
                     </div>
                 </div>
 
@@ -86,8 +81,7 @@
                     <label class="label-nexus">QUANTIDADE ATUAL</label>
                     <div class="input-wrapper-nexus">
                         <i class="bi bi-box-seam-fill"></i>
-                        <input type="number" name="estoque" id="id_estoque" value="{{ produto.estoque|default:'0' }}"
-                            placeholder="0" required oninput="validarEstoque()">
+                        <input type="number" name="estoque" id="id_estoque" value="{{ produto.estoque|default:'0' }}" placeholder="0" required oninput="validarEstoque()">
                     </div>
                     <small id="estoque_msg" class="text-danger" style="display: none; font-size: 0.7rem; margin-top: 5px; font-weight: 600;">A quantidade inicial deve ser maior que o estoque mínimo.</small>
                 </div>
@@ -106,14 +100,13 @@
                     <i class="bi bi-x-circle me-1"></i> CANCELAR
                 </a>
                 <button type="submit" class="btn-nexus-save">
-                    <i class="bi bi-check2-circle me-2"></i> SALVAR ALTERAÇÕES
+                    <i class="bi bi-check2-circle me-2"></i> SALVAR
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal para Nova/Editar Categoria -->
 <div id="modalCategoria" class="nexus-modal-backdrop" style="display: none;">
     <div class="nexus-modal-card">
         <div class="nexus-modal-icon"><i id="modalIcon" class="bi bi-folder-plus"></i></div>
@@ -126,11 +119,11 @@
             <div id="categoria_error" class="text-danger small mt-2" style="display: none;"></div>
         </div>
         <div class="nexus-modal-footer">
-            <button type="button" onclick="salvarCategoria()" class="btn-nexus-save">
-                <i class="bi bi-check-lg"></i> SALVAR
-            </button>
-            <button type="button" onclick="fecharModalCategoria()" class="btn-nexus-cancel">
+            <button type="button" onclick="fecharModalCategoria()" class="btn-nexus-modal-cancel">
                 <i class="bi bi-x-circle"></i> CANCELAR
+            </button>
+            <button type="button" onclick="salvarCategoria()" class="btn-nexus-modal-save">
+                <i class="bi bi-check-lg"></i> SALVAR
             </button>
         </div>
     </div>
@@ -217,8 +210,7 @@
     html.light-mode .category-link { color: #2563eb !important; }
     html.light-mode .category-link:hover { text-decoration: underline !important; }
 
-
-    /* Footer e Botões */
+    /* Footer e Botões Gerais */
     .nexus-form-footer {
         display: flex;
         justify-content: flex-end;
@@ -283,12 +275,8 @@
         color: #0f172a !important;
     }
     html.light-mode .input-wrapper-nexus input:focus { border-color: #2563EB !important; }
+    html.light-mode ::placeholder { color: #94a3b8 !important; }
 
-    html.light-mode ::placeholder {
-        color: #94a3b8 !important;
-    }
-
-    /* --- BOTÃO SALVAR IDENTICO AO NO LIGHT MODE --- */
     html.light-mode .btn-nexus-save {
         background-color: #2563EB !important;
         color: #ffffff !important;
@@ -340,20 +328,18 @@
 
     .nexus-modal-card {
         background: #0b1120;
-        border: 1px solid var(--borda);
-        border-top: 4px solid var(--nexus-blue);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 4px solid #00e5ff;
         border-radius: 20px;
         padding: 40px;
         max-width: 450px;
         width: 90%;
         text-align: center;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        border-top: 4px solid var(--nexus-blue);
     }
-    .nexus-modal-icon { color: var(--nexus-blue); font-size: 3.5rem; margin-bottom: 15px; }
+    .nexus-modal-icon { color: #00e5ff; font-size: 3.5rem; margin-bottom: 15px; }
     .nexus-modal-title { color: #ffffff; font-weight: 800; letter-spacing: 1px; margin-bottom: 20px; }
 
-    /* Modal Light Mode */
     html.light-mode .nexus-modal-backdrop { background: rgba(241, 245, 249, 0.6); }
     html.light-mode .nexus-modal-card { 
         background: #ffffff !important; 
@@ -363,6 +349,86 @@
     }
     html.light-mode .nexus-modal-title { color: #0f172a !important; }
     html.light-mode .nexus-modal-icon { color: #2563eb !important; }
+
+    /* =======================================================
+       CORREÇÃO E ALINHAMENTO DE BOTÕES DO POP-UP
+       ======================================================= */
+    .nexus-modal-footer {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 15px !important;
+        margin-top: 25px !important;
+        padding-top: 15px !important;
+        width: 100% !important;
+    }
+
+    .btn-nexus-modal-save {
+        background-color: #2563EB !important;
+        color: #ffffff !important;
+        border: none !important;
+        padding: 10px 24px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        text-transform: uppercase;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        cursor: pointer !important;
+        height: 42px !important;
+        min-width: 140px !important;
+        justify-content: center !important;
+        transition: 0.2s all !important;
+    }
+    .btn-nexus-modal-save:hover {
+        background-color: #1d4ed8 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+    }
+
+    .btn-nexus-modal-cancel {
+        background: transparent !important;
+        color: #dc2626 !important;
+        border: 1px solid #dc2626 !important;
+        padding: 12px 25px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        text-transform: uppercase;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        cursor: pointer !important;
+        height: 42px !important;
+        min-width: 140px !important;
+        transition: 0.2s all !important;
+    }
+    .btn-nexus-modal-cancel:hover {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2) !important;
+    }
+
+    /* Cores se o pop-up for renderizado no Dark Mode nativo */
+    html:not(.light-mode) .nexus-modal-card { border-top-color: #00e5ff !important; }
+    html:not(.light-mode) .nexus-modal-icon { color: #00e5ff !important; }
+    html:not(.light-mode) .nexus-modal-footer .btn-nexus-modal-save {
+        background-color: #00e5ff !important;
+        color: #000000 !important;
+    }
+    html:not(.light-mode) .nexus-modal-footer .btn-nexus-modal-cancel {
+        color: #ff4d4d !important;
+        border-color: rgba(255, 77, 77, 0.4) !important;
+        background: transparent !important;
+    }
+    html:not(.light-mode) .nexus-modal-footer .btn-nexus-modal-cancel:hover {
+        background: rgba(255, 77, 77, 0.1) !important;
+        color: #ff4d4d !important;
+        border-color: #ff4d4d !important;
+        box-shadow: none !important;
+    }
 </style>
 
 <script>
@@ -380,7 +446,7 @@
     function openEditCategoryModal() {
         const select = document.querySelector('select[name="categoria"]');
         const selectedId = select.value;
-        
+
         if (!selectedId) {
             alert("Por favor, selecione uma categoria para editar.");
             return;
@@ -388,7 +454,6 @@
 
         editingCategoryId = selectedId;
         const fullText = select.options[select.selectedIndex].text;
-        // Extrai apenas o nome removendo o prefixo "ID - "
         const nomeAtual = fullText.split(' - ').slice(1).join(' - ');
 
         document.getElementById('modalTitle').innerText = 'EDITAR CATEGORIA';
@@ -408,7 +473,7 @@
     function salvarCategoria() {
         const nome = document.getElementById('nova_categoria_nome').value;
         const errorDiv = document.getElementById('categoria_error');
-        
+
         if (!nome) {
             errorDiv.innerText = "Por favor, digite o nome da categoria.";
             errorDiv.style.display = 'block';
@@ -419,7 +484,7 @@
         formData.append('nome', nome);
         formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-        const url = editingCategoryId 
+        const url = editingCategoryId
             ? `/dashboard/categorias/editar-ajax/${editingCategoryId}/`
             : "{% url 'cadastrar_categoria' %}";
 
