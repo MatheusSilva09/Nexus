@@ -4,9 +4,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Entrar na Loja - NEXUS Store</title>
-    <link rel="icon" type="image/png" href="{% static 'img/LOGOMARCA FAVICON.png' %}">
-    <link rel="shortcut icon" type="image/png" href="{% static 'img/LOGOMARCA FAVICON.png' %}">
+    <title>Identificação</title>
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon_nexushub.png' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Script preventivo para evitar flickering -->
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.classList.add('light-mode');
+        }
+    </script>
 
     <style>
         * {
@@ -24,18 +33,22 @@
             justify-content: center;
             align-items: center;
             background: radial-gradient(circle at center, #1e3a5f 0%, #0f172a 70%, #020617 100%);
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
+            transition: background 0.5s ease;
         }
-
         .login-container {
+            /* Mantendo o Dark Mode no container com o azul profundo #0F172A */
             background: #0f172a;
             padding: 2.5rem;
             border-radius: 20px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
             width: 100%;
             max-width: 400px;
+            /* Detalhe superior em turquesa para amarrar com o fundo */
             border-top: 5px solid #00f2fe;
             border: 1px solid rgba(0, 242, 254, 0.1);
+            transition: all 0.4s ease;
         }
 
         .logo {
@@ -44,12 +57,18 @@
         }
 
         .logo img {
+            /* Ajustei para responsivo: 100% da largura do container, com máximo de 400px */
             width: 100%;
             max-width: 400px;
             height: auto;
+            /* Mantém a proporção correta sem distorcer */
+
+            /* Mantendo o efeito de brilho que você já tinha */
             filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.3));
+
+            /* Alinhando a imagem à esquerda */
             display: block;
-            margin: 0 auto;
+            margin: 0;
         }
 
         .login-header {
@@ -87,6 +106,7 @@
             transition: all 0.3s ease;
         }
 
+        /* Foco do input puxando para o turquesa da logo */
         .form-group input:focus {
             outline: none;
             border-color: #00f2fe;
@@ -97,6 +117,7 @@
         .login-btn {
             width: 100%;
             padding: 0.8rem;
+            /* Botão em turquesa vibrante */
             background: linear-gradient(90deg, #087cb2, #2ab6dc);
             color: #0f172a;
             border: none;
@@ -145,42 +166,163 @@
             color: #ffffff;
             text-decoration: underline;
         }
+
+        /* --- TEMA LIGHT MODE OVERRIDES --- */
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            color: #00f2fe;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            z-index: 1000;
+        }
+        .theme-toggle-btn:hover {
+            background: rgba(0, 242, 254, 0.1);
+            transform: scale(1.1);
+        }
+
+        html.light-mode body {
+            background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+            /* Adiciona manchas de luz suaves nos cantos para o Mesh Effect */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 242, 254, 0.08) 0px, transparent 50%);
+        }
+
+        html.light-mode .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-color: #cbd5e1;
+            border-top-color: #2563eb;
+            /* Sombra multicamada: uma suave escura e um "glow" azulado sutil */
+            box-shadow: 
+                0 10px 25px rgba(37, 99, 235, 0.1), 
+                0 20px 48px rgba(0, 0, 0, 0.05);
+        }
+
+        html.light-mode .login-header p {
+            color: #64748b;
+        }
+
+        html.light-mode .form-group label {
+            color: #475569;
+        }
+
+        html.light-mode .form-group input {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        html.light-mode .form-group input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        html.light-mode .login-btn {
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        html.light-mode .links {
+            border-top-color: #e2e8f0;
+        }
+
+        html.light-mode .links a {
+            color: #2563eb;
+        }
+
+        html.light-mode .theme-toggle-btn {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #2563eb;
+        }
     </style>
 </head>
 
 <body>
+    <button id="theme-toggle" class="theme-toggle-btn" title="Alternar Tema">
+        <i id="theme-icon" class="bi bi-sun-fill"></i>
+    </button>
+
     <div class="login-container">
+
         <div class="logo">
-            <img src="{% static 'Logos/NEXUS STORE.png' %}" alt="Nexus Store Logo">
+            <img src="{% static 'img/nexushub.png' %}" alt="Nexus Hub Logo">
         </div>
+
         <div class="login-header">
-            <p>Bem-vindo(a) à NEXUS Store</p>
+            <p>Bem-vindo(a) ao Ecossistema NEXUS Hub</p>
         </div>
 
         {% if messages %}
             {% for message in messages %}
-            <div class="error-message">{{ message }}</div>
+            <div class="error-message">
+                {{ message }}
+            </div>
             {% endfor %}
         {% endif %}
 
-        <form method="post" action="{% url 'loja_login' %}">
+        <form method="post" action="{% url 'login_view' %}">
             {% csrf_token %}
+
             <div class="form-group">
                 <label>Usuário</label>
-                <input type="text" name="username" placeholder="Seu usuário da loja" required>
+                <input type="text" name="username" placeholder="Digite seu usuário" required>
             </div>
+
             <div class="form-group">
                 <label>Senha</label>
-                <input type="password" name="password" placeholder="Sua senha" required>
+                <input type="password" name="password" placeholder="Digite sua senha" required>
             </div>
-            <button type="submit" class="login-btn">Entrar na Loja</button>
+
+            <button type="submit" class="login-btn">Entrar</button>
         </form>
 
         <div class="links">
-            <a href="{% url 'loja_cadastro' %}">Ainda não tem conta? Cadastre-se aqui!</a>
+            <a href="{% url 'registrar' %}">Ainda não tem conta? Cadastre-se aqui!</a>
             <br><br>
-            <a href="{% url 'vitrine' %}">Voltar para a Vitrine</a>
+            <a href="{% url 'admin:index' %}">Acesso Administrativo</a>
         </div>
+
     </div>
+
+    <script>
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+
+        function updateIcon() {
+            if (document.documentElement.classList.contains('light-mode')) {
+                themeIcon.className = 'bi bi-moon-stars-fill';
+            } else {
+                themeIcon.className = 'bi bi-sun-fill';
+            }
+        }
+
+        updateIcon();
+
+        themeToggleBtn.addEventListener('click', function() {
+            document.documentElement.classList.toggle('light-mode');
+            
+            if (document.documentElement.classList.contains('light-mode')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            updateIcon();
+        });
+    </script>
 </body>
+
 </html>

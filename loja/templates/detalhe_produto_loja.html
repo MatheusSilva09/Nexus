@@ -1,31 +1,37 @@
 {% extends 'loja_base.html' %}
 {% load static %}
 
-{% block title %}{{ produto.nome }} | NEXUS Store{% endblock %}
+{% block title %}Comprar {{ produto.nome }} | NEXUS Store{% endblock %}
 
 {% block content %}
 <style>
+    /* Container Principal Adaptivo */
     .product-detail-container {
-        background: rgba(15, 23, 42, 0.55);
-        backdrop-filter: blur(8px);
-        border: 1px solid var(--borda);
+        background: var(--bg-card) !important;
+        border: 1px solid var(--borda) !important;
         border-radius: 16px;
         padding: 40px;
         margin-top: 20px;
+        transition: background 0.3s ease, border-color 0.3s ease;
     }
 
     /* Área da Imagem Principal */
     .main-img-display {
         width: 100%;
         height: 400px;
-        background: rgba(2, 6, 23, 0.4);
+        background: rgba(2, 6, 23, 0.2);
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--borda);
         overflow: hidden;
         margin-bottom: 20px;
+        transition: background 0.3s ease;
+    }
+
+    html.light-mode .main-img-display {
+        background: #f1f5f9;
     }
 
     .main-img-display img {
@@ -37,27 +43,28 @@
     /* Miniaturas da Galeria */
     .gallery-thumbs {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         overflow-x: auto;
+        padding-bottom: 5px;
     }
 
     .thumb-item {
-        width: 80px;
-        height: 80px;
-        background: rgba(2, 6, 23, 0.4);
-        border: 1px solid var(--borda);
+        width: 75px;
+        height: 75px;
+        background: rgba(2, 6, 23, 0.2);
+        border: 2px solid var(--borda);
         border-radius: 8px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 5px;
-        transition: 0.2s;
+        overflow: hidden;
+        transition: 0.2s ease-in-out;
+        padding: 4px;
     }
 
-    .thumb-item:hover, .thumb-item.active {
-        border-color: var(--turquesa-brilhante);
-        box-shadow: 0 0 10px var(--turquesa-glow);
+    html.light-mode .thumb-item {
+        background: #f1f5f9;
     }
 
     .thumb-item img {
@@ -66,92 +73,132 @@
         object-fit: contain;
     }
 
-    /* Textos e Info */
-    .badge-category {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--turquesa-brilhante);
-        margin-bottom: 10px;
-        display: inline-block;
+    /* Miniatura selecionada herda o glow do tema atual */
+    .thumb-item.active-thumb {
+        border-color: var(--sotaque-glow) !important;
+        box-shadow: 0 0 10px var(--turquesa-glow);
     }
 
+    /* Informações de Texto Dinâmicas */
     .product-info-title {
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: #ffffff;
-        margin-bottom: 15px;
-    }
-
-    .product-info-price {
         font-size: 2rem;
         font-weight: 800;
-        color: var(--turquesa-brilhante);
-        margin-bottom: 25px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--texto-principal);
+        margin-bottom: 5px;
     }
 
-    .product-info-desc {
+    .product-info-vendor {
+        font-size: 0.9rem;
         color: var(--texto-muted);
-        font-size: 1rem;
+        margin-bottom: 25px;
+    }
+    .product-info-vendor strong {
+        color: var(--texto-principal);
+    }
+
+    .product-info-heading {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--sotaque-glow);
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    /* Descrição do produto com a cor do subtítulo para legibilidade */
+    .product-info-desc {
+        color: var(--texto-subtitulo, var(--texto-muted)) !important;
+        font-size: 0.95rem;
         line-height: 1.6;
         margin-bottom: 30px;
     }
 
-    .stock-indicator {
-        font-size: 0.9rem;
+    /* Preço Realçado */
+    .product-info-price {
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: var(--sotaque-glow);
         margin-bottom: 20px;
+    }
+
+    /* Botão Dinâmico de Adicionar ao Carrinho */
+    .btn-store-add {
+        background-color: var(--sotaque-glow) !important;
+        border: none !important;
+        color: #000000 !important;
+        border-radius: 12px !important;
+        font-weight: 800 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: 0.2s ease-in-out;
+        text-decoration: none;
+        box-shadow: 0 0 15px var(--turquesa-glow);
+    }
+
+    html.light-mode .btn-store-add {
+        color: #ffffff !important;
+    }
+
+    .btn-store-add:hover {
+        opacity: 0.9;
+        box-shadow: 0 0 25px var(--turquesa-glow);
+        transform: translateY(-2px);
+    }
+
+    /* Link de Voltar */
+    .btn-back-link {
+        color: var(--texto-muted) !important;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+    .btn-back-link:hover {
+        color: var(--sotaque-glow) !important;
     }
 </style>
 
-<div class="container animate-fade-in">
-    <a href="{% url 'vitrine' %}" class="text-decoration-none mb-4 d-inline-block" style="color: var(--texto-muted); font-size: 0.9rem;">
-        <i class="bi bi-arrow-left"></i> Voltar para o Catálogo
-    </a>
+<div class="container pb-5">
+    <div class="mt-4">
+        <a href="{% url 'vitrine' %}" class="btn-back-link">
+            <i class="bi bi-arrow-left"></i> Voltar para a Vitrine
+        </a>
+    </div>
 
     <div class="product-detail-container">
         <div class="row g-5">
-            <div class="col-md-6">
+            
+            <div class="col-12 col-lg-6">
                 <div class="main-img-display">
-                    {% if galeria %}
-                        <img src="{{ galeria.first.imagem.url }}" id="view-main-image" alt="{{ produto.nome }}">
+                    {% if produto.imagens.all %}
+                        <img id="view-main-image" src="{{ produto.imagens.first.imagem.url }}" alt="{{ produto.nome }}">
                     {% else %}
-                        <div class="text-center">
-                            <i class="bi bi-box-seam" style="font-size: 5rem; color: rgba(255,255,255,0.15); display: block; margin-bottom: 10px;"></i>
-                            <span class="text-muted" style="font-size: 0.85rem;">Nenhuma imagem disponível</span>
-                        </div>
+                        <i class="bi bi-box-seam text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
                     {% endif %}
                 </div>
 
-                {% if galeria.count > 1 %}
+                {% if produto.imagens.all and produto.imagens.count > 1 %}
                 <div class="gallery-thumbs">
-                    {% for img in galeria %}
-                        <div class="thumb-item {% if forloop.first %}active{% endif %}" onclick="switchImage('{{ img.imagem.url }}', this)">
-                            <img src="{{ img.imagem.url }}" alt="Galeria">
+                    {% for img in produto.imagens.all %}
+                        <div class="thumb-item {% if forloop.first %}active-thumb{% endif %}" onclick="switchImage('{{ img.imagem.url }}', this)">
+                            <img src="{{ img.imagem.url }}" alt="Miniatura">
                         </div>
                     {% endfor %}
                 </div>
                 {% endif %}
             </div>
-            </div>
 
-            <div class="col-md-6 d-flex flex-column justify-content-between">
+            <div class="col-12 col-lg-6 d-flex flex-column justify-content-between">
                 <div>
-                    <span class="badge-category">{{ produto.categoria.nome|default:"Tecnologia Avançada" }}</span>
                     <h1 class="product-info-title">{{ produto.nome }}</h1>
-                    
-                    <div class="stock-indicator">
-                    <span class="text-white-50">Disponibilidade:</span> 
-                    {% if produto.status_estoque == "À Venda" %}
-                        <strong style="color: #10b981;">{{ produto.estoque }} unidades em estoque</strong>
-                    {% elif produto.status_estoque == "Estoque Baixo" %}
-                        <strong style="color: #f59e0b;">Estoque Baixo (Restam apenas {{ produto.estoque }} un!)</strong>
-                    {% else %}
-                        <strong style="color: #ef4444;">Esgotado</strong>
-                    {% endif %}
-                </div>
+                    <div class="product-info-vendor">
+                        Produto distribuído e homologado por: <strong>{{ produto.loja.nome }}</strong>
+                    </div>
 
+                    <h3 class="product-info-heading">Descrição</h3>
                     <p class="product-info-desc">
-                        {{ produto.descricao }}
+                        {{ produto.descricao|default:"Nenhuma especificação técnica adicional fornecida para este item." }}
                     </p>
                 </div>
 
@@ -163,12 +210,13 @@
                             <i class="bi bi-cart-plus-fill" style="font-size: 1.3rem;"></i> Adicionar ao Carrinho de Compras
                         </a>
                     {% else %}
-                        <button class="btn btn-secondary py-3 px-4 w-100 fs-6 d-inline-flex align-items-center justify-content-center gap-2" disabled style="background: #334155; border-color: #475569; color: #94a3b8; cursor: not-allowed;">
+                        <button class="btn btn-secondary py-3 px-4 w-100 fs-6 d-inline-flex align-items-center justify-content-center gap-2" disabled style="background: #334155; border-color: #475569; color: #94a3b8; cursor: not-allowed; border-radius: 12px;">
                             <i class="bi bi-x-circle-fill" style="font-size: 1.3rem;"></i> Produto Sem Estoque
                         </button>
                     {% endif %}
                 </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -177,11 +225,13 @@
     function switchImage(url, element) {
         document.getElementById('view-main-image').src = url;
         
-        // Remove a classe ativa de todos e adiciona no clicado
+        // Remove a classe ativa de todas as miniaturas
         document.querySelectorAll('.thumb-item').forEach(thumb => {
-            thumb.classList.remove('active');
+            thumb.classList.remove('active-thumb');
         });
-        element.classList.add('active');
+        
+        // Adiciona a classe ativa apenas à miniatura clicada
+        element.classList.add('active-thumb');
     }
 </script>
 {% endblock %}

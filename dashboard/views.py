@@ -17,6 +17,7 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage, send_mail, mail_admins
 from django.contrib import messages
 from django.utils import timezone
+import re
 
 from django.conf import settings
 from .models import Produto, ProdutoImagem, Categoria, Loja, Vendedor, Cliente, Pedido, ItemPedido, Carrinho, Venda, Funcionario, Perfil
@@ -267,7 +268,6 @@ def cadastrar_produto(request):
     vendedor_perfil = Vendedor.objects.filter(usuario=request.user).first()
     loja_do_usuario = Loja.objects.filter(vendedor=vendedor_perfil).first()
 
-    # 2. Caso para administradores ou recuperação de falha
     if not loja_do_usuario and request.user.is_superuser:
         loja_do_usuario = Loja.objects.first()
 
@@ -276,36 +276,61 @@ def cadastrar_produto(request):
         return redirect('criar_loja')
 
     if request.method == 'POST':
-        form = ProdutoForm(request.POST, request.FILES)
+        post_data = request.POST.copy()
+        
+        # --- LIMPEZA ROBUSTA CONTRA INVALIDOPERATION ---
+        preco_raw = post_data.get('preco', '0')
+        
+        # 1. Mantém apenas dígitos, pontos e vírgulas (remove R$, espaços e lixos de máscara)
+        preco_limpo = re.sub(r'[^\d.,]', '', preco_raw).strip()
+        
+        # 2. Se a string contiver pontos de milhar E vírgula decimal (ex: 1.500,00)
+        if ',' in preco_limpo and '.' in preco_limpo:
+            # Se o ponto vier antes da vírgula, removemos os pontos de milhar
+            if preco_limpo.rfind('.') < preco_limpo.rfind(','):
+                preco_limpo = preco_limpo.replace('.', '')
+        
+        # 3. Transforma a vírgula decimal no padrão aceito pelo Python (ponto)
+        preco_limpo = preco_limpo.replace(',', '.')
+
+        try:
+            # Validação e conversão segura para o dicionário do Form
+            valor_decimal = Decimal(preco_limpo)
+            post_data['preco'] = str(valor_decimal)
+        except (InvalidOperation, ValueError, TypeError):
+            valor_decimal = Decimal('0.00')
+            post_data['preco'] = '0.00'
+
+        form = ProdutoForm(post_data, request.FILES)
+        
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    # 1. Instancia o produto sem salvar ainda para vincular a loja
+                    # Instancia e associa os dados da loja
                     novo_produto = form.save(commit=False)
                     novo_produto.loja = loja_do_usuario
-                    
-                    # 2. Tratamento robusto de preço (limpeza de máscara de moeda R$)
-                    preco_raw = request.POST.get('preco', '0')
-                    preco_limpo = preco_raw.replace('R$', '').replace('.', '').replace(',', '.').strip()
-                    novo_produto.preco = Decimal(preco_limpo)
-                    
+                    novo_produto.preco = valor_decimal # Garante o valor sanitizado diretamente no objeto
                     novo_produto.save()
 
-                    # 3. Processamento da Galeria de Imagens
+                    # PROCESSAMENTO REAL DO BINÁRIO DA IMAGEM
                     imagens = request.FILES.getlist('imagens_galeria')
-                    for img in imagens:
-                        ProdutoImagem.objects.create(produto=novo_produto, imagem=img)
+                    
+                    if imagens:
+                        for img in imagens:
+                            ProdutoImagem.objects.create(produto=novo_produto, imagem=img)
+                    else:
+                        messages.warning(request, "Nenhuma imagem foi carregada para a galeria deste produto.")
 
                     messages.success(request, f"Produto '{novo_produto.nome}' cadastrado com sucesso!")
                     return redirect('lista_estoque')
             except Exception as e:
-                messages.error(request, f"Erro interno ao salvar: {str(e)}")
+                messages.error(request, f"Erro interno ao salvar os arquivos físicos: {str(e)}")
         else:
-            messages.error(request, "Erro ao validar formulário. Verifique os dados inseridos.")
+            messages.error(request, f"Erro ao validar formulário: {form.errors.as_text()}")
     else:
         form = ProdutoForm()
 
-    categorias = Categoria.objects.all() # Garante que as categorias apareçam no select
+    categorias = Categoria.objects.all()
     
     return render(request, 'produto_form.html', {
         'form': form, 
@@ -316,49 +341,69 @@ def cadastrar_produto(request):
 
 @login_required
 def editar_produto(request, produto_id):
-    # Mantendo sua segurança de busca por usuário
     produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
     categorias = Categoria.objects.all()
     
     if request.method == 'POST':
-        # 1. Pegamos os dados simples
         produto.nome = request.POST.get('nome')
         produto.descricao = request.POST.get('descricao', '')
         
-        # 2. Tratamos a Categoria
         categoria_id = request.POST.get('categoria')
         produto.categoria = Categoria.objects.filter(id=categoria_id).first()
 
-        # 3. Tratamos os números inteiros
         estoque_raw = request.POST.get('estoque', '0')
         produto.estoque = int(estoque_raw) if estoque_raw.isdigit() else 0
         
         estoque_min_raw = request.POST.get('estoque_minimo', '5')
         produto.estoque_minimo = int(estoque_min_raw) if estoque_min_raw.isdigit() else 5
 
-        # 4. Tratamos o Preço (Limpando antes de salvar no objeto)
+        # --- TRATAMENTO ROBUSTO CONTRA INVALIDOPERATION ---
         preco_raw = request.POST.get('preco', '0,00')
+        
+        # 1. Remove R$, espaços e tudo que não for número, ponto ou vírgula
+        preco_limpo = re.sub(r'[^\d.,]', '', preco_raw).strip()
+        
+        # 2. Se o padrão for brasileiro (ex: 1.500,00), remove o ponto de milhar e troca vírgula por ponto
+        if ',' in preco_limpo and '.' in preco_limpo:
+            if preco_limpo.rfind('.') < preco_limpo.rfind(','):
+                preco_limpo = preco_limpo.replace('.', '')
+        
+        preco_limpo = preco_limpo.replace(',', '.')
+
         try:
-            # Usando sua lógica de limpeza completa para evitar erros
-            preco_limpo = preco_raw.replace('R$', '').replace('.', '').replace(',', '.').strip()
+            # Tenta converter. Se vier string vazia ou zoada, cai no except e bota 0.00
             produto.preco = Decimal(preco_limpo)
-        except:
+        except (InvalidOperation, ValueError, TypeError):
             produto.preco = Decimal('0.00')
         
-        # 5. Agora sim, salvamos o objeto completo
+        # 5. Salvamento seguro
         try:
-            produto.save()
-            messages.success(request, f"Produto '{produto.nome}' atualizado com sucesso!")
-            return redirect('lista_estoque')
+            with transaction.atomic():
+                produto.save()
+                
+                # Coleta as imagens sem quebrar caso o input venha vazio
+                novas_imagens = request.FILES.getlist('imagens_galeria')
+                if novas_imagens:
+                    for img in novas_imagens:
+                        ProdutoImagem.objects.create(produto=produto, imagem=img)
+                
+                messages.success(request, f"Produto '{produto.nome}' atualizado com sucesso!")
+                return redirect('lista_estoque')
+                
         except Exception as e:
-            messages.error(request, f"Erro ao atualizar: {e}")
+            messages.error(request, f"Erro ao atualizar no banco: {e}")
     
-    # O contexto unificado que você já estava usando
+    imagens_atuais = produto.imagens.all()
+    
+    preco_formatado = f"{produto.preco:.2f}".replace('.', ',')
+
     return render(request, 'editar_produto.html', {
-        'produto': produto, 
-        'categorias': categorias,
-        'titulo_aba': 'Editar Produto | NEXUS Hub'
-    })
+    'produto': produto, 
+    'preco_formatado': preco_formatado, # Passamos a string perfeitamente lapidada aqui
+    'categorias': categorias,
+    'imagens_atuais': imagens_atuais,
+    'titulo_aba': 'Editar Produto | NEXUS Hub'
+})
 
 @login_required
 def detalhe_produto(request, produto_id):

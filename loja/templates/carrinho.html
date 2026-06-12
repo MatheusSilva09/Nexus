@@ -11,10 +11,10 @@
         letter-spacing: 2px;
         text-transform: uppercase;
         margin-bottom: 40px;
-        color: #ffffff;
+        color: var(--texto-principal); /* Corrigido: Dinâmico */
     }
     .nexus-title strong {
-        color: var(--turquesa-brilhante);
+        color: var(--sotaque-glow); /* Corrigido: Dinâmico */
         font-weight: 800;
     }
 
@@ -32,11 +32,10 @@
         }
     }
 
-    /* Estilo da Tabela do Carrinho (Inspirado na lista de clientes) */
+    /* Estilo da Tabela do Carrinho */
     .cart-table-card {
-        background: rgba(15, 23, 42, 0.55);
-        backdrop-filter: blur(8px);
-        border: 1px solid var(--borda);
+        background: var(--bg-card) !important; /* Corrigido: Dinâmico */
+        border: 1px solid var(--borda) !important;
         border-radius: 16px;
         overflow: hidden;
     }
@@ -48,28 +47,31 @@
 
     .cart-table th {
         padding: 18px 20px;
-        color: var(--turquesa-brilhante);
+        color: var(--sotaque-glow) !important; /* Corrigido: Dinâmico */
         font-size: 0.8rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        background: rgba(0, 242, 254, 0.03);
+        background: rgba(0, 242, 254, 0.02);
         border-bottom: 1px solid var(--borda);
         text-align: left;
     }
 
+    html.light-mode .cart-table th {
+        background: rgba(8, 145, 178, 0.05);
+    }
+
     .cart-table td {
         padding: 20px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        color: #e2e8f0;
+        border-bottom: 1px solid var(--borda);
+        color: var(--texto-principal); /* Corrigido: Dinâmico */
         font-size: 0.95rem;
         vertical-align: middle;
     }
 
     /* Resumo Lateral do Pedido */
     .summary-card {
-        background: rgba(15, 23, 42, 0.85);
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--borda);
+        background: var(--bg-card) !important; /* Corrigido: Dinâmico */
+        border: 1px solid var(--borda) !important;
         border-radius: 16px;
         padding: 25px;
         position: sticky;
@@ -81,7 +83,7 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: #ffffff;
+        color: var(--texto-principal); /* Corrigido: Dinâmico */
         margin-bottom: 20px;
         border-bottom: 1px solid var(--borda);
         padding-bottom: 10px;
@@ -103,12 +105,12 @@
         border-top: 1px solid var(--borda);
         font-size: 1.3rem;
         font-weight: 800;
-        color: var(--turquesa-brilhante);
+        color: var(--sotaque-glow); /* Corrigido: Dinâmico */
     }
 
     /* Botões Operacionais */
     .btn-nexus-checkout {
-        background-color: var(--turquesa-brilhante) !important;
+        background-color: var(--sotaque-glow) !important; /* Corrigido: Dinâmico */
         border: none !important;
         color: #000000 !important;
         width: 100%;
@@ -128,9 +130,13 @@
         box-shadow: 0 0 15px var(--turquesa-glow);
     }
 
+    html.light-mode .btn-nexus-checkout {
+        color: #ffffff !important; /* Texto branco no modo claro para contraste */
+    }
+
     .btn-nexus-checkout:hover {
-        background-color: #00b8cc !important;
-        box-shadow: 0 0 25px rgba(0, 229, 255, 0.6);
+        opacity: 0.9;
+        box-shadow: 0 0 25px var(--turquesa-glow);
         transform: translateY(-1px);
     }
 
@@ -150,17 +156,35 @@
 
     .btn-remove:hover {
         background: #ef4444;
-        color: #ffffff;
+        color: #ffffff !important;
         box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
     }
 
     .empty-cart {
         text-align: center;
         padding: 60px 20px;
+        color: var(--texto-principal); /* Corrigido: Dinâmico */
+    }
+
+    /* Reaproveitando estilo de botão para carrinho vazio */
+    .btn-store-back {
+        background-color: var(--sotaque-glow) !important;
+        color: #000000 !important;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    html.light-mode .btn-store-back {
+        color: #ffffff !important;
     }
 </style>
 
-<div class="container animate-fade-in">
+<div class="container">
     <h1 class="nexus-title">Seu <strong>Carrinho</strong></h1>
 
     {% if itens_carrinho %}
@@ -180,12 +204,12 @@
                     {% for item in itens_carrinho %}
                     <tr>
                         <td>
-                            <span class="fw-bold text-white d-block">{{ item.produto.nome }}</span>
+                            <span class="fw-bold d-block" style="color: var(--texto-principal);">{{ item.produto.nome }}</span>
                             <small class="text-muted">{{ item.produto.categoria.nome|default:"Acessório" }}</small>
                         </td>
                         <td>R$ {{ item.produto.preco }}</td>
                         <td class="fw-bold">{{ item.quantidade }}x</td>
-                        <td class="text-white fw-bold">R$ {{ item.subtotal }}</td>
+                        <td class="fw-bold" style="color: var(--texto-principal);">R$ {{ item.subtotal }}</td>
                         <td>
                             <a href="{% url 'remover_do_carrinho' item.produto.id %}" class="btn-remove">
                                 <i class="bi bi-trash3"></i> Tirar
@@ -201,7 +225,7 @@
             <h2 class="summary-title">Resumo do Pedido</h2>
             <div class="summary-row">
                 <span>Módulos selecionados</span>
-                <span class="text-white fw-bold">{{ total_itens }}</span>
+                <span class="fw-bold" style="color: var(--texto-principal);">{{ total_itens }}</span>
             </div>
             <div class="summary-row">
                 <span>Envio / Entrega</span>
@@ -226,9 +250,9 @@
     <div class="cart-table-card">
         <div class="empty-cart">
             <i class="bi bi-cart-x" style="font-size: 3.5rem; color: var(--texto-muted); display: block; margin-bottom: 15px;"></i>
-            <h3 class="text-white">Seu carrinho está vazio</h3>
+            <h3>Seu carrinho está vazio</h3>
             <p class="text-muted mb-4">Você ainda não adicionou nenhuma tecnologia ao seu terminal.</p>
-            <a href="{% url 'vitrine' %}" class="btn-store-add d-inline-flex" style="max-width: 250px;">
+            <a href="{% url 'vitrine' %}" class="btn-store-back">
                 Voltar ao Catálogo
             </a>
         </div>

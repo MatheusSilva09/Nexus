@@ -5,31 +5,24 @@
 
 {% block content %}
 <style>
-    /* Estilo dos Cards Baseado na Simulação da NEXUS Store */
+    /* Estilo dos Cards Adaptados ao Modelo Tech Premium e Temas Dinâmicos */
     .nexus-store-title {
         font-size: 1.8rem;
         font-weight: 300;
         letter-spacing: 2px;
         text-transform: uppercase;
-        margin-bottom: 40px;
-        color: #ffffff;
+        margin-bottom: 30px;
+        color: var(--texto-principal); /* Corrigido: Dinâmico */
     }
     .nexus-store-title strong {
-        color: var(--turquesa-brilhante);
+        color: var(--sotaque-glow);
         font-weight: 800;
     }
 
-    .product-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 30px;
-    }
-
-    /* O Card em Glassmorphic Escuro */
+    /* O Card Dinâmico que se adapta ao Light/Dark Mode */
     .product-card {
-        background: rgba(15, 23, 42, 0.55);
-        backdrop-filter: blur(8px);
-        border: 1px solid var(--borda);
+        background: var(--bg-card) !important;
+        border: 1px solid var(--borda) !important;
         border-radius: 16px;
         padding: 20px;
         display: flex;
@@ -43,7 +36,7 @@
     /* Efeito de foco/hover no card do produto */
     .product-card:hover {
         transform: translateY(-5px);
-        border-color: var(--turquesa-brilhante);
+        border-color: var(--sotaque-glow) !important;
         box-shadow: 0 10px 25px var(--turquesa-glow);
     }
 
@@ -51,14 +44,18 @@
     .product-img-wrapper {
         width: 100%;
         height: 200px;
-        background: rgba(2, 6, 23, 0.4);
+        background: rgba(2, 6, 23, 0.2);
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.02);
+        margin-bottom: 15px;
+        border: 1px solid var(--borda);
         overflow: hidden;
+    }
+
+    html.light-mode .product-img-wrapper {
+        background: #f1f5f9;
     }
 
     .product-img {
@@ -76,13 +73,22 @@
     .product-name {
         font-size: 1.05rem;
         font-weight: 700;
-        color: #ffffff;
         margin-bottom: 6px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    .product-name a {
+        color: var(--texto-principal) !important; /* Corrigido: Dinâmico */
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .product-name a:hover {
+        color: var(--sotaque-glow) !important;
     }
 
     .product-description {
@@ -100,15 +106,15 @@
     .product-price {
         font-size: 1.4rem;
         font-weight: 800;
-        color: var(--turquesa-brilhante);
+        color: var(--sotaque-glow);
         margin-bottom: 15px;
     }
 
-    /* Botão Adicionar ao Carrinho (Inspirado no .btn-nexus-add do painel administrativo) */
+    /* Botão Adicionar ao Carrinho */
     .btn-store-add {
-        background-color: var(--turquesa-brilhante) !important;
+        background-color: var(--sotaque-glow) !important;
         border: none !important;
-        color: #000000 !important;
+        color: #000000 !important; /* Texto preto no modo escuro para contraste */
         width: 100%;
         padding: 12px 20px !important;
         border-radius: 12px !important;
@@ -124,59 +130,99 @@
         text-decoration: none;
     }
 
+    /* Garante que o texto do botão fica visível no modo claro */
+    html.light-mode .btn-store-add {
+        color: #ffffff !important;
+    }
+
     .btn-store-add:hover {
-        background-color: #00b8cc !important;
-        box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+        opacity: 0.9;
+        box-shadow: 0 0 15px var(--turquesa-glow);
+    }
+
+    /* Texto do fornecedor dinâmico */
+    .vendor-text {
+        font-weight: 500;
+        color: var(--texto-muted) !important;
+    }
+    .vendor-text span {
+        color: var(--texto-principal) !important;
     }
 
     .empty-catalog {
         text-align: center;
         padding: 80px 20px;
-        background: rgba(15, 23, 42, 0.3);
+        background: var(--bg-card);
         border-radius: 16px;
         border: 1px dashed var(--borda);
+        color: var(--texto-principal); /* Corrigido: Dinâmico */
     }
 </style>
 
-<div class="container animate-fade-in">
+<div class="container">
+    
+    <!-- BANNER DE DESTAQUE COMERCIAL (ESTILO TECH PREMIUM) -->
+    <div class="p-5 mb-5 rounded-4 text-center" style="background: var(--bg-card); border: 1px solid var(--borda); transition: background 0.3s ease;">
+        <h1 class="fw-bold" style="color: var(--sotaque-glow);">NEXUS TECH WEEK</h1>
+        <p class="banner-desc" style="color: var(--texto-subtitulo); margin-bottom: 20px; transition: color 0.3s ease;">
+            Equipamentos de alta performance com condições imperdíveis no ecossistema integrado.
+        </p>
+        <button class="btn btn-primary px-4 py-2 fw-semibold" style="background: var(--nexus-blue); border: none; border-radius: 8px;">Conferir Ofertas</button>
+    </div>
+
+    <!-- TÍTULO DA VITRINE -->
     <h1 class="nexus-store-title">Catálogo de <strong>Produtos</strong></h1>
 
-    <div class="product-grid">
+    <!-- GRID DE PRODUTOS RESPONSIVO DO BOOTSTRAP (GRID EXPANSIVA) -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         {% for produto in produtos %}
-        <div class="product-card">
-            <small class="text-muted" style="color: #ffffff">Vendido por: {{ produto.loja.nome }}</small>
-            <div>
-                <div class="product-img-wrapper">
-                    {% if produto.imagens.all %}
-                    <img src="{{ produto.imagens.first.imagem.url }}" alt="{{ produto.nome }}" class="img-fluid">
-                {% else %}
-                    <i class="bi bi-box-seam" style="font-size: 3rem; color: rgba(255,255,255,0.15);"></i>
-                {% endif %}
+            <div class="col">
+                <div class="card h-100 product-card">
+                    
+                    <!-- Fornecedor/Loja Origem -->
+                    <small class="vendor-text mb-2 d-block">
+                        Vendido por: <span>{{ produto.loja.nome }}</span>
+                    </small>
+                    
+                    <!-- Mapeamento Dinâmico de Imagens Corrigido -->
+                    <div class="product-img-wrapper">
+                        {% if produto.imagens.all %}
+                            <img src="{{ produto.imagens.first.imagem.url }}" alt="{{ produto.nome }}" class="product-img">
+                        {% else %}
+                            <i class="bi bi-box-seam" style="font-size: 3rem; color: var(--texto-muted); opacity: 0.5;"></i>
+                        {% endif %}
+                    </div>
+
+                    <!-- Corpo de Informações -->
+                    <div class="card-body p-0 d-flex flex-column">
+                        <h2 class="product-name" title="{{ produto.nome }}">
+                            <a href="{% url 'detalhe_produto_loja' produto.id %}">
+                                {{ produto.nome }}
+                            </a>
+                        </h2>
+                        <p class="product-description">{{ produto.descricao|default:"Dispositivo de alta performance integrado ao ecossistema Nexus." }}</p>
+                        
+                        <div class="mt-auto">
+                            <div class="product-price">R$ {{ produto.preco }}</div>
+                            
+                            <!-- Rota Real de Adição ao Carrinho Restabelecida -->
+                            <a href="{% url 'adicionar_ao_carrinho' produto.id %}" class="btn-store-add">
+                                <i class="bi bi-cart-plus-fill" style="font-size: 1.1rem;"></i> Adicionar ao Carrinho
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
-
-                <h2 class="product-name" title="{{ produto.nome }}">
-                    <a href="{% url 'detalhe_produto_loja' produto.id %}" style="color: #ffffff; text-decoration: none; transition: 0.2s;" onmouseover="this.style.color='var(--turquesa-brilhante)'" onmouseout="this.style.color='#ffffff'">
-                        {{ produto.nome }}
-                    </a>
-                <p class="product-description">{{ produto.descricao|default:"Dispositivo de alta performance integrado ao ecossistema Nexus." }}</p>
             </div>
-
-            <div>
-                <div class="product-price">R$ {{ produto.preco }}</div>
-                
-                <a href="{% url 'adicionar_ao_carrinho' produto.id %}" class="btn-store-add">
-                    <i class="bi bi-cart-plus-fill" style="font-size: 1.1rem;"></i> Adicionar ao Carrinho
-                </a>
-            </div>
-        </div>
         {% empty %}
-        <div class="w-100 grid-span-full">
-            <div class="empty-catalog">
-                <i class="bi bi-cpu" style="font-size: 3rem; color: var(--texto-muted); margin-bottom: 15px; display: block;"></i>
-                <h3 class="text-white">Nenhum módulo disponível</h3>
-                <p class="text-muted mb-0">O estoque da loja está sendo reabastecido pelo painel de controle.</p>
+            <!-- Tratamento de Catálogo Vazio Real da Loja -->
+            <div class="col-12 w-100">
+                <div class="empty-catalog">
+                    <i class="bi bi-cpu" style="font-size: 3rem; color: var(--texto-muted); margin-bottom: 15px; display: block;"></i>
+                    <h3>Nenhum módulo disponível</h3>
+                    <p class="text-muted mb-0">O estoque da loja está sendo reabastecido pelo painel de controle.</p>
+                </div>
             </div>
-        </div>
         {% endfor %}
     </div>
 </div>

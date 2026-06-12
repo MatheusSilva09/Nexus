@@ -35,45 +35,58 @@
             </div>
 
             <div class="form-row-nexus" style="margin-bottom: 25px; display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label class="label-nexus">CATEGORIA</label>
-                    <div class="input-wrapper-nexus">
-                        <i class="bi bi-layers-fill"></i>
-                        <select name="categoria" class="form-control-nexus select-nexus" required style="padding-left: 45px !important;">
-                            <option value="">Selecione...</option>
-                            {% for cat in categorias %}
-                            <option value="{{ cat.id }}" {% if cat.id == produto.categoria.id %}selected{% endif %}>
-                                {{ cat.id }} - {{ cat.nome }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="d-flex gap-3 mt-2">
-                        <a href="javascript:void(0)" onclick="openCategoryModal()" class="category-link" style="font-size: 0.85rem; text-decoration: none; display: inline-block; cursor: pointer; font-weight: 700;">
-                            <i class="bi bi-plus-circle"></i> Criar Nova Categoria
-                        </a>
-                        <a href="javascript:void(0)" onclick="openEditCategoryModal()" class="category-link" style="font-size: 0.85rem; text-decoration: none; display: inline-block; cursor: pointer; font-weight: 700;">
-                            <i class="bi bi-pencil-square"></i> Editar Categoria
-                        </a>
-                    </div>
-                </div>
+    <div style="flex: 1;">
+        <label class="label-nexus">CATEGORIA</label>
+        <div class="input-wrapper-nexus">
+            <i class="bi bi-layers-fill"></i>
+            <select name="categoria" class="form-control-nexus select-nexus" required style="padding-left: 45px !important;">
+                <option value="">Selecione...</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id }}" {% if produto.categoria.id == cat.id %}selected{% endif %}>
+                    {{ cat.id }} - {{ cat.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <a href="javascript:void(0)" onclick="openCategoryModal()" class="category-link"
+            style="color: var(--nexus-blue); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block; cursor: pointer;">
+            <i class="bi bi-plus-circle"></i> Criar nova categoria
+        </a>
+    </div>
 
-                <div style="flex: 1;">
-                    <label class="label-nexus">SELECIONAR NOVAS IMAGENS</label>
-                    <div class="input-wrapper-nexus">
-                        <i class="bi bi-images"></i>
-                        <input type="file" name="imagens_galeria" class="form-control-nexus" multiple accept="image/*" style="padding: 10px 15px 10px 45px !important;">
+    <div style="flex: 1;">
+        <label class="label-nexus">ADICIONAR IMAGENS À GALERIA</label>
+        <div class="input-wrapper-nexus">
+            <i class="bi bi-images"></i>
+            <input type="file" name="imagens_galeria" class="form-control-nexus" multiple accept="image/*" style="padding: 10px 15px 10px 45px !important;">
+        </div>
+        <small style="color: rgba(255,255,255,0.4); font-size: 0.7rem; display: block; margin-top: 5px;">
+            Selecione novos arquivos para anexar à galeria deste produto (Ctrl/Shift para múltiplos).
+        </small>
+
+        {% if imagens_atuais %}
+        <div style="margin-top: 15px;">
+            <p style="font-size: 0.7rem; color: var(--nexus-blue); font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                Imagens Atuais no Servidor:
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                {% for img in imagens_atuais %}
+                    <div style="width: 55px; height: 55px; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.15); overflow: hidden; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; padding: 4px;">
+                        <img src="{{ img.imagem.url }}" alt="Mídia Ativa" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                     </div>
-                    <small class="text-secondary" style="font-size: 0.7rem; display: block; margin-top: 5px;">Múltiplas seleções permitidas (Ctrl/Shift).</small>
-                </div>
+                {% endfor %}
             </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
 
             <div class="form-row-nexus" style="margin-bottom: 25px; display: flex; gap: 20px;">
                 <div style="flex: 1;">
                     <label class="label-nexus">PREÇO SUGERIDO</label>
                     <div class="input-wrapper-nexus">
                         <span class="currency-prefix">R$</span>
-                        <input type="text" name="preco" id="id_preco" value="{{ produto.preco|stringformat:'.2f' }}" placeholder="0,00" required style="padding-left: 45px !important;">
+                        <input type="text" name="preco" id="id_preco" value="{{ preco_formatado }}" placeholder="0,00" required style="padding-left: 45px !important;">
                     </div>
                 </div>
 
