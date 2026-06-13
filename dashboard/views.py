@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.db import transaction
 from django.db.models import Sum, Count, F
+from django.db.models import Q
 from django.db.models.functions import TruncDay
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -165,6 +166,7 @@ def dashboard_faturamento(request):
 @loja_obrigatoria
 def lista_estoque(request):
     # 1. Busca a base de produtos do usuário logado
+    termo_busca = request.GET.get('q', '').strip()
     produtos_base = Produto.objects.filter(loja__vendedor__usuario=request.user)
     
     # 2. CALCULA OS ALERTAS (Antes de qualquer filtro de busca)
@@ -182,6 +184,14 @@ def lista_estoque(request):
         valor_total=Sum(F('preco') * F('estoque')) # Valor total em R$
     )
 
+    if termo_busca:
+        produtos = produtos.filter(
+            Q(nome__icontains=termo_busca) | 
+            Q(descricao__icontains=termo_busca)
+        )
+    
+    produtos = produtos.order_by('nome')
+
     context = {
         'produtos': produtos,
         'total_itens': totais['total_itens'] or 0,
@@ -189,7 +199,10 @@ def lista_estoque(request):
         'alertas_reposicao': alertas_count, # Agora a variável existe!
         'titulo_aba': 'Gerenciamento de Estoque | NEXUS Hub',
     }
-    return render(request, 'estoque_lista.html', context)
+    return render(request, 'estoque_lista.html', {
+        'produtos': produtos,
+        'termo_busca': termo_busca, # Mantém o texto fixo na barra superior após o carregamento
+    })
 
 class ListaEstoqueView(LoginRequiredMixin, ListView):
     login_url = 'login_view'
@@ -312,12 +325,17 @@ def cadastrar_produto(request):
                     novo_produto.preco = valor_decimal # Garante o valor sanitizado diretamente no objeto
                     novo_produto.save()
 
-                    # PROCESSAMENTO REAL DO BINÁRIO DA IMAGEM
+                    # PROCESSAMENTO REAL DO BINÁRIO DA IMAGEM COM ORDENAÇÃO AUTOMÁTICA
                     imagens = request.FILES.getlist('imagens_galeria')
                     
                     if imagens:
-                        for img in imagens:
-                            ProdutoImagem.objects.create(produto=novo_produto, imagem=img)
+                        # O enumerate gera o 'indice' (0, 1, 2...) com base na ordem de envio dos arquivos
+                        for indice, img in enumerate(imagens):
+                            ProdutoImagem.objects.create(
+                                produto=novo_produto, 
+                                imagem=img,
+                                ordem=indice  # <--- DEFINE A ORDEM AUTOMÁTICA AQUI!
+                            )
                     else:
                         messages.warning(request, "Nenhuma imagem foi carregada para a galeria deste produto.")
 
@@ -338,6 +356,33 @@ def cadastrar_produto(request):
         'categorias': categorias,
         'titulo_aba': 'Cadastrar Produto | NEXUS Hub'
     })
+
+@login_required
+@require_POST
+def deletar_imagem_galeria(request, imagem_id):
+    try:
+        # Busca a imagem garantindo que o produto pertença à loja mapeada pelo usuário
+        imagem = ProdutoImagem.objects.get(
+            id=imagem_id, 
+            produto__loja__vendedor__usuario=request.user
+        )
+        
+        # 1. Deleta o arquivo físico da pasta media/produtos/galeria/
+        if imagem.imagem:
+            imagem.imagem.delete(save=False)
+            
+        # 2. Deleta o registro da tabela dashboard_produto do SQLite
+        imagem.delete()
+        
+        print(f"[NEXUS HUB] Imagem ID {imagem_id} deletada com sucesso pelo usuário {request.user}.")
+        return JsonResponse({'success': True, 'message': 'Imagem removida com sucesso!'})
+        
+    except ProdutoImagem.DoesNotExist:
+        print(f"[NEXUS HUB] Erro: Imagem ID {imagem_id} não encontrada para o usuário {request.user}.")
+        return JsonResponse({'success': False, 'error': 'Imagem não encontrada ou acesso negado.'})
+    except Exception as e:
+        print(f"[NEXUS HUB] Erro crítico na exclusão: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)})
 
 @login_required
 def editar_produto(request, produto_id):
@@ -381,6 +426,12 @@ def editar_produto(request, produto_id):
             with transaction.atomic():
                 produto.save()
                 
+                for key, value in request.POST.items():
+                    if key.startswith('ordem_imagem_'):
+                        img_id = key.replace('ordem_imagem_', '') # Extrai o ID da imagem
+                        # Atualiza a ordem daquela imagem específica
+                        ProdutoImagem.objects.filter(id=img_id, produto=produto).update(ordem=int(value or 0))
+
                 # Coleta as imagens sem quebrar caso o input venha vazio
                 novas_imagens = request.FILES.getlist('imagens_galeria')
                 if novas_imagens:
@@ -396,6 +447,7 @@ def editar_produto(request, produto_id):
     imagens_atuais = produto.imagens.all()
     
     preco_formatado = f"{produto.preco:.2f}".replace('.', ',')
+    imagens_atuais = produto.imagens.all().order_by('ordem', 'id')
 
     return render(request, 'editar_produto.html', {
     'produto': produto, 

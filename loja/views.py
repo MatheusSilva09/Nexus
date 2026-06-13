@@ -1,18 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from dashboard.models import Produto 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Q
+
 from dashboard.models import Produto, Pedido, ItemPedido, Cliente, Loja
 
-# 1. VIEW DA VITRINE (Já está funcionando!)
 def vitrine_view(request):
-    # Opção A: Exibir produtos de TODAS as lojas cadastradas
+    # 1. Base: Exibir produtos de TODAS as lojas cadastradas com estoque disponível
     produtos = Produto.objects.filter(estoque__gt=0)
     
-    # Opção B (Mais profissional): Filtrar por uma loja específica se o usuário escolher
+    # 2. NOVO: Filtrar apenas produtos em promoção se o parâmetro 'ofertas' estiver na URL
+    apenas_ofertas = request.GET.get('ofertas') == 'true'
+    if apenas_ofertas:
+        produtos = produtos.filter(em_oferta=True)
+    
+    # 3. Filtrar por uma loja específica se o usuário escolher no menu
     loja_id = request.GET.get('loja_id')
     if loja_id:
         produtos = produtos.filter(loja_id=loja_id)
@@ -23,8 +28,9 @@ def vitrine_view(request):
     context = {
         'titulo_aba': 'NEXUS Store | Gestão Modular Inteligente',
         'produtos': produtos,
-        'lojas': Loja.objects.all(), # Para criar um menu de seleção de lojas
+        'lojas': Loja.objects.all(),
         'total_itens': total_itens,
+        'filtrando_ofertas': apenas_ofertas,  # Enviamos para o HTML para controle visual
     }
     return render(request, 'vitrine.html', context)
 

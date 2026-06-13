@@ -114,6 +114,14 @@ class Produto(models.Model):
     estoque_minimo = models.IntegerField(default=5)
     ativo = models.BooleanField(default=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
+    em_oferta = models.BooleanField(default=False, verbose_name="Ativar Promoção?")
+    preco_promocional = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        null=True, 
+        blank=True, 
+        verbose_name="Preço com Desconto"
+    )
     
     @property
     def status_estoque(self):
@@ -134,6 +142,11 @@ class Produto(models.Model):
 
     def precisa_repor(self):
         return self.estoque <= self.estoque_minimo
+    
+    def preco_final(self):
+        if self.em_oferta and self.preco_promocional:
+            return self.preco_promocional
+        return self.preco
 
     def __str__(self):
         return self.nome
@@ -141,6 +154,11 @@ class Produto(models.Model):
 class ProdutoImagem(models.Model):
     produto = models.ForeignKey(Produto, related_name='imagens', on_delete=models.CASCADE)
     imagem = models.ImageField(upload_to='produtos/galeria/')
+    ordem = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'dashboard_produtoimagem' # Troque pelo nome real se houver
+        ordering = ['ordem', 'id']
 
 # --- CARRINHO E PEDIDOS ---
 

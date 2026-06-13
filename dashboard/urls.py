@@ -40,4 +40,5 @@ urlpatterns = [
     path('dashboard/funcionarios/novo/', views.adicionar_funcionario, name='adicionar_funcionario'),
     path('dashboard/funcionarios/editar/<int:id>/', views.editar_funcionario, name='editar_funcionario'),
     path('dashboard/funcionarios/excluir/<int:id>/', views.excluir_funcionario, name='excluir_funcionario'),
+    path('dashboard/estoque/produto/imagem/deletar/<int:imagem_id>/', views.deletar_imagem_galeria, name='deletar_imagem_galeria'),
 ]

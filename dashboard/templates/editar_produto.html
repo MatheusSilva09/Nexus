@@ -67,12 +67,24 @@
         {% if imagens_atuais %}
         <div style="margin-top: 15px;">
             <p style="font-size: 0.7rem; color: var(--nexus-blue); font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-                Imagens Atuais no Servidor:
+                Galeria de Imagens (Defina a ordem numérica e clique em Salvar):
             </p>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 {% for img in imagens_atuais %}
-                    <div style="width: 55px; height: 55px; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.15); overflow: hidden; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; padding: 4px;">
-                        <img src="{{ img.imagem.url }}" alt="Mídia Ativa" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    <div id="wrapper-foto-{{ img.id }}" style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                        
+                        <div style="position: relative; width: 65px; height: 65px; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.15); background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; padding: 4px;">
+                            <img src="{{ img.imagem.url }}" alt="Mídia Ativa" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px;">
+                            
+                            <button type="button" onclick="apagarImagemGaleria('{{ img.id }}')" 
+                                    style="position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: #dc2626; color: #ffffff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
+                                <i class="bi bi-trash-fill" style="font-size: 0.65rem; color: #fff !important;"></i>
+                            </button>
+                        </div>
+
+                        <input type="number" name="ordem_imagem_{{ img.id }}" value="{{ img.ordem }}" min="0"
+                               style="width: 50px; text-align: center; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem; border-radius: 4px; padding: 2px 0;"
+                               title="Posição de exibição">
                     </div>
                 {% endfor %}
             </div>
@@ -532,5 +544,51 @@
             errorDiv.style.display = 'block';
         });
     }
+
+function apagarImagemGaleria(imagemId) {
+    if (confirm("Tem certeza que deseja remover esta imagem permanentemente da galeria?")) {
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        // Construímos a URL dinâmica usando o nome que você registrou no urls.py
+        // O replace final substitui o número 0 fake pelo ID correto da imagem no JavaScript
+        let urlDeletar = "{% url 'deletar_imagem_galeria' 0 %}".replace('0', imagemId);
+
+        fetch(urlDeletar, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Erro de rede no servidor.");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Remove o container da imagem da tela com um efeito suave
+                const containerFoto = document.getElementById(`wrapper-foto-${imagemId}`);
+                if (containerFoto) {
+                    containerFoto.style.transition = "all 0.3s ease";
+                    containerFoto.style.opacity = "0";
+                    containerFoto.style.transform = "scale(0.7)";
+                    setTimeout(() => {
+                        containerFoto.remove();
+                    }, 300);
+                }
+            } else {
+                // Se o Django retornou um erro (ex: acesso negado), ele avisa aqui
+                alert("Não foi possível apagar: " + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert("Erro na comunicação com o servidor. Verifique o console do navegador.");
+        });
+    }
+}
 </script>
 {% endblock %}

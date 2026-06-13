@@ -167,7 +167,11 @@
         <p class="banner-desc" style="color: var(--texto-subtitulo); margin-bottom: 20px; transition: color 0.3s ease;">
             Equipamentos de alta performance com condições imperdíveis no ecossistema integrado.
         </p>
-        <button class="btn btn-primary px-4 py-2 fw-semibold" style="background: var(--nexus-blue); border: none; border-radius: 8px;">Conferir Ofertas</button>
+            <a href="{% url 'vitrine' %}?ofertas=true" 
+            class="btn btn-primary px-4 py-2 fw-semibold" 
+            style="background: var(--nexus-blue); border: none; border-radius: 8px; color: #ffffff !important; display: inline-block; text-decoration: none;">
+                Conferir Ofertas
+            </a>
     </div>
 
     <!-- TÍTULO DA VITRINE -->
@@ -176,45 +180,58 @@
     <!-- GRID DE PRODUTOS RESPONSIVO DO BOOTSTRAP (GRID EXPANSIVA) -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         {% for produto in produtos %}
-            <div class="col">
-                <div class="card h-100 product-card">
-                    
-                    <!-- Fornecedor/Loja Origem -->
-                    <small class="vendor-text mb-2 d-block">
-                        Vendido por: <span>{{ produto.loja.nome }}</span>
-                    </small>
-                    
-                    <!-- Mapeamento Dinâmico de Imagens Corrigido -->
-                    <div class="product-img-wrapper">
-                        {% if produto.imagens.all %}
-                            <img src="{{ produto.imagens.first.imagem.url }}" alt="{{ produto.nome }}" class="product-img">
+    <div class="col">
+        <div class="card h-100 product-card position-relative" style="overflow: hidden;">
+            
+            {% if produto.em_oferta %}
+                <span class="badge-oferta-nexus" style="position: absolute; top: 12px; right: 12px; background: #dc2626; color: #ffffff; font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);">
+                    Oferta
+                </span>
+            {% endif %}
+            
+            <small class="vendor-text mb-2 d-block" style="z-index: 2;">
+                Vendido por: <span>{{ produto.loja.nome }}</span>
+            </small>
+            
+            <div class="product-img-wrapper">
+                {% if produto.imagens.all %}
+                    <img src="{{ produto.imagens.first.imagem.url }}" alt="{{ produto.nome }}" class="product-img">
+                {% else %}
+                    <i class="bi bi-box-seam" style="font-size: 3rem; color: var(--texto-muted); opacity: 0.5;"></i>
+                {% endif %}
+            </div>
+
+            <div class="card-body p-0 d-flex flex-column" style="z-index: 2;">
+                <h2 class="product-name" title="{{ produto.nome }}">
+                    <a href="{% url 'detalhe_produto_loja' produto.id %}" class="stretched-link">
+                        {{ produto.nome }}
+                    </a>
+                </h2>
+                <p class="product-description">{{ produto.descricao|default:"Dispositivo de alta performance integrado ao ecossistema Nexus." }}</p>
+                
+                <div class="mt-auto">
+                    <div class="product-price" style="min-height: 52px; display: flex; flex-direction: column; justify-content: flex-end;">
+                        {% if produto.em_oferta and produto.preco_promocional %}
+                            <span style="font-size: 0.75rem; color: #888888; text-decoration: line-through; font-weight: 400; margin-bottom: -2px; display: block;">
+                                R$ {{ produto.preco }}
+                            </span>
+                            <span style="color: #00e5ff !important; font-weight: 800;">
+                                R$ {{ produto.preco_promocional }}
+                            </span>
                         {% else %}
-                            <i class="bi bi-box-seam" style="font-size: 3rem; color: var(--texto-muted); opacity: 0.5;"></i>
+                            <span>R$ {{ produto.preco }}</span>
                         {% endif %}
                     </div>
-
-                    <!-- Corpo de Informações -->
-                    <div class="card-body p-0 d-flex flex-column">
-                        <h2 class="product-name" title="{{ produto.nome }}">
-                            <a href="{% url 'detalhe_produto_loja' produto.id %}">
-                                {{ produto.nome }}
-                            </a>
-                        </h2>
-                        <p class="product-description">{{ produto.descricao|default:"Dispositivo de alta performance integrado ao ecossistema Nexus." }}</p>
-                        
-                        <div class="mt-auto">
-                            <div class="product-price">R$ {{ produto.preco }}</div>
-                            
-                            <!-- Rota Real de Adição ao Carrinho Restabelecida -->
-                            <a href="{% url 'adicionar_ao_carrinho' produto.id %}" class="btn-store-add">
-                                <i class="bi bi-cart-plus-fill" style="font-size: 1.1rem;"></i> Adicionar ao Carrinho
-                            </a>
-                        </div>
-                    </div>
-
+                    
+                    <a href="{% url 'adicionar_ao_carrinho' produto.id %}" class="btn-store-add" style="position: relative; z-index: 3;">
+                        <i class="bi bi-cart-plus-fill" style="font-size: 1.1rem;"></i> Adicionar ao Carrinho
+                    </a>
                 </div>
             </div>
-        {% empty %}
+
+        </div>
+    </div>
+{% empty %}
             <!-- Tratamento de Catálogo Vazio Real da Loja -->
             <div class="col-12 w-100">
                 <div class="empty-catalog">
