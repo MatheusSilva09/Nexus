@@ -73,14 +73,21 @@ def signup_view(request):
 
 @login_required(login_url='login_view')
 def dashboard_view(request):
+    # CORREÇÃO PRINCIPAL: Declaramos como None aqui no escopo global da função
+    # Isso garante que mesmo o Superusuário tenha essa variável definida
+    loja_usuario = None 
+    
     # 1. Identificar se é Administrador Global
     if request.user.is_superuser:
         produtos_queryset = Produto.objects.all()
         clientes_queryset = Cliente.objects.all()
         total_funcionarios = Funcionario.objects.count()
+        
+        # Opcional para o Admin Geral não ver o painel zerado: 
+        # Podemos associar à primeira loja cadastrada no banco, se houver
+        loja_usuario = Loja.objects.first()
     else:
         # 2. Buscar a loja vinculada ao usuário comum (Lockey)
-        loja_usuario = None
 
         # Tenta buscar a loja primeiro através do modelo Perfil
         if hasattr(request.user, 'perfil') and hasattr(request.user.perfil, 'loja'):
@@ -90,9 +97,9 @@ def dashboard_view(request):
         elif hasattr(request.user, 'loja'):
             loja_usuario = request.user.loja
             
-        # Redundância 2: Tenta buscar pelo funcionário (usando usuario_id como no seu código original)
+        # Redundância 2: Tenta buscar pelo funcionário (Ajustado para usar o objeto do usuário de forma segura)
         else:
-            funcionario_registro = Funcionario.objects.filter(usuario_id=request.user).first()
+            funcionario_registro = Funcionario.objects.filter(usuario=request.user).first()
             if funcionario_registro and hasattr(funcionario_registro, 'loja'):
                 loja_usuario = funcionario_registro.loja
 
@@ -113,7 +120,7 @@ def dashboard_view(request):
     # --- CÁLCULO DAS MÉTRICAS ---
     total_itens = produtos_queryset.aggregate(total=Sum('estoque'))['total'] or 0
     
-    # 1. Calculamos o valor bruto do estoque
+    # 1. Calculamos o valor brute do estoque
     valor_bruto = produtos_queryset.aggregate(total=Sum(F('preco') * F('estoque')))['total'] or 0
     
     # 2. Formatamos o valor diretamente na View para o padrão monetário brasileiro (Ex: 204.159,12)
@@ -133,8 +140,8 @@ def dashboard_view(request):
 
     context = {
         'total_itens': total_itens,
-        'valor_estoque': valor_estoque_formatado,  # <--- Passamos a string perfeitamente formatada aqui
-        'baixo_estoque': baixo_estoque,
+        'valor_estoque': valor_estoque_formatado,  # String perfeitamente formatada
+        'baixo_estoque':baixo_estoque,
         'alertas_criticos': alertas_criticos,
         'total_clientes_ativos': total_clientes_ativos,
         'total_funcionarios': total_funcionarios,
@@ -142,6 +149,7 @@ def dashboard_view(request):
         'produtos': produtos_recentes,
         'loja_status': "Online",
         'hoje': hoje_inicio.date(),
+        'loja_usuario': loja_usuario,
     }
 
     # Debug para o seu terminal
