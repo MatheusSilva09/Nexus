@@ -67,6 +67,16 @@
         text-shadow: 0 0 8px var(--turquesa-glow);
     }
 
+    .subtotal-original {
+        text-decoration: line-through; 
+        font-size: 0.8rem; 
+        display: block; 
+        color: #ff4d4d; 
+        opacity: 0.7;
+        font-weight: normal;
+        text-shadow: none;
+    }
+
     .btn-action-delete {
         color: #ff4d4d;
         text-decoration: none;
@@ -118,7 +128,7 @@
         </div>
     </header>
 
-    {% if itens %}
+    {% if itens_carrinho %}
     <div class="nexus-table-wrapper">
         <table class="nexus-table">
             <thead>
@@ -131,19 +141,37 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in itens %}
-                <tr>
-                    <td class="fw-bold">{{ item.produto.nome }}</td>
-                    <td class="text-white-50">R$ {{ item.produto.preco }}</td>
-                    <td>{{ item.quantidade }}</td>
-                    <td class="subtotal-highlight">R$ {{ item.subtotal }}</td>
-                    <td class="text-center">
-                        <a href="{% url 'remover_do_carrinho' item.produto.id %}" class="btn-action-delete"
-                            onclick="return confirm('Tem certeza que deseja remover este item?')">
-                            <i class="bi bi-trash3-fill"></i>
-                        </a>
-                    </td>
-                </tr>
+                {% for item in itens_carrinho %}
+                    <tr>
+                        <td class="fw-bold">{{ item.produto.nome }}</td>
+                        
+                        <td class="subtotal-highlight">
+                            {% if item.produto.em_oferta and item.produto.preco_promocional %}
+                                <span class="subtotal-original">
+                                    R$ {{ item.preco_original_total }}
+                                </span>
+                            {% endif %}
+                            <span>R$ {{ item.subtotal_exibicao }}</span>
+                        </td>
+                        
+                        <td>{{ item.quantidade }}x</td>
+                        
+                        <td class="subtotal-highlight">
+                            {% if item.produto.em_oferta and item.produto.preco_promocional %}
+                                <span class="subtotal-original">
+                                    R$ {{ item.preco_original_total }}
+                                </span>
+                            {% endif %}
+                            <span>R$ {{ item.subtotal }}</span>
+                        </td>
+                        
+                        <td class="text-center">
+                            <a href="{% url 'remover_do_carrinho' item.produto.id %}" class="btn-action-delete"
+                                onclick="return confirm('Tem certeza que deseja remover este item?')">
+                                <i class="bi bi-trash3-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -153,7 +181,9 @@
         <div class="col-md-4">
             <div class="summary-card">
                 <h4 class="text-light small fw-bold text-uppercase" style="letter-spacing: 1px;">Total da Compra</h4>
-                <h2 style="color: var(--turquesa-brilhante); font-weight: 800;">R$ {{ total }}</h2>
+                
+                <h2 style="color: var(--turquesa-brilhante); font-weight: 800;">R$ {{ total_do_carrinho_nexus }}</h2>
+                
                 <hr style="background-color: #334155;">
                 <a href="{% url 'finalizar_pedido' %}" class="btn-finalizar mt-3">
                     <i class="bi bi-check-all me-2"></i>Confirmar e Finalizar
@@ -165,7 +195,7 @@
     {% else %}
     <div class="text-center py-5">
         <h4 class="text-muted italic">Seu carrinho está vazio.</h4>
-        <a href="{% url 'vitrine_produtos' %}" class="logout-btn mt-3 px-4 d-inline-block">
+        <a href="{% url 'vitrine' %}" class="logout-btn mt-3 px-4 d-inline-block">
             <i class="bi bi-arrow-left me-2"></i>Voltar para a Vitrine
         </a>
     </div>

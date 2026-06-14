@@ -3,35 +3,13 @@
 
 {% block title %}Lista de Clientes | NEXUS Hub{% endblock %}
 
-{% block page_title %}Lista de Clientes{% endblock %}
-
 {% block content %}
 <style>
-    /* Estilo para unificar o botão de Novo Cliente com o padrão Slim do Dashboard e Estoque */
-    .btn-header-nexus {
-        min-width: 180px;
-        height: 42px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.85rem !important;
-        text-decoration: none;
-        box-sizing: border-box;
-        gap: 15px; /* Espaçamento elegante reorganizado */
-    }
-
+    /* --- Estilos Gerais do Módulo de Clientes --- */
     .nexus-container {
         padding: 20px;
         color: #ffffff;
         font-family: 'Segoe UI', Roboto, sans-serif;
-    }
-
-    .nexus-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding: 0 10px;
     }
 
     .nexus-title {
@@ -39,323 +17,320 @@
         font-weight: 600 !important;
         text-transform: uppercase !important;
         letter-spacing: 1.5px !important;
-        margin: 0 !important;
-        color: #ffffff !important; /* Retornado para Branco Puro no Dark Mode padrão */
+        color: #fff;
+        margin: 0;
     }
 
-    .nexus-title-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    /* Tabela e Ações */
-    .nexus-table-wrapper {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(12px);
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-left: 4px solid var(--nexus-blue, #2563eb);
-        overflow: hidden;
-        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-    }
-
-    .nexus-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: transparent;
-    }
-
-    .nexus-table th {
-        padding: 18px 20px;
-        color: #00d1ff;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        background: rgba(30, 41, 59, 0.4);
-        border-bottom: 1px solid rgba(0, 209, 255, 0.2);
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
-
-    .nexus-table td {
-        padding: 14px 20px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        color: #f8fafc;
-        font-size: 0.9rem;
-    }
-
-    .nexus-table tbody tr:hover {
-        background: rgba(37, 99, 235, 0.05);
-    }
-
-    /* --- MODAL E POP-UP --- */
-    .nexus-modal-backdrop {
-        background: rgba(2, 6, 23, 0.85);
-        backdrop-filter: blur(10px);
-    }
-
-    .nexus-modal-title {
-        color: #ff4444;
-        font-weight: 600;
-        letter-spacing: 1px;
-        margin-bottom: 15px;
-    }
-
-    .nexus-highlight {
-        color: #00d9ff;
-        font-weight: 600;
-        text-decoration: underline;
-    }
-
-    .btn-nexus-modal {
+    /* --- Botão Novo Cliente Slim --- */
+    .btn-header-nexus {
         min-width: 180px;
         height: 42px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: 0.3s;
+        font-size: 0.85rem !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         text-decoration: none;
+        background: linear-gradient(90deg, #2563eb, #00f2fe);
+        color: #ffffff !important;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px var(--nexus-blue-glow);
+        transition: all 0.3s ease;
+        gap: 10px;
     }
 
-    .btn-confirm {
-        background: #ef4444 !important;
-        color: #fff !important;
-        border: none !important;
+    .btn-header-nexus:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px var(--turquesa-glow);
+        filter: brightness(1.1);
     }
 
-    .btn-confirm:hover {
-        background: #dc2626 !important;
-        box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-    }
-
-    .btn-cancel {
-        background: transparent !important;
-        border: 1px solid var(--texto-muted) !important;
-        color: #fff !important;
-    }
-
-    .nexus-modal-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.9);
+    /* --- Container de Filtro/Pesquisa --- */
+    .nexus-filter-container {
+        background: var(--bg-card);
+        border: 1px solid var(--borda);
+        border-radius: 12px;
+        padding: 15px 25px;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .search-box-nexus {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .search-box-nexus i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--nexus-blue);
+    }
+
+    .search-input-nexus {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid var(--borda) !important;
+        border-radius: 10px;
+        padding: 10px 15px 10px 45px;
+        color: #fff !important;
+        font-size: 0.9rem;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .search-input-nexus:focus {
+        border-color: var(--turquesa-brilhante) !important;
+        box-shadow: 0 0 12px var(--turquesa-glow) !important;
+    }
+
+    /* --- Tabela Customizada Nexus --- */
+    .table-container-nexus {
+        background: var(--bg-card);
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        margin-top: 25px;
+        overflow: hidden;
+    }
+
+    .table-nexus-mod {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .table-nexus-mod th {
+        background: rgba(15, 23, 42, 0.8);
+        color: var(--texto-muted);
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--borda);
+    }
+
+    .table-nexus-mod td {
+        padding: 16px 20px;
+        color: #e2e8f0;
+        font-size: 0.95rem;
+        border-bottom: 1px solid var(--borda);
+        vertical-align: middle;
+    }
+
+    .table-nexus-mod tr:last-child td {
+        border-bottom: none;
+    }
+
+    .client-name-highlight {
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    /* --- Modos Claros Adaptados --- */
+    html.light-mode .nexus-title { color: #0f172a; }
+    html.light-mode .search-input-nexus { background: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+    html.light-mode .table-nexus-mod th { background: #f8fafc; color: #64748b; }
+    html.light-mode .table-nexus-mod td { color: #334155; }
+    html.light-mode .client-name-highlight { color: #0f172a; }
+    html.light-mode .btn-header-nexus { background: linear-gradient(90deg, #2563eb, #1d4ed8); }
+
+    /* --- Modal de Exclusão Customizado --- */
+    .nexus-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(2, 6, 23, 0.85);
+        backdrop-filter: blur(8px);
         z-index: 9999;
+        align-items: center;
+        justify-content: center;
     }
 
     .nexus-modal-card {
         background: #0b1120;
-        border: 1px solid #ff4444;
-        border-top: 4px solid #ff4444;
-        border-radius: 20px;
-        padding: 40px;
-        max-width: 450px;
+        border: 1px solid #ef4444;
+        border-top: 4px solid #ef4444;
+        border-radius: 15px;
         width: 90%;
+        max-width: 450px;
+        padding: 30px;
         text-align: center;
         box-shadow: 0 0 40px rgba(239, 68, 68, 0.2);
+        animation: fadeInUp 0.3s ease-out forwards;
     }
-    
-    .nexus-modal-icon {
+
+    html.light-mode .nexus-modal-overlay { background: rgba(241, 245, 249, 0.5) !important; }
+    html.light-mode .nexus-modal-card { background: rgba(255, 255, 255, 0.95) !important; border-color: #fecaca !important; }
+
+    .nexus-modal-icon-box {
         font-size: 3rem;
         color: #ef4444;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
+
+    .nexus-modal-title {
+        color: #fff;
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
+    html.light-mode .nexus-modal-title { color: #0f172a; }
 
     .nexus-modal-text {
-        color: #94a3b8;
-        margin-bottom: 30px;
+        color: var(--texto-muted);
+        font-size: 0.95rem;
+        margin-bottom: 25px;
     }
 
-    .btn-edit-icon {
-        color: var(--nexus-blue) !important; /* Azul padrão Nexus para Edição */
-    }
-
-    /* --- BOTOES DE AÇÃO REFINADOS (ÍCONES AMPLIADOS E CENTRALIZADOS) --- */
-    .actions-cell {
+    .nexus-modal-footer {
         display: flex;
-        gap: 18px; /* Espaçamento reorganizado conforme solicitado */
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .btn-nexus-modal {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+        display: inline-flex;
         align-items: center;
-        justify-content: center; /* Centraliza os ícones horizontalmente na célula */
+        gap: 8px;
     }
 
-    .empty-row {
-        text-align: center;
-        padding: 50px !important;
-        color: #555;
+    .btn-nexus-modal.btn-confirm {
+        background: #ef4444;
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    .btn-nexus-modal.btn-confirm:hover { background: #dc2626; }
+
+    .btn-nexus-modal.btn-cancel {
+        background: transparent;
+        border: 1px solid var(--texto-muted);
+        color: var(--texto-muted);
+    }
+    html.light-mode .btn-nexus-modal.btn-cancel { border-color: #cbd5e1; color: #64748b; }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
-    /* --- COMPORTAMENTO DA INTERFACE DE CLIENTES NO LIGHT MODE --- */
-    html.light-mode .nexus-title {
-        color: #2563eb !important; /* Azul Nexus marcante */
-        text-shadow: none !important;
-    }
+    /* =======================================================
+       ⚡ MEDIA QUERIES - RESPONSIVIDADE TOTAL (TELEMÓVEL) ⚡
+       ======================================================= */
+    @media (max-width: 767.98px) {
+        .nexus-header {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+            align-items: center !important;
+            padding: 0;
+        }
 
-    html.light-mode .nexus-title-icon {
-        color: #2563eb !important;
-    }
+        .btn-header-nexus {
+            width: 100%; /* Botão expande no telemóvel */
+        }
 
-    html.light-mode .nexus-table-wrapper {
-        background: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-left: 4px solid #2563EB !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important;
-        backdrop-filter: none !important;
-    }
+        .nexus-filter-container {
+            flex-direction: column;
+            padding: 20px;
+        }
 
-    html.light-mode .nexus-table thead th {
-        background-color: #f8fafc !important;
-        color: #475569 !important;
-        border-bottom: 2px solid #e2e8f0 !important;
-        font-weight: 600 !important;
-    }
-
-    html.light-mode .nexus-table td {
-        color: #334155 !important;
-        border-bottom: 1px solid #e2e8f0 !important;
-    }
-
-    html.light-mode .nexus-table tbody tr:nth-child(odd) td {
-        background-color: #ffffff !important;
-    }
-
-    html.light-mode .nexus-table tbody tr:nth-child(even) td {
-        background-color: #f4f7fa !important;
-    }
-
-    html.light-mode .nexus-table tbody tr:hover td {
-        background-color: #e2e8f0 !important;
-    }
-
-    html.light-mode .nexus-table tbody tr td:first-child {
-        color: #0f172a !important;
-        font-weight: 600;
-    }
-
-    /* Ajuste de cor e proporção dos ícones de ação no Light Mode */
-    html.light-mode .btn-edit-icon {
-        color: #2563eb !important;
-        font-size: 1.3rem !important;
-    }
-    html.light-mode .btn-edit-icon:hover {
-        color: #1d4ed8 !important;
-    }
-
-    html.light-mode .btn-delete-icon {
-        color: #dc2626 !important;
-        font-size: 1.3rem !important;
-    }
-    html.light-mode .btn-delete-icon:hover {
-        color: #b91c1c !important;
-    }
-
-    /* --- BOTÃO NO LIGHT MODE (Seguindo o padrão solid blue do Dashboard) --- */
-    html.light-mode .btn-header-nexus {
-        background-color: #2563EB !important;
-        color: #ffffff !important;
-        border: none !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
-    }
-
-    /* --- AJUSTES DO MODAL PARA LIGHT MODE (FOSCO E CLARO) --- */
-    html.light-mode .nexus-modal-backdrop {
-        background: rgba(241, 245, 249, 0.5) !important;
-        backdrop-filter: blur(8px) !important;
-    }
-
-    html.light-mode .nexus-modal-card {
-        background: rgba(255, 255, 255, 0.8) !important;
-        backdrop-filter: blur(12px) !important;
-        border: 1px solid #fecaca !important;
-        border-top: 4px solid #ef4444 !important;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    html.light-mode .nexus-modal-title {
-        color: #b91c1c !important;
-    }
-
-    html.light-mode .nexus-modal-text {
-        color: #475569 !important;
-    }
-
-    html.light-mode .btn-cancel {
-        background: transparent !important;
-        border: 1px solid #cbd5e1 !important;
-        color: #64748b !important;
-    }
-
-    html.light-mode .btn-cancel:hover {
-        background: #f8fafc !important;
-        border-color: #94a3b8 !important;
+        .search-box-nexus {
+            max-width: 100%; /* Barra de filtro ocupa largura total */
+        }
     }
 </style>
 
-<div class="nexus-container">
-    <header class="nexus-header">
-        <div class="nexus-title-wrapper">
-            <div class="nexus-title-icon">
-                <i class="bi bi-people-fill"></i>
-            </div>
-            <h1 class="nexus-title">Clientes</h1>
-        </div>
-
-        <a href="{% url 'cadastrar_cliente' %}" class="logout-btn btn-header-nexus">
-            <i class="bi bi-plus-lg"></i> NOVO CLIENTE
+<div class="nexus-container container-fluid fade-in-content">
+    
+    <div class="nexus-header d-flex justify-content-between align-items-center mb-4">
+        <h1 class="nexus-title">
+            <i class="bi bi-people-fill me-2" style="color: var(--nexus-blue);"></i>Controle de Clientes
+        </h1>
+        <a href="{% url 'cadastrar_cliente' %}" class="btn-header-nexus">
+            <i class="bi bi-person-plus-fill" style="font-size: 1.1rem; color: inherit !important;"></i> Novo Cliente
         </a>
-    </header>
+    </div>
 
-    <div class="nexus-table-wrapper">
-        <table class="nexus-table">
+    <div class="nexus-filter-container">
+        <div class="search-box-nexus">
+            <i class="bi bi-search"></i>
+            <input type="text" id="nexusSearch" class="search-input-nexus" placeholder="Buscar por nome, e-mail ou CPF...">
+        </div>
+        <div style="color: var(--texto-muted); font-size: 0.85rem; font-weight: 600;">
+            <i class="bi bi-info-circle me-1"></i> Filtragem em tempo real
+        </div>
+    </div>
+
+    <div class="table-container-nexus table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table class="table-nexus-mod" style="min-width: 900px;">
             <thead>
                 <tr>
                     <th>Nome do Cliente</th>
+                    <th>E-mail</th>
                     <th>Telefone</th>
-                    <th style="width: 120px; text-align: center;">Ações</th>
+                    <th>CPF / Documento</th>
+                    <th class="text-center">Ações</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="clientesTable">
                 {% for cliente in clientes %}
                 <tr>
-                    <td>{{ cliente.nome }}</td>
-                    <td>{{ cliente.telefone }}</td>
-                    <td class="actions-cell">
-                        <a href="{% url 'editar_cliente' cliente.id %}" class="btn-action-icon btn-edit-icon" title="Editar">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <a href="javascript:void(0)"
-                            onclick="abrirModalExclusao('{{ cliente.id }}', '{{ cliente.nome }}')"
-                            class="btn-action-icon btn-delete-icon" title="Excluir">
-                            <i class="bi bi-trash3"></i>
-                        </a>
+                    <td class="client-name-highlight">
+                        <i class="bi bi-person me-2" style="color: var(--nexus-blue);"></i>{{ cliente.nome }}
+                    </td>
+                    <td>{{ cliente.email|default:"—" }}</td>
+                    <td>{{ cliente.telefone|default:"—" }}</td>
+                    <td>{{ cliente.cpf|default:"—" }}</td>
+                    <td class="text-center">
+                        <div class="action-buttons">
+                            <a href="{% url 'editar_cliente' cliente.id %}" class="btn-action edit" title="Editar dados">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="javascript:void(0)" onclick="abrirModalExclusao('{{ cliente.id }}', '{{ cliente.nome }}')" class="btn-action delete" title="Remover cliente">
+                                <i class="bi bi-trash3-fill"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3" class="empty-row">Nenhum cliente registado na base de dados.</td>
+                    <td colspan="5" class="text-center py-5 text-secondary">
+                        <i class="bi bi-folder-x-fill display-6 d-block mb-3" style="opacity: 0.3;"></i>
+                        Nenhum cliente cadastrado no sistema.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
 </div>
 
-<div id="nexusDeleteClienteModal" class="nexus-modal-backdrop" style="display: none;">
+<div id="nexusDeleteClienteModal" class="nexus-modal-overlay">
     <div class="nexus-modal-card">
-        <div class="nexus-modal-icon">
+        <div class="nexus-modal-icon-box">
             <i class="bi bi-exclamation-triangle"></i>
         </div>
         <h2 class="nexus-modal-title">CONFIRMAR EXCLUSÃO</h2>
         <p class="nexus-modal-text">
-            Deseja realmente excluir o cliente <span id="modalClienteNome" class="nexus-highlight"></span>?
+            Deseja realmente excluir o cliente <span id=\"modalClienteNome\" style="color: var(--turquesa-brilhante); font-weight: 700;"></span> do sistema? Esta ação não pode ser desfeita.
         </p>
 
         <div class="nexus-modal-footer">
@@ -389,5 +364,18 @@
             fecharModalNexus();
         }
     }
+
+    // Filtro JS em tempo real estável
+    document.getElementById('nexusSearch').addEventListener('keyup', function () {
+        const value = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#clientesTable tr');
+
+        rows.forEach(row => {
+            if(row.cells.length > 1) { 
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(value) ? '' : 'none';
+            }
+        });
+    });
 </script>
 {% endblock %}

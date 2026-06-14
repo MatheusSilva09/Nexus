@@ -18,7 +18,7 @@
         font-weight: 800;
     }
 
-    /* Container Principal da Tabela (Card Reutilizável) */
+    /* Container Principal da Tabela (Desktop) */
     .orders-card {
         background: var(--bg-card) !important;
         backdrop-filter: blur(8px);
@@ -36,12 +36,13 @@
 
     .orders-table th {
         padding: 18px 20px;
-        color: var(--sotaque-glow) !important;
+        color: var(--sotaque-glow) !important; 
         font-size: 0.8rem;
         text-transform: uppercase;
-        text-align: left;
-        background: rgba(0, 242, 254, 0.03);
+        letter-spacing: 1px;
+        background: rgba(0, 242, 254, 0.02);
         border-bottom: 1px solid var(--borda);
+        text-align: left;
     }
 
     html.light-mode .orders-table th {
@@ -49,41 +50,126 @@
     }
 
     .orders-table td {
-        padding: 20px;
+        padding: 18px 20px;
         border-bottom: 1px solid var(--borda);
         color: var(--texto-principal);
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         vertical-align: middle;
     }
 
-    /* Lista interna de itens do pedido */
-    .order-items-list {
-        font-size: 0.85rem;
-        color: var(--texto-subtitulo, var(--texto-muted));
+    .orders-table tbody tr:hover {
+        background: rgba(0, 242, 254, 0.02);
     }
 
-    /* Destaque para o valor total do pedido */
+    .order-id-badge {
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: 700;
+        color: var(--texto-principal);
+    }
+
+    .order-items-list {
+        font-size: 0.9rem;
+        color: var(--texto-muted);
+    }
+
     .order-total-price {
         font-weight: 700;
         color: var(--texto-principal);
     }
 
-    /* Container para estado de histórico vazio */
-    .empty-orders {
-        background: var(--bg-card) !important;
-        border: 1px solid var(--borda) !important;
-        border-radius: 16px;
-        padding: 40px;
-        text-align: center;
-        color: var(--texto-principal);
-        transition: background 0.3s ease, border-color 0.3s ease;
+    /* --- COORDENAÇÃO RESPONSIVA (MOBILE CARDS) --- */
+    .mobile-orders-feed {
+        display: none; /* Oculto por padrão no Desktop */
     }
 
-    /* Botão de retorno adaptado ao padrão global */
+    .nexus-mobile-order-card {
+        background: var(--bg-card) !important;
+        border: 1px solid var(--borda) !important;
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .mobile-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--borda);
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+    }
+
+    /* Elementos das Badges de Status Modernizadas */
+    .status-badge-nexus {
+        font-size: 0.75rem;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-weight: 600;
+        border: 1px solid transparent;
+        display: inline-block;
+    }
+    .status-finalizado {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border-color: rgba(16, 185, 129, 0.2);
+    }
+    .status-cancelado {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.2);
+    }
+    .status-pendente {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+        border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    /* Botão de Cancelar Operação */
+    .btn-cancel-order {
+        color: #ef4444;
+        background: transparent;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.2s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-cancel-order:hover {
+        background: #ef4444;
+        color: #ffffff !important;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Media Query para alternar Tabela <-> Cards */
+    @media (max-width: 768px) {
+        .desktop-orders-wrapper {
+            display: none !important; /* Esconde a tabela no mobile */
+        }
+        .mobile-orders-feed {
+            display: block !important; /* Mostra os cards no mobile */
+        }
+    }
+
+    /* Estado Vazio */
+    .empty-orders {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--texto-principal);
+    }
+
     .btn-orders-back {
         background-color: var(--sotaque-glow) !important;
         color: #000000 !important;
-        padding: 10px 20px;
+        padding: 12px 24px;
         border-radius: 12px;
         font-weight: 800;
         text-transform: uppercase;
@@ -91,73 +177,143 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        font-size: 0.85rem;
-        transition: 0.2s ease;
     }
-
     html.light-mode .btn-orders-back {
         color: #ffffff !important;
     }
-
-    .btn-orders-back:hover {
-        opacity: 0.9;
-        box-shadow: 0 0 15px var(--turquesa-glow);
-    }
 </style>
 
-<div class="container animate-fade-in">
-    <h1 class="orders-title">
-        Meus <strong>Pedidos</strong>
-    </h1>
+<div class="container mt-4">
+    <h1 class="orders-title">Histórico de <strong>Pedidos</strong></h1>
+
+    {% if messages %}
+        <div class="row mb-3">
+            <div class="col-12">
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert" style="border-radius: 10px;">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 
     {% if pedidos %}
-    <div class="orders-card">
-        <table class="orders-table">
-            <thead>
-                <tr>
-                    <th>Nº do Pedido</th>
-                    <th>Data</th>
-                    <th>Status</th>
-                    <th>Itens</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for pedido in pedidos %}
-                <tr>
-                    <td class="fw-bold" style="color: var(--sotaque-glow);">#{{ pedido.id }}</td>
-                    <td>{{ pedido.data_criacao|date:"d/m/Y H:i" }}</td>
-                    <td>
-                        {% if pedido.status == 'PAGO' or pedido.status == 'CONCLUIDO' %}
-                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.75rem; border-radius: 6px;">{{ pedido.status }}</span>
-                        {% elif pedido.status == 'CANCELADO' %}
-                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1" style="font-size: 0.75rem; border-radius: 6px;">{{ pedido.status }}</span>
+        
+        <div class="desktop-orders-wrapper orders-card table-responsive">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Módulos Adquiridos</th>
+                        <th>Total Pago</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in pedidos %}
+                    <tr>
+                        <td class="order-id-badge">#{{ pedido.id }}</td>
+                        <td class="text-muted">{{ pedido.data_criacao|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if pedido.status == 'Finalizado' or pedido.status == 'Entregue' %}
+                                <span class="status-badge-nexus status-finalizado">{{ pedido.status }}</span>
+                            {% elif pedido.status == 'Cancelado' %}
+                                <span class="status-badge-nexus status-cancelado">{{ pedido.status }}</span>
+                            {% else %}
+                                <span class="status-badge-nexus status-pendente">{{ pedido.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="order-items-list">
+                                {% for item in pedido.itens.all %}
+                                    <div>{{ item.quantidade }}x {{ item.produto.nome }}</div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="order-total-price">R$ {{ pedido.total }}</td>
+                        
+                        <td class="text-center">
+                            {% if pedido.status != 'Cancelado' and pedido.status != 'Entregue' and pedido.status != 'Finalizado' %}
+                                <a href="{% url 'cancelar_pedido' pedido.id %}" 
+                                   class="btn-cancel-order"
+                                   style="width: auto;"
+                                   onclick="return confirm('ATENÇÃO: Deseja realmente cancelar o Pedido #{{ pedido.id }}? Os produtos comprados voltarão imediatamente para o estoque.')">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                            {% else %}
+                                <span class="text-muted small italic" style="font-size: 0.8rem; opacity: 0.6;">Sem ações</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mobile-orders-feed">
+            {% for pedido in pedidos %}
+                <div class="nexus-mobile-order-card">
+                    <div class="mobile-card-header">
+                        <span class="order-id-badge" style="font-size: 1.1rem;">#{{ pedido.id }}</span>
+                        {% if pedido.status == 'Finalizado' or pedido.status == 'Entregue' %}
+                            <span class="status-badge-nexus status-finalizado">{{ pedido.status }}</span>
+                        {% elif pedido.status == 'Cancelado' %}
+                            <span class="status-badge-nexus status-cancelado">{{ pedido.status }}</span>
                         {% else %}
-                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1" style="font-size: 0.75rem; border-radius: 6px;">{{ pedido.status }}</span>
+                            <span class="status-badge-nexus status-pendente">{{ pedido.status }}</span>
                         {% endif %}
-                    </td>
-                    <td>
+                    </div>
+                    
+                    <div class="mb-2" style="font-size: 0.85rem; color: var(--texto-muted);">
+                        <i class="bi bi-calendar3 me-1"></i> {{ pedido.data_criacao|date:"d/m/Y H:i" }}
+                    </div>
+
+                    <div class="p-2 my-2 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.03);">
+                        <div class="fw-bold mb-1" style="font-size: 0.8rem; text-transform: uppercase; color: var(--sotaque-glow); letter-spacing: 0.5px;">Itens:</div>
                         <div class="order-items-list">
                             {% for item in pedido.itens.all %}
-                                <div>{{ item.quantidade }}x {{ item.produto.nome }}</div>
+                                <div class="text-white">{{ item.quantidade }}x {{ item.produto.nome }}</div>
                             {% endfor %}
                         </div>
-                    </td>
-                    <td class="order-total-price">R$ {{ pedido.total }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2" style="border-top: 1px dashed var(--borda);">
+                        <div>
+                            <span class="text-muted small d-block">Total Pago</span>
+                            <span class="order-total-price" style="font-size: 1.2rem; color: var(--texto-principal);">R$ {{ pedido.total }}</span>
+                        </div>
+                        
+                        <div style="min-width: 120px;">
+                            {% if pedido.status != 'Cancelado' and pedido.status != 'Entregue' and pedido.status != 'Finalizado' %}
+                                <a href="{% url 'cancelar_pedido' pedido.id %}" 
+                                   class="btn-cancel-order"
+                                   onclick="return confirm('ATENÇÃO: Deseja realmente cancelar o Pedido #{{ pedido.id }}? Os produtos comprados voltarão imediatamente para o estoque.')">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                            {% else %}
+                                <span class="text-muted small d-block text-end italic" style="opacity: 0.5;">Sem ações</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
     {% else %}
-    <div class="empty-orders">
-        <i class="bi bi-box-seam" style="font-size: 3rem; color: var(--texto-muted); display: block; margin-bottom: 15px;"></i>
-        <h4 class="fw-semibold">Nenhum pedido efetuado</h4>
-        <p class="text-muted mb-4">As suas compras aparecerão listadas aqui assim que finalizar um pedido.</p>
-        <a href="{% url 'vitrine' %}" class="btn-orders-back">
-            <i class="bi bi-arrow-left"></i> Ir para a Vitrine
-        </a>
-    </div>
+        <div class="orders-card">
+            <div class="empty-orders">
+                <i class="bi bi-box-seam" style="font-size: 3rem; color: var(--texto-muted); display: block; margin-bottom: 15px;"></i>
+                <h4 class="fw-semibold">Nenhum pedido efetuado</h4>
+                <p class="text-muted mb-4">As suas compras aparecerão listadas aqui assim que finalizar um pedido.</p>
+                <a href="{% url 'vitrine' %}" class="btn-orders-back">
+                    <i class="bi bi-arrow-left me-2"></i> Ir para a Vitrine
+                </a>
+            </div>
+        </div>
     {% endif %}
 </div>
 {% endblock %}

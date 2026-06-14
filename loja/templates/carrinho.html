@@ -11,10 +11,10 @@
         letter-spacing: 2px;
         text-transform: uppercase;
         margin-bottom: 40px;
-        color: var(--texto-principal); /* Corrigido: Dinâmico */
+        color: var(--texto-principal); 
     }
     .nexus-title strong {
-        color: var(--sotaque-glow); /* Corrigido: Dinâmico */
+        color: var(--sotaque-glow); 
         font-weight: 800;
     }
 
@@ -34,7 +34,7 @@
 
     /* Estilo da Tabela do Carrinho */
     .cart-table-card {
-        background: var(--bg-card) !important; /* Corrigido: Dinâmico */
+        background: var(--bg-card) !important; 
         border: 1px solid var(--borda) !important;
         border-radius: 16px;
         overflow: hidden;
@@ -47,7 +47,7 @@
 
     .cart-table th {
         padding: 18px 20px;
-        color: var(--sotaque-glow) !important; /* Corrigido: Dinâmico */
+        color: var(--sotaque-glow) !important; 
         font-size: 0.8rem;
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -63,14 +63,28 @@
     .cart-table td {
         padding: 20px;
         border-bottom: 1px solid var(--borda);
-        color: var(--texto-principal); /* Corrigido: Dinâmico */
+        color: var(--texto-principal); 
         font-size: 0.95rem;
         vertical-align: middle;
     }
 
+    /* Estilos para preços promocionais e riscados */
+    .preco-original-riscado {
+        text-decoration: line-through;
+        font-size: 0.8rem;
+        color: #ef4444;
+        opacity: 0.7;
+        display: block;
+    }
+    
+    .preco-promocional-destaque {
+        color: #10b981;
+        font-weight: bold;
+    }
+
     /* Resumo Lateral do Pedido */
     .summary-card {
-        background: var(--bg-card) !important; /* Corrigido: Dinâmico */
+        background: var(--bg-card) !important; 
         border: 1px solid var(--borda) !important;
         border-radius: 16px;
         padding: 25px;
@@ -83,7 +97,7 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: var(--texto-principal); /* Corrigido: Dinâmico */
+        color: var(--texto-principal); 
         margin-bottom: 20px;
         border-bottom: 1px solid var(--borda);
         padding-bottom: 10px;
@@ -105,12 +119,12 @@
         border-top: 1px solid var(--borda);
         font-size: 1.3rem;
         font-weight: 800;
-        color: var(--sotaque-glow); /* Corrigido: Dinâmico */
+        color: var(--sotaque-glow); 
     }
 
     /* Botões Operacionais */
     .btn-nexus-checkout {
-        background-color: var(--sotaque-glow) !important; /* Corrigido: Dinâmico */
+        background-color: var(--sotaque-glow) !important; 
         border: none !important;
         color: #000000 !important;
         width: 100%;
@@ -131,7 +145,7 @@
     }
 
     html.light-mode .btn-nexus-checkout {
-        color: #ffffff !important; /* Texto branco no modo claro para contraste */
+        color: #ffffff !important; 
     }
 
     .btn-nexus-checkout:hover {
@@ -163,10 +177,9 @@
     .empty-cart {
         text-align: center;
         padding: 60px 20px;
-        color: var(--texto-principal); /* Corrigido: Dinâmico */
+        color: var(--texto-principal); 
     }
 
-    /* Reaproveitando estilo de botão para carrinho vazio */
     .btn-store-back {
         background-color: var(--sotaque-glow) !important;
         color: #000000 !important;
@@ -205,11 +218,27 @@
                     <tr>
                         <td>
                             <span class="fw-bold d-block" style="color: var(--texto-principal);">{{ item.produto.nome }}</span>
-                            <small class="text-muted">{{ item.produto.categoria.nome|default:"Acessório" }}</small>
+                            <small class="text-muted">{{ item.produto.categoria.nome|default:"Tecnologia" }}</small>
                         </td>
-                        <td>R$ {{ item.produto.preco }}</td>
+                        
+                        <td>
+                            {% if item.produto.em_oferta and item.produto.preco_promocional %}
+                                <span class="preco-original-riscado">R$ {{ item.produto.preco }}</span>
+                                <span class="preco-promocional-destaque">R$ {{ item.produto.preco_promocional }}</span>
+                            {% else %}
+                                R$ {{ item.produto.preco }}
+                            {% endif %}
+                        </td>
+                        
                         <td class="fw-bold">{{ item.quantidade }}x</td>
-                        <td class="fw-bold" style="color: var(--texto-principal);">R$ {{ item.subtotal }}</td>
+                        
+                        <td class="fw-bold" style="color: var(--texto-principal);">
+                            {% if item.produto.em_oferta and item.produto.preco_promocional %}
+                                <span class="preco-original-riscado">R$ {{ item.preco_original_total }}</span>
+                            {% endif %}
+                            <span>R$ {{ item.subtotal }}</span>
+                        </td>
+                        
                         <td>
                             <a href="{% url 'remover_do_carrinho' item.produto.id %}" class="btn-remove">
                                 <i class="bi bi-trash3"></i> Tirar

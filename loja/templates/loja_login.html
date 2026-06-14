@@ -4,12 +4,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Identificação</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identificação | NEXUS Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon_nexushub.png' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    <!-- Script preventivo para evitar flickering -->
     <script>
         const savedTheme = localStorage.getItem('theme') || 'dark';
         if (savedTheme === 'light') {
@@ -18,55 +19,148 @@
     </script>
 
     <style>
+        /* --- Variáveis de Cor Dinâmicas (Tech Premium da loja_base) --- */
+        :root {
+            --nexus-blue: #2563eb;
+            --nexus-blue-glow: rgba(37, 99, 235, 0.4);
+            --azul-profundo: #020617;
+            --azul-card: #0f172a;
+            --borda: #1e293b;
+            --texto-muted: #94a3b8;
+            --turquesa-brilhante: #00f2fe;
+            --turquesa-glow: rgba(0, 242, 254, 0.3);
+
+            --bg-principal: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 100%);
+            --bg-navbar: rgba(15, 23, 42, 0.75);
+            --bg-card: #0f172a;
+            --texto-principal: #f8fafc;
+            --sotaque-glow: var(--turquesa-brilhante);
+        }
+
+        html.light-mode {
+            --bg-principal: #f8fafc;
+            --bg-navbar: rgba(255, 255, 255, 0.85);
+            --bg-card: #ffffff;
+            --texto-principal: #0f172a;
+            --sotaque-glow: #0891b2;
+            --borda: #cbd5e1;
+            --texto-muted: #64748b;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
+        .main-container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-principal) !important;
+            background-attachment: fixed;
+            color: var(--texto-principal) !important;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        html.light-mode body {
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 242, 254, 0.08) 0px, transparent 50%);
+        }
+
+        /* --- Navbar Superior Alinhada com loja_base --- */
+        .top-navbar-nexus {
+            background: var(--bg-navbar) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--borda);
+            padding: 15px 5%;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 6px rgba(0, 150, 255, 0.2));
+        }
+
+        .brand-logo:hover {
+            transform: scale(1.02);
+            filter: drop-shadow(0 0 12px var(--sotaque-glow));
+        }
+
+        /* Botão de Tema Integrado */
+        .theme-toggle-btn {
+            background: rgba(15, 23, 42, 0.4) !important;
+            border: 1px solid var(--borda) !important;
+            color: var(--sotaque-glow) !important;
+            cursor: pointer;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        html.light-mode .theme-toggle-btn {
+            background: #ffffff !important;
+        }
+
+        .theme-toggle-btn:hover {
+            transform: rotate(15deg);
+            border-color: var(--sotaque-glow) !important;
+            box-shadow: 0 0 10px var(--turquesa-glow);
+        }
+
+        /* --- Centralização do Formulário --- */
+        .login-content-area {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: radial-gradient(circle at center, #1e3a5f 0%, #0f172a 70%, #020617 100%);
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            transition: background 0.5s ease;
+            padding: 40px 20px;
         }
+
         .login-container {
-            /* Mantendo o Dark Mode no container com o azul profundo #0F172A */
             background: #0f172a;
             padding: 2.5rem;
             border-radius: 20px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
             width: 100%;
             max-width: 400px;
-            /* Detalhe superior em turquesa para amarrar com o fundo */
             border-top: 5px solid #00f2fe;
             border: 1px solid rgba(0, 242, 254, 0.1);
             transition: all 0.4s ease;
         }
 
-        .logo {
+        html.light-mode .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-color: #cbd5e1;
+            border-top-color: #2563eb;
+            box-shadow: 
+                0 10px 25px rgba(37, 99, 235, 0.1), 
+                0 20px 48px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo-box {
             text-align: center;
             margin-bottom: 10px;
         }
 
-        .logo img {
-            /* Ajustei para responsivo: 100% da largura do container, com máximo de 400px */
+        .logo-box img {
             width: 100%;
             max-width: 400px;
             height: auto;
-            /* Mantém a proporção correta sem distorcer */
-
-            /* Mantendo o efeito de brilho que você já tinha */
             filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.3));
-
-            /* Alinhando a imagem à esquerda */
             display: block;
             margin: 0;
         }
@@ -83,6 +177,10 @@
             letter-spacing: 0.5px;
         }
 
+        html.light-mode .login-header p {
+            color: #64748b;
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -93,6 +191,10 @@
             color: #e2e8f0;
             font-weight: 500;
             font-size: 0.9rem;
+        }
+
+        html.light-mode .form-group label {
+            color: #475569;
         }
 
         .form-group input {
@@ -106,7 +208,12 @@
             transition: all 0.3s ease;
         }
 
-        /* Foco do input puxando para o turquesa da logo */
+        html.light-mode .form-group input {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
         .form-group input:focus {
             outline: none;
             border-color: #00f2fe;
@@ -114,10 +221,15 @@
             background: #1e293b;
         }
 
+        html.light-mode .form-group input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+            background: #ffffff;
+        }
+
         .login-btn {
             width: 100%;
             padding: 0.8rem;
-            /* Botão em turquesa vibrante */
             background: linear-gradient(90deg, #087cb2, #2ab6dc);
             color: #0f172a;
             border: none;
@@ -134,6 +246,12 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
             filter: brightness(1.1);
+        }
+
+        html.light-mode .login-btn {
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
         .error-message {
@@ -154,6 +272,10 @@
             border-top: 1px solid #334155;
         }
 
+        html.light-mode .links {
+            border-top-color: #e2e8f0;
+        }
+
         .links a {
             color: #00f2fe;
             text-decoration: none;
@@ -162,141 +284,95 @@
             transition: color 0.2s;
         }
 
-        .links a:hover {
-            color: #ffffff;
-            text-decoration: underline;
-        }
-
-        /* --- TEMA LIGHT MODE OVERRIDES --- */
-        .theme-toggle-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(0, 242, 254, 0.2);
-            color: #00f2fe;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 1.2rem;
-            z-index: 1000;
-        }
-        .theme-toggle-btn:hover {
-            background: rgba(0, 242, 254, 0.1);
-            transform: scale(1.1);
-        }
-
-        html.light-mode body {
-            background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
-            /* Adiciona manchas de luz suaves nos cantos para o Mesh Effect */
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(0, 242, 254, 0.08) 0px, transparent 50%);
-        }
-
-        html.light-mode .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-color: #cbd5e1;
-            border-top-color: #2563eb;
-            /* Sombra multicamada: uma suave escura e um "glow" azulado sutil */
-            box-shadow: 
-                0 10px 25px rgba(37, 99, 235, 0.1), 
-                0 20px 48px rgba(0, 0, 0, 0.05);
-        }
-
-        html.light-mode .login-header p {
-            color: #64748b;
-        }
-
-        html.light-mode .form-group label {
-            color: #475569;
-        }
-
-        html.light-mode .form-group input {
-            background: #ffffff;
-            border-color: #cbd5e1;
-            color: #0f172a;
-        }
-
-        html.light-mode .form-group input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-        }
-
-        html.light-mode .login-btn {
-            background: linear-gradient(90deg, #2563eb, #3b82f6);
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-        }
-
-        html.light-mode .links {
-            border-top-color: #e2e8f0;
-        }
-
         html.light-mode .links a {
             color: #2563eb;
         }
 
-        html.light-mode .theme-toggle-btn {
-            background: #ffffff;
-            border-color: #cbd5e1;
-            color: #2563eb;
+        .links a:hover {
+            color: #ffffff;
+            text-decoration: underline;
         }
+        
+        html.light-mode .links a:hover {
+            color: #0f172a;
+        }
+
+        .footer-store {
+            border-top: 1px solid var(--borda);
+            padding: 30px;
+            text-align: center;
+            background: rgba(2, 6, 23, 0.4);
+        }
+        html.light-mode .footer-store { background: #fff !important; }
     </style>
 </head>
 
 <body>
-    <button id="theme-toggle" class="theme-toggle-btn" title="Alternar Tema">
-        <i id="theme-icon" class="bi bi-sun-fill"></i>
-    </button>
 
-    <div class="login-container">
+    <div class="main-container">
+        <header class="top-navbar-nexus d-flex align-items-center justify-content-between">
+            <a href="{% url 'vitrine' %}">
+                <img src="{% static 'img/nexusstore.png' %}" alt="NEXUS Store" class="brand-logo">
+            </a>
 
-        <div class="logo">
-            <img src="{% static 'img/nexushub.png' %}" alt="Nexus Hub Logo">
+            <div class="d-flex align-items-center gap-3">
+                <button id="theme-toggle" class="theme-toggle-btn" title="Alternar Tema">
+                    <i id="theme-icon" class="bi bi-sun-fill"></i>
+                </button>
+                <a href="{% url 'vitrine' %}" class="btn btn-sm btn-outline-secondary" style="color: var(--texto-muted); border-color: var(--borda);">Voltar à Vitrine</a>
+            </div>
+        </header>
+
+        <div class="login-content-area">
+            <div class="login-container">
+                <div class="logo-box">
+                    <img src="{% static 'img/nexushub.png' %}" alt="Nexus Hub Logo">
+                </div>
+
+                <div class="login-header">
+                    <p>Bem-vindo(a) ao Ecossistema NEXUS Hub</p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="error-message">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" action="{% url 'login_view' %}">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label>Usuário</label>
+                        <input type="text" name="username" placeholder="Digite seu usuário" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" name="password" placeholder="Digite sua senha" required>
+                    </div>
+
+                    <button type="submit" class="login-btn">Entrar</button>
+                </form>
+
+                <div class="links">
+                    <a href="{% url 'registrar' %}">Ainda não tem conta? Cadastre-se aqui!</a>
+                    <br><br>
+                    <a href="{% url 'admin:index' %}">Acesso Administrativo</a>
+                </div>
+            </div>
         </div>
 
-        <div class="login-header">
-            <p>Bem-vindo(a) ao Ecossistema NEXUS Hub</p>
-        </div>
-
-        {% if messages %}
-            {% for message in messages %}
-            <div class="error-message">
-                {{ message }}
-            </div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="post" action="{% url 'login_view' %}">
-            {% csrf_token %}
-
-            <div class="form-group">
-                <label>Usuário</label>
-                <input type="text" name="username" placeholder="Digite seu usuário" required>
-            </div>
-
-            <div class="form-group">
-                <label>Senha</label>
-                <input type="password" name="password" placeholder="Digite sua senha" required>
-            </div>
-
-            <button type="submit" class="login-btn">Entrar</button>
-        </form>
-
-        <div class="links">
-            <a href="{% url 'registrar' %}">Ainda não tem conta? Cadastre-se aqui!</a>
-            <br><br>
-            <a href="{% url 'admin:index' %}">Acesso Administrativo</a>
-        </div>
-
+        <footer class="footer-store">
+            <p style="color: var(--texto-muted); font-size: 0.85rem; margin: 0;">
+                &copy; {% now "Y" %} <strong style="color: var(--texto-principal);">NEXUS Store</strong> — Gestão Comercial Premium.
+            </p>
+        </footer>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const themeToggleBtn = document.getElementById('theme-toggle');
         const themeIcon = document.getElementById('theme-icon');
@@ -313,13 +389,7 @@
 
         themeToggleBtn.addEventListener('click', function() {
             document.documentElement.classList.toggle('light-mode');
-            
-            if (document.documentElement.classList.contains('light-mode')) {
-                localStorage.setItem('theme', 'light');
-            } else {
-                localStorage.setItem('theme', 'dark');
-            }
-            
+            localStorage.setItem('theme', document.documentElement.classList.contains('light-mode') ? 'light' : 'dark');
             updateIcon();
         });
     </script>

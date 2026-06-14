@@ -26,10 +26,20 @@ SECRET_KEY = 'django-insecure-(&9wy6isih3h%v3nk^rs5brpzykup_8*-s_w!!6_u^7s62bp8m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
-
+ALLOWED_HOSTS = [
+    '127.0.0.1', 
+    'localhost', 
+    'testserver', 
+    'nineteen-kiwi-helpful.ngrok-free.dev',
+    '.ngrok-free.dev',
+]
 # Configuração para evitar erro de CSRF em ambiente de desenvolvimento
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000', 
+    'http://localhost:8000',
+    'https://nineteen-kiwi-helpful.ngrok-free.dev',
+    'https://*.ngrok-free.dev',
+    ]
 
 # Application definition
 

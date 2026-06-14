@@ -203,7 +203,20 @@
                 </div>
 
                 <div>
-                    <div class="product-info-price">R$ {{ produto.preco }}</div>
+                    <div class="product-info-price-wrapper" style="margin-bottom: 25px;">
+                        {% if produto.em_oferta and produto.preco_promocional %}
+                            <span style="font-size: 1.1rem; color: var(--texto-muted); text-decoration: line-through; display: block; margin-bottom: 2px; font-weight: 400;">
+                                De: R$ {{ produto.preco }}
+                            </span>
+                            <div class="product-info-price" style="margin-bottom: 0; line-height: 1.1;">
+                                Por: R$ {{ produto.preco_promocional }}
+                            </div>
+                        {% else %}
+                            <div class="product-info-price" style="margin-bottom: 0;">
+                                R$ {{ produto.preco }}
+                            </div>
+                        {% endif %}
+                    </div>
                     
                     {% if produto.estoque > 0 %}
                         <a href="{% url 'adicionar_ao_carrinho' produto.id %}" class="btn-store-add py-3 px-4 w-100 fs-6 d-inline-flex align-items-center justify-content-center gap-2">
@@ -212,7 +225,7 @@
                     {% else %}
                         <button class="btn btn-secondary py-3 px-4 w-100 fs-6 d-inline-flex align-items-center justify-content-center gap-2" disabled style="background: #334155; border-color: #475569; color: #94a3b8; cursor: not-allowed; border-radius: 12px;">
                             <i class="bi bi-x-circle-fill" style="font-size: 1.3rem;"></i> Produto Sem Estoque
-                        </button>
+                                        </button>
                     {% endif %}
                 </div>
             </div>

@@ -166,29 +166,79 @@ class Carrinho(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     data_criacao = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Carrinho"
+        verbose_name_plural = "Carrinhos"
+
+    def __str__(self):
+        return f"Carrinho de {self.cliente.nome} - {self.data_criacao.strftime('%d/%m/%Y')}"
+
+    @property
+    def total_carrinho(self):
+        # Soma todos os subtotais dos itens vinculados a este carrinho
+        return sum(item.subtotal for item in self.itens.all())
+
+
 class ItemCarrinho(models.Model):
     carrinho = models.ForeignKey(Carrinho, on_delete=models.CASCADE, related_name='itens')
     produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
     quantidade = models.PositiveIntegerField(default=1)
 
+    @property
+    def subtotal(self):
+        # Validação automática da oferta ativa para calcular o subtotal no banco/sessão
+        preco_final = self.produto.preco_promocional if (self.produto.em_oferta and self.produto.preco_promocional) else self.produto.preco
+        return preco_final * self.quantidade
+
+    def __str__(self):
+        return f"{self.quantidade}x {self.produto.nome} no Carrinho"
+
+
 class Pedido(models.Model):
+    STATUS_CHOICES = [
+        ('Aguardando Pagamento', 'Aguardando Pagamento'),
+        ('Pago', 'Pago'),
+        ('Enviado', 'Enviado'),
+        ('Cancelado', 'Cancelado'),
+    ]
+
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     data_criacao = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, default='Aguardando Pagamento')
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Aguardando Pagamento')
     total = models.DecimalField(max_digits=10, decimal_places=2)
     pago = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Pedido"
+        verbose_name_plural = "Pedidos"
+        ordering = ['-data_criacao'] # Traz sempre os pedidos mais recentes primeiro
+
+    def __str__(self):
+        return f"Pedido #{self.id} - {self.cliente.nome}"
+
 
 class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, related_name='itens', on_delete=models.CASCADE)
     produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
-    preco = models.DecimalField(max_digits=10, decimal_places=2)
+    preco = models.DecimalField(max_digits=10, decimal_places=2) # Mantém o histórico real da venda
     quantidade = models.PositiveIntegerField(default=1)
+
+    @property
+    def subtotal(self):
+        return self.preco * self.quantidade
+
+    def __str__(self):
+        return f"{self.quantidade}x {self.produto.nome} (Pedido #{self.pedido.id})"
+
 
 class Pagamento(models.Model):
     pedido = models.OneToOneField(Pedido, on_delete=models.CASCADE)
     metodo = models.CharField(max_length=50) # Ex: Pix, Cartão
     status = models.CharField(max_length=50)
     id_transacao = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"Pagamento do Pedido #{self.pedido.id} - Status: {self.status}"
 
 
 # --- VENDAS ---

@@ -1,120 +1,240 @@
-{% extends "base.html" %}
-{% load static %} {% block title %}Cadastro de Usuário | NEXUS Store{% endblock %}
-{% block page_title %}CADASTRO DE USUÁRIO{% endblock %}
+{% extends "loja_base.html" %}
+{% load static %}
+
+{% block title %}Cadastro de Usuário | NEXUS Store{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <div class="nexus-form-card p-4">
-            
-            <form method="POST">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="nexus-label">NOME DE USUÁRIO</label>
-                    <div class="input-container-nexus">
-                        <i class="bi bi-person-fill"></i>
-                        <input type="text" name="username" required placeholder="Escolha um usuário">
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="nexus-label">E-MAIL</label>
-                    <div class="input-container-nexus">
-                        <i class="bi bi-envelope-fill"></i>
-                        <input type="email" name="email" required placeholder="seu@email.com">
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label class="nexus-label">SENHA</label>
-                    <div class="input-container-nexus">
-                        <i class="bi bi-lock-fill"></i>
-                        <input type="password" name="password" required placeholder="********">
-                    </div>
-                </div>
-                <button type="submit" class="btn-nexus-save w-100 mb-4 py-2">CADASTRAR</button>
-                <div class="text-center">
-                    <a href="{% url 'login_view' %}" style="color: var(--texto-muted); font-size: 0.8rem; text-decoration: none;">
-                        Já tem uma conta? <span style="color: var(--turquesa-brilhante);">Acesse aqui</span>
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <style>
-    .nexus-form-card {
-        background: rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(15px);
-        border: 1px solid var(--borda);
+    /* --- Centralização e Ajuste do Container de Cadastro (Padrão Tech Premium) --- */
+    .signup-content-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        min-height: calc(100vh - 160px); /* Desconta header e footer */
+    }
+
+    .signup-container {
+        background: #0f172a;
+        padding: 2.5rem;
         border-radius: 20px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        width: 100%;
+        max-width: 450px;
+        border-top: 5px solid #00f2fe;
+        border: 1px solid rgba(0, 242, 254, 0.1);
+        transition: all 0.4s ease;
     }
 
-    .nexus-label {
-        display: block;
-        color: var(--turquesa-brilhante);
-        font-size: 0.75rem;
-        font-weight: 800;
+    html.light-mode .signup-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-color: #cbd5e1;
+        border-top-color: #2563eb;
+        box-shadow: 
+            0 10px 25px rgba(37, 99, 235, 0.1), 
+            0 20px 48px rgba(0, 0, 0, 0.05);
+    }
+
+    .logo-box-signup {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .logo-box-signup img {
+        width: 100%;
+        max-width: 320px;
+        height: auto;
+        filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.3));
+        margin: 0 auto;
+    }
+
+    .signup-header-text {
+        text-align: center;
+        color: var(--texto-principal);
+        font-size: 1.15rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin-bottom: 2rem;
         text-transform: uppercase;
-        margin-bottom: 12px;
-        letter-spacing: 1px;
     }
 
-    .input-container-nexus {
+    /* --- Customização Inteligente dos Inputs com Ícones --- */
+    .form-group-nexus {
+        margin-bottom: 1.5rem;
+    }
+
+    .nexus-label-style {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #e2e8f0;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    html.light-mode .nexus-label-style {
+        color: #475569;
+    }
+
+    .input-wrapper-nexus {
         position: relative;
         display: flex;
         align-items: center;
     }
 
-    .input-container-nexus i {
+    .input-wrapper-nexus i {
         position: absolute;
         left: 15px;
         color: var(--nexus-blue);
         font-size: 1.1rem;
         z-index: 10;
-        opacity: 0.8;
+        transition: color 0.3s ease;
     }
 
-    .input-container-nexus input {
+    html.light-mode .input-wrapper-nexus i {
+        color: #2563eb;
+    }
+
+    .input-wrapper-nexus input {
         width: 100%;
-        background: rgba(15, 23, 42, 0.6) !important;
-        border: 1px solid var(--borda) !important;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--borda);
         border-radius: 10px;
         padding: 12px 15px 12px 45px;
-        color: #e2e8f0 !important;
+        color: var(--texto-principal);
         font-size: 0.95rem;
-        transition: 0.3s;
+        transition: all 0.3s ease;
         outline: none;
     }
 
-    .input-container-nexus input:focus {
-        border-color: var(--nexus-blue) !important;
-        box-shadow: 0 0 12px var(--nexus-blue-glow) !important;
+    html.light-mode .input-wrapper-nexus input {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        color: #0f172a;
     }
 
-    .input-container-nexus input::placeholder {
-        color: #64748b !important;
+    .input-wrapper-nexus input:focus {
+        border-color: #00f2fe !important;
+        box-shadow: 0 0 12px var(--turquesa-glow) !important;
+        background: #1e293b;
     }
 
-    .btn-nexus-save {
-        background: linear-gradient(90deg, #087cb2, #2ab6dc) !important;
-        color: #0f172a !important;
-        border: none !important;
+    html.light-mode .input-wrapper-nexus input:focus {
+        border-color: #2563eb !important;
+        box-shadow: 0 0 12px rgba(37, 99, 235, 0.2) !important;
+        background: #ffffff;
+    }
+
+    .input-wrapper-nexus input::placeholder {
+        color: #64748b;
+    }
+
+    /* --- Botão de Ação --- */
+    .btn-nexus-register {
+        width: 100%;
+        padding: 0.8rem;
+        background: linear-gradient(90deg, #087cb2, #2ab6dc);
+        color: #0f172a;
+        border: none;
         border-radius: 10px;
+        font-size: 1rem;
         font-weight: 700;
-        text-transform: uppercase;
         cursor: pointer;
-        transition: 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.9rem;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .btn-nexus-save:hover {
-        filter: brightness(1.1);
+    .btn-nexus-register:hover {
         transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
+        filter: brightness(1.1);
+    }
+
+    html.light-mode .btn-nexus-register {
+        background: linear-gradient(90deg, #2563eb, #3b82f6);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .signup-links {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #334155;
+    }
+
+    html.light-mode .signup-links {
+        border-top-color: #e2e8f0;
+    }
+
+    .signup-links a {
+        color: #00f2fe;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    html.light-mode .signup-links a {
+        color: #2563eb;
+    }
+
+    .signup-links a:hover {
+        color: var(--texto-principal);
+        text-decoration: underline;
     }
 </style>
-{% endblock %}
+
+<div class="signup-content-area">
+    <div class="signup-container">
+        
+        <div class="logo-box-signup">
+            <img src="{% static 'img/nexushub.png' %}" alt="Nexus Hub Logo">
+        </div>
+
+        <div class="signup-header-text">
+            Criar Nova Conta
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group-nexus">
+                <label class="nexus-label-style">NOME DE USUÁRIO</label>
+                <div class="input-wrapper-nexus">
+                    <i class="bi bi-person-fill"></i>
+                    <input type="text" name="username" required placeholder="Escolha um nome de usuário">
+                </div>
+            </div>
+
+            <div class="form-group-nexus">
+                <label class="nexus-label-style">E-MAIL</label>
+                <div class="input-wrapper-nexus">
+                    <i class="bi bi-envelope-fill"></i>
+                    <input type="email" name="email" required placeholder="seu@email.com">
+                </div>
+            </div>
+
+            <div class="form-group-nexus">
+                <label class="nexus-label-style">SENHA</label>
+                <div class="input-wrapper-nexus">
+                    <i class="bi bi-lock-fill"></i>
+                    <input type="password" name="password" required placeholder="********">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-nexus-register">
+                <i class="bi bi-person-plus-fill me-2" style="color: inherit !important;"></i> Finalizar Cadastro
+            </button>
+        </form>
+
+        <div class="signup-links">
+            <a href="{% url 'login_view' %}">Já possui uma conta? Faça o login aqui!</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}  

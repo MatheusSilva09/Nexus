@@ -87,19 +87,70 @@
             filter: drop-shadow(0 0 12px var(--sotaque-glow));
         }
 
-        /* Barra de Busca Estilo Premium */
+        /* Barra de Busca Estilo Premium Avançado */
+        .search-wrapper-nexus {
+            position: relative;
+            width: 350px;
+        }
+
         .search-box-nexus {
             background: rgba(15, 23, 42, 0.4) !important;
             border: 1px solid var(--borda) !important;
             color: var(--texto-principal) !important;
             border-radius: 20px;
-            padding: 6px 20px;
-            width: 350px;
-            transition: 0.3s;
+            padding: 8px 40px 8px 20px; /* Espaço para os ícones na direita */
+            width: 100%;
+            transition: all 0.3s ease;
         }
 
         html.light-mode .search-box-nexus {
-            background: #fff !important;
+            background: #ffffff !important;
+        }
+
+        .search-box-nexus:focus {
+            border-color: var(--sotaque-glow) !important;
+            box-shadow: 0 0 12px var(--turquesa-glow) !important;
+            outline: none;
+        }
+
+        /* Botões internos da barra de pesquisa */
+        .search-btn-nexus {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--texto-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-btn-nexus:hover {
+            color: var(--sotaque-glow);
+        }
+
+        .search-clear-nexus {
+            position: absolute;
+            right: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+            transition: opacity 0.2s;
+        }
+        
+        .search-clear-nexus:hover {
+            color: #dc2626;
         }
 
         .search-box-nexus:focus {
@@ -181,12 +232,33 @@
             </a>
 
                 <div class="d-none d-md-flex align-items-center">
-                    <form method="GET" action="{% url 'lista_estoque' %}" style="width: 100%; max-width: 350px;">
+                    <form method="GET" action="{% url 'vitrine' %}" class="search-wrapper-nexus">
+                        
+                        {% if filtrando_ofertas %}
+                            <input type="hidden" name="ofertas" value="true">
+                        {% endif %}
+                        {% if request.GET.loja_id %}
+                            <input type="hidden" name="loja_id" value="{{ request.GET.loja_id }}">
+                        {% endif %}
+
                         <input type="text" 
                             name="q" 
                             value="{{ termo_busca|default:'' }}" 
-                            placeholder="Procurar produtos, marcas..." 
-                            class="search-box-nexus">
+                            placeholder="Procurar produtos, especificações..." 
+                            class="search-box-nexus"
+                            autocomplete="off">
+
+                        {% if termo_busca %}
+                            <a href="?{% if filtrando_ofertas %}ofertas=true&{% endif %}{% if request.GET.loja_id %}loja_id={{ request.GET.loja_id }}{% endif %}" 
+                               class="search-clear-nexus" 
+                               title="Limpar pesquisa">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </a>
+                        {% endif %}
+
+                        <button type="submit" class="search-btn-nexus" title="Pesquisar">
+                            <i class="bi bi-search"></i>
+                        </button>
                     </form>
                 </div>
             <div class="d-flex align-items-center gap-3">
@@ -198,8 +270,8 @@
                     <span class="small d-none d-sm-inline">Olá, <strong style="color: var(--sotaque-glow);">{{ user.username }}</strong></span>
                     <a href="{% url 'loja_meus_pedidos' %}" class="btn btn-sm btn-outline-secondary style-btn" style="color: var(--texto-principal); border-color: var(--borda);">Pedidos</a>
                     
-                    {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' %}
-                        <a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary style-btn" style="color: var(--texto-muted); border-color: var(--borda);">Admin</a>
+                    {% if user.perfil.nivel in 'ADMIN,GERENTE,DONO' or user.is_superuser or user.is_staff %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary style-btn" style="color: var(--texto-muted); border-color: var(--borda);">Admin</a>
                     {% endif %}
                     <a href="{% url 'loja_logout' %}" class="btn btn-sm btn-outline-danger">Sair</a>
                 {% else %}

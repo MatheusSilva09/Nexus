@@ -36,7 +36,7 @@ class ClienteForm(forms.ModelForm):
 class ProdutoForm(forms.ModelForm):
     class Meta:
         model = Produto
-        fields = ['nome', 'descricao', 'preco', 'estoque', 'estoque_minimo', 'categoria'] # Seus campos normais
+        fields = ['nome', 'descricao', 'preco', 'estoque', 'estoque_minimo', 'categoria', 'em_oferta', 'preco_promocional'] # Seus campos normais
 
     def clean_preco(self):
         # Captura o valor exatamente como veio do HTML
@@ -63,5 +63,10 @@ class ProdutoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['preco'].localize = True
-        self.fields['preco'].widget.is_localized = True
+        self.fields['preco_promocional'].widget.attrs.update({
+            'class': 'form-control-nexus',
+            'placeholder': 'R$ 0,00'
+        })
+        self.fields['em_oferta'].widget.attrs.update({
+            'class': 'form-check-input-nexus'
+        })

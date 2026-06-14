@@ -71,40 +71,69 @@ def signup_view(request):
 
 # --- DASHBOARD ---
 
-@admin_only_required
 @login_required(login_url='login_view')
 def dashboard_view(request):
-    # 1. Total de itens físicos (Soma da coluna estoque)
-    total_itens = Produto.objects.aggregate(total=Sum('estoque'))['total'] or 0
+    # 1. Identificar se é Administrador Global
+    if request.user.is_superuser:
+        produtos_queryset = Produto.objects.all()
+        clientes_queryset = Cliente.objects.all()
+        total_funcionarios = Funcionario.objects.count()
+    else:
+        # 2. Buscar a loja vinculada ao usuário comum (Lockey)
+        loja_usuario = None
 
-    # 2. Valor financeiro do estoque
-    valor_estoque = Produto.objects.all().aggregate(
-        total=Sum(F('preco') * F('estoque'))
-    )['total'] or 0
+        # Tenta buscar a loja primeiro através do modelo Perfil
+        if hasattr(request.user, 'perfil') and hasattr(request.user.perfil, 'loja'):
+            loja_usuario = request.user.perfil.loja
+            
+        # Redundância 1: Tenta buscar se houver relação direta no User
+        elif hasattr(request.user, 'loja'):
+            loja_usuario = request.user.loja
+            
+        # Redundância 2: Tenta buscar pelo funcionário (usando usuario_id como no seu código original)
+        else:
+            funcionario_registro = Funcionario.objects.filter(usuario_id=request.user).first()
+            if funcionario_registro and hasattr(funcionario_registro, 'loja'):
+                loja_usuario = funcionario_registro.loja
 
-    # 3. Diferenciação de Alertas
-    # Baixo estoque: Itens entre 1 e o limite mínimo
-    baixo_estoque = Produto.objects.filter(estoque__gt=0, estoque__lte=F('estoque_minimo')).count()
+        # 3. Filtrar as QuerySets com segurança total contra FieldError
+        if loja_usuario:
+            # Mantemos o filtro apenas em Produto (que sabemos que tem o campo 'loja')
+            produtos_queryset = Produto.objects.filter(loja=loja_usuario)
+            
+            # Evita FieldError: Carrega globalmente por enquanto até ajustarmos as chaves estrangeiras
+            clientes_queryset = Cliente.objects.all() 
+            total_funcionarios = Funcionario.objects.count()
+        else:
+            # Se não encontrar nenhuma loja no perfil, zera o inventário por segurança
+            produtos_queryset = Produto.objects.none()
+            clientes_queryset = Cliente.objects.none()
+            total_funcionarios = 0
+
+    # --- CÁLCULO DAS MÉTRICAS ---
+    total_itens = produtos_queryset.aggregate(total=Sum('estoque'))['total'] or 0
     
-    # Alertas críticos: Itens com estoque ZERO (Esgotados)
-    alertas_criticos = Produto.objects.filter(estoque__lte=0).count()
-
-    # 4. Total de Clientes
-    total_clientes_ativos = Cliente.objects.count()
-
-    # 5. Total de Funcionários (Equipe)
-    total_funcionarios = Funcionario.objects.filter(usuario_id=request.user).count()
+    # 1. Calculamos o valor bruto do estoque
+    valor_bruto = produtos_queryset.aggregate(total=Sum(F('preco') * F('estoque')))['total'] or 0
     
-    # Filtro robusto para 'hoje' considerando o fuso horário local
+    # 2. Formatamos o valor diretamente na View para o padrão monetário brasileiro (Ex: 204.159,12)
+    valor_estoque_formatado = f"{valor_bruto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    # Alertas
+    baixo_estoque = produtos_queryset.filter(estoque__gt=0, estoque__lte=F('estoque_minimo')).count()
+    alertas_criticos = produtos_queryset.filter(estoque__lte=0).count()
+
+    # Clientes e Funcionários
+    total_clientes_ativos = clientes_queryset.count()
     hoje_inicio = timezone.localtime(timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
-    novos_clientes_hoje = Cliente.objects.filter(data_cadastro__gte=hoje_inicio).count()
+    novos_clientes_hoje = clientes_queryset.filter(data_cadastro__gte=hoje_inicio).count()
 
-    # 5. Produtos para a tabela de 'Atividade Recente'
-    produtos_recentes = Produto.objects.all().order_by('-id')[:5]
+    # Tabela de Atividade Recente
+    produtos_recentes = produtos_queryset.order_by('-id')[:5]
 
     context = {
         'total_itens': total_itens,
-        'valor_estoque': valor_estoque,
+        'valor_estoque': valor_estoque_formatado,  # <--- Passamos a string perfeitamente formatada aqui
         'baixo_estoque': baixo_estoque,
         'alertas_criticos': alertas_criticos,
         'total_clientes_ativos': total_clientes_ativos,
@@ -115,9 +144,9 @@ def dashboard_view(request):
         'hoje': hoje_inicio.date(),
     }
 
-    # Print de teste para confirmar no seu terminal
+    # Debug para o seu terminal
     print("--- DEBUG NEXUS HUB ---")
-    print(f"Itens: {total_itens} | Valor: {valor_estoque}")
+    print(f"Usuário: {request.user.username} | Loja detetada: {loja_usuario}")
     
     return render(request, 'dashboard.html', context)
 
@@ -163,27 +192,51 @@ def dashboard_faturamento(request):
     
 # --- ESTOQUE E PRODUTOS ---
 
-@loja_obrigatoria
 def lista_estoque(request):
-    # 1. Busca a base de produtos do usuário logado
+    # 1. Busca a base de produtos isolada pela loja do usuário logado (Suporta Lockey pelo Perfil)
+    if request.user.is_superuser:
+        produtos_base = Produto.objects.all()
+    else:
+        loja_usuario = None
+        # Tenta pelo Perfil (Lockey)
+        if hasattr(request.user, 'perfil') and hasattr(request.user.perfil, 'loja'):
+            loja_usuario = request.user.perfil.loja
+        # Redundância: Tenta pela relação direta ou vendedor se houver
+        elif hasattr(request.user, 'loja'):
+            loja_usuario = request.user.loja
+        
+        if loja_usuario:
+            produtos_base = Produto.objects.filter(loja=loja_usuario)
+        else:
+            # Caso o usuário ainda use o vínculo antigo por Vendedor
+            try:
+                produtos_base = Produto.objects.filter(loja__vendedor__usuario=request.user)
+            except Exception:
+                produtos_base = Produto.objects.none()
+
     termo_busca = request.GET.get('q', '').strip()
-    produtos_base = Produto.objects.filter(loja__vendedor__usuario=request.user)
     
     # 2. CALCULA OS ALERTAS (Antes de qualquer filtro de busca)
-    # Aqui definimos a variável que estava faltando
     alertas_count = produtos_base.filter(estoque__lte=F('estoque_minimo')).count()
+    # Adicionamos também o Alerta Crítico (Estoque em zero) que aparece na sua imagem
+    alertas_criticos = produtos_base.filter(estoque__lte=0).count()
 
     # 3. Lógica de filtro (se o usuário clicou para ver apenas baixo estoque)
     produtos = produtos_base
     if request.GET.get('baixo_estoque'):
         produtos = produtos.filter(estoque__lte=F('estoque_minimo'))
 
-    # 4. Agregações de valores
+    # 4. Agregações de valores brutos
     totais = produtos.aggregate(
-        total_itens=Sum('estoque'), # Soma a quantidade total de peças
-        valor_total=Sum(F('preco') * F('estoque')) # Valor total em R$
+        total_itens=Sum('estoque'),
+        valor_total=Sum(F('preco') * F('estoque'))
     )
 
+    # 5. Formatação do Valor Monetário para o padrão brasileiro (Evita valor quebrado/longo)
+    valor_bruto = totais['valor_total'] or 0
+    valor_estoque_formatado = f"{valor_bruto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    # 6. Aplica o termo de busca por nome ou descrição se houver
     if termo_busca:
         produtos = produtos.filter(
             Q(nome__icontains=termo_busca) | 
@@ -192,26 +245,20 @@ def lista_estoque(request):
     
     produtos = produtos.order_by('nome')
 
+    # CORREÇÃO DO CONTEXTO: Incluímos todas as variáveis que a sua tela de estoque precisa
     context = {
         'produtos': produtos,
+        'termo_busca': termo_busca,
         'total_itens': totais['total_itens'] or 0,
-        'valor_estoque': totais['valor_total'] or 0,
-        'alertas_reposicao': alertas_count, # Agora a variável existe!
+        'valor_estoque': valor_estoque_formatado,   # String bonita e limpa (R$ 204.159,12)
+        'alertas_reposicao': alertas_count,
+        'alertas_criticos': alertas_criticos,       # Envia para o card de Ruptura
         'titulo_aba': 'Gerenciamento de Estoque | NEXUS Hub',
     }
-    return render(request, 'estoque_lista.html', {
-        'produtos': produtos,
-        'termo_busca': termo_busca, # Mantém o texto fixo na barra superior após o carregamento
-    })
-
-class ListaEstoqueView(LoginRequiredMixin, ListView):
-    login_url = 'login_view'
-    model = Produto
-    template_name = 'estoque.html'
-
-    def get_queryset(self):
-        vendedor = Vendedor.objects.get(usuario=self.request.user)
-        return Produto.objects.filter(loja__vendedor=vendedor)
+    
+    # Retorna o arquivo de template correto passando o CONTEXT completo
+    # Nota: Certifique-se se o seu arquivo se chama 'estoque_lista.html' ou 'lista_estoque.html'
+    return render(request, 'estoque_lista.html', context)
 
 def vitrine_produtos(request):
     query = request.GET.get('q')
@@ -291,28 +338,43 @@ def cadastrar_produto(request):
     if request.method == 'POST':
         post_data = request.POST.copy()
         
-        # --- LIMPEZA ROBUSTA CONTRA INVALIDOPERATION ---
+        # --- LIMPEZA ROBUSTA CONTRA INVALIDOPERATION (PREÇO ORIGINAL) ---
         preco_raw = post_data.get('preco', '0')
-        
-        # 1. Mantém apenas dígitos, pontos e vírgulas (remove R$, espaços e lixos de máscara)
         preco_limpo = re.sub(r'[^\d.,]', '', preco_raw).strip()
         
-        # 2. Se a string contiver pontos de milhar E vírgula decimal (ex: 1.500,00)
         if ',' in preco_limpo and '.' in preco_limpo:
-            # Se o ponto vier antes da vírgula, removemos os pontos de milhar
             if preco_limpo.rfind('.') < preco_limpo.rfind(','):
                 preco_limpo = preco_limpo.replace('.', '')
-        
-        # 3. Transforma a vírgula decimal no padrão aceito pelo Python (ponto)
         preco_limpo = preco_limpo.replace(',', '.')
 
         try:
-            # Validação e conversão segura para o dicionário do Form
             valor_decimal = Decimal(preco_limpo)
             post_data['preco'] = str(valor_decimal)
         except (InvalidOperation, ValueError, TypeError):
             valor_decimal = Decimal('0.00')
             post_data['preco'] = '0.00'
+
+        # --- LIMPEZA ROBUSTA (PREÇO PROMOCIONAL) ---
+        preco_promo_raw = post_data.get('preco_promocional', '').strip()
+        valor_promo_decimal = None
+        
+        if preco_promo_raw:
+            preco_promo_limpo = re.sub(r'[^\d.,]', '', preco_promo_raw).strip()
+            if ',' in preco_promo_limpo and '.' in preco_promo_limpo:
+                if preco_promo_limpo.rfind('.') < preco_promo_limpo.rfind(','):
+                    preco_promo_limpo = preco_promo_limpo.replace('.', '')
+            preco_promo_limpo = preco_promo_limpo.replace(',', '.')
+            
+            try:
+                valor_promo_decimal = Decimal(preco_promo_limpo)
+                post_data['preco_promocional'] = str(valor_promo_decimal)
+            except (InvalidOperation, ValueError, TypeError):
+                post_data['preco_promocional'] = None
+        else:
+            post_data['preco_promocional'] = None
+
+        # Tratamento do Checkbox booleano (se não vem no POST, o lojista não marcou, logo é False)
+        post_data['em_oferta'] = 'em_oferta' in request.POST
 
         form = ProdutoForm(post_data, request.FILES)
         
@@ -322,19 +384,23 @@ def cadastrar_produto(request):
                     # Instancia e associa os dados da loja
                     novo_produto = form.save(commit=False)
                     novo_produto.loja = loja_do_usuario
-                    novo_produto.preco = valor_decimal # Garante o valor sanitizado diretamente no objeto
+                    novo_produto.preco = valor_decimal  # Garante o valor sanitizado original
+                    
+                    # Salva os novos estados de promoção no objeto
+                    novo_produto.em_oferta = post_data['em_oferta']
+                    novo_produto.preco_promocional = valor_promo_decimal
+                    
                     novo_produto.save()
 
                     # PROCESSAMENTO REAL DO BINÁRIO DA IMAGEM COM ORDENAÇÃO AUTOMÁTICA
                     imagens = request.FILES.getlist('imagens_galeria')
                     
                     if imagens:
-                        # O enumerate gera o 'indice' (0, 1, 2...) com base na ordem de envio dos arquivos
                         for indice, img in enumerate(imagens):
                             ProdutoImagem.objects.create(
                                 produto=novo_produto, 
                                 imagem=img,
-                                ordem=indice  # <--- DEFINE A ORDEM AUTOMÁTICA AQUI!
+                                ordem=indice
                             )
                     else:
                         messages.warning(request, "Nenhuma imagem foi carregada para a galeria deste produto.")
@@ -384,7 +450,7 @@ def deletar_imagem_galeria(request, imagem_id):
         print(f"[NEXUS HUB] Erro crítico na exclusão: {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)})
 
-@login_required
+@login_required(login_url='login_view')
 def editar_produto(request, produto_id):
     produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
     categorias = Categoria.objects.all()
@@ -402,41 +468,65 @@ def editar_produto(request, produto_id):
         estoque_min_raw = request.POST.get('estoque_minimo', '5')
         produto.estoque_minimo = int(estoque_min_raw) if estoque_min_raw.isdigit() else 5
 
-        # --- TRATAMENTO ROBUSTO CONTRA INVALIDOPERATION ---
+        # --- TRATAMENTO ROBUSTO CONTRA INVALIDOPERATION (PREÇO ORIGINAL) ---
         preco_raw = request.POST.get('preco', '0,00')
-        
-        # 1. Remove R$, espaços e tudo que não for número, ponto ou vírgula
         preco_limpo = re.sub(r'[^\d.,]', '', preco_raw).strip()
         
-        # 2. Se o padrão for brasileiro (ex: 1.500,00), remove o ponto de milhar e troca vírgula por ponto
         if ',' in preco_limpo and '.' in preco_limpo:
             if preco_limpo.rfind('.') < preco_limpo.rfind(','):
                 preco_limpo = preco_limpo.replace('.', '')
-        
         preco_limpo = preco_limpo.replace(',', '.')
 
         try:
-            # Tenta converter. Se vier string vazia ou zoada, cai no except e bota 0.00
             produto.preco = Decimal(preco_limpo)
         except (InvalidOperation, ValueError, TypeError):
             produto.preco = Decimal('0.00')
+
+        # --- NOVO: TRATAMENTO ROBUSTO (PREÇO PROMOCIONAL) ---
+        preco_promo_raw = request.POST.get('preco_promocional', '').strip()
         
-        # 5. Salvamento seguro
+        if preco_promo_raw:
+            preco_promo_limpo = re.sub(r'[^\d.,]', '', preco_promo_raw).strip()
+            if ',' in preco_promo_limpo and '.' in preco_promo_limpo:
+                if preco_promo_limpo.rfind('.') < preco_promo_limpo.rfind(','):
+                    preco_promo_limpo = preco_promo_limpo.replace('.', '')
+            preco_promo_limpo = preco_promo_limpo.replace(',', '.')
+            
+            try:
+                produto.preco_promocional = Decimal(preco_promo_limpo)
+            except (InvalidOperation, ValueError, TypeError):
+                produto.preco_promocional = None
+        else:
+            produto.preco_promocional = None
+
+        # Captura o estado do checkbox de promoção (True se marcado, False se omitido)
+        produto.em_oferta = 'em_oferta' in request.POST
+        
+        # Salvamento seguro
         try:
             with transaction.atomic():
                 produto.save()
                 
+                # --- ATUALIZAR ORDEM DAS IMAGENS EXISTENTES ---
                 for key, value in request.POST.items():
                     if key.startswith('ordem_imagem_'):
-                        img_id = key.replace('ordem_imagem_', '') # Extrai o ID da imagem
-                        # Atualiza a ordem daquela imagem específica
+                        img_id = key.replace('ordem_imagem_', '')
                         ProdutoImagem.objects.filter(id=img_id, produto=produto).update(ordem=int(value or 0))
 
-                # Coleta as imagens sem quebrar caso o input venha vazio
+                # --- ADICIONAR NOVAS IMAGENS DA GALERIA ---
                 novas_imagens = request.FILES.getlist('imagens_galeria')
                 if novas_imagens:
+                    # Descobre qual a maior ordem atual para continuar a sequência de onde parou
+                    ultima_imagem = produto.imagens.all().order_by('-ordem').first()
+                    proxima_ordem = (ultima_imagem.ordem + 1) if ultima_imagem else 0
+                    
                     for img in novas_imagens:
-                        ProdutoImagem.objects.create(produto=produto, imagem=img)
+                        ProdutoImagem.objects.create(
+                            produto=produto, 
+                            imagem=img, 
+                            ordem=proxima_ordem
+                        )
+                        proxima_ordem += 1
                 
                 messages.success(request, f"Produto '{produto.nome}' atualizado com sucesso!")
                 return redirect('lista_estoque')
@@ -444,20 +534,22 @@ def editar_produto(request, produto_id):
         except Exception as e:
             messages.error(request, f"Erro ao atualizar no banco: {e}")
     
-    imagens_atuais = produto.imagens.all()
-    
+    # Formatações de saída para renderizar no formulário HTML
     preco_formatado = f"{produto.preco:.2f}".replace('.', ',')
+    preco_promo_formatado = f"{produto.preco_promocional:.2f}".replace('.', ',') if produto.preco_promocional else ""
+    
     imagens_atuais = produto.imagens.all().order_by('ordem', 'id')
 
     return render(request, 'editar_produto.html', {
-    'produto': produto, 
-    'preco_formatado': preco_formatado, # Passamos a string perfeitamente lapidada aqui
-    'categorias': categorias,
-    'imagens_atuais': imagens_atuais,
-    'titulo_aba': 'Editar Produto | NEXUS Hub'
-})
+        'produto': produto, 
+        'preco_formatado': preco_formatado,
+        'preco_promo_formatado': preco_promo_formatado,  # Passamos o preço promocional limpo
+        'categorias': categorias,
+        'imagens_atuais': imagens_atuais,
+        'titulo_aba': 'Editar Produto | NEXUS Hub'
+    })
 
-@login_required
+@login_required(login_url='login_view')
 def detalhe_produto(request, produto_id):
     produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
     imagens = produto.imagens.all()
@@ -466,8 +558,12 @@ def detalhe_produto(request, produto_id):
         'imagens': imagens,
     })
 
-@login_required
+@login_required(login_url='login_view')
 def excluir_produto(request, produto_id):
+    # Bloqueio para Vendedores: não podem deletar produtos do sistema
+    if not request.user.is_superuser and request.user.perfil.nivel == 'VENDEDOR':
+        messages.error(request, "Você não tem permissão para excluir produtos do catálogo.")
+        return redirect('lista_estoque')
     # Busca o produto garantindo que ele pertença à loja do usuário
     produto = get_object_or_404(Produto, id=produto_id, loja__vendedor__usuario=request.user)
     
@@ -476,162 +572,18 @@ def excluir_produto(request, produto_id):
         return redirect('lista_estoque')
         
     return render(request, 'confirmar_exclusao_produto.html', {'produto': produto})
-@vendedor_or_admin_required
+
+# --- PEDIDO ---
+
+@login_required(login_url='login_view')
 def alternar_status_produto(request, produto_id):
     produto = get_object_or_404(Produto, id=produto_id, loja=request.user.vendedor.loja)
     produto.ativo = not produto.ativo
     produto.save()
     return redirect('gerenciamento_estoque')
 
-# These cart views are for the 'loja' app, not dashboard.
-# They should ideally be in loja/views.py or protected differently if they are meant for dashboard users.
-# For now, I'll assume they are public or client-facing.
-def adicionar_ao_carrinho(request, produto_id):
-    cart = Cart(request)
-    produto = get_object_or_404(Produto, id=produto_id)
-    cart.add(produto_id=produto.id)
-    return redirect('vitrine')
+# --- VIEWS DO CARRINHO (CLIENT-FACING) ---
 
-def ver_carrinho(request):
-    cart = Cart(request)
-    itens_carrinho = []
-    total_geral = 0
-
-    # Percorre os IDs guardados na sessão
-    for produto_id, dados in cart.cart.items():
-        produto = Produto.objects.get(id=produto_id)
-        subtotal = produto.preco * dados['quantidade']
-        total_geral += subtotal
-        
-        itens_carrinho.append({
-            'produto': produto,
-            'quantidade': dados['quantidade'],
-            'subtotal': subtotal
-        })
-
-    return render(request, 'carrinho.html', {
-        'itens': itens_carrinho,
-        'total': total_geral,
-        'titulo_aba': 'Carrinho | NEXUS Hub'
-    })
-    
-def remover_do_carrinho(request, produto_id):
-    cart = Cart(request)
-    cart.remove(produto_id)
-    return redirect('ver_carrinho')
-
-@transaction.atomic
-@login_required
-def finalizar_pedido(request):
-    cart = Cart(request)
-    if not cart.cart:
-        return redirect('vitrine')
-
-    # 1. Recupera o cadastro de Cliente do usuário logado
-    cliente = Cliente.objects.filter(usuario=request.user).first()
-
-    if not cliente:
-        messages.warning(request, "Por favor, complete seus dados de entrega antes de finalizar a compra.")
-        return redirect('cadastrar_cliente')
-
-    # 2. Otimização: Busca todos os produtos do carrinho de uma só vez
-    ids_produtos = cart.cart.keys()
-    produtos_dict = {p.id: p for p in Produto.objects.filter(id__in=ids_produtos)}
-
-    # Calcula o total usando o dicionário em memória
-    total_geral = sum(produtos_dict[int(id)].preco * item['quantidade'] 
-                      for id, item in cart.cart.items())
-    
-    # Cria o Pedido principal
-    pedido = Pedido.objects.create(cliente=cliente, total=total_geral)
-
-    # 3. Transfere os itens da Sessão para o Banco (ItemPedido)
-    for produto_id, dados in cart.cart.items():
-        produto = produtos_dict[int(produto_id)]
-        
-        ItemPedido.objects.create(
-            pedido=pedido,
-            produto=produto,
-            preco=produto.preco,
-            quantidade=dados['quantidade']
-        )
-
-        # Baixa no estoque
-        produto.estoque -= dados['quantidade']
-        produto.save()
-
-    # 4. Limpa o carrinho
-    request.session['cart'] = {}
-    
-    # 5. Processamento de E-mail (Protegido por try/except)
-    try:
-        # Monta o e-mail
-        assunto = f"Nexus Hub - Pedido #{pedido.id} Confirmado!"
-        corpo = f"Olá {pedido.cliente.usuario.username}, seu pedido #{pedido.id} foi recebido com sucesso."
-        destinatario = [pedido.cliente.usuario.email]
-
-        send_mail(assunto, corpo, settings.EMAIL_HOST_USER, destinatario)
-        
-    except Exception as e:
-        print(f"Aviso: Não foi possível enviar o e-mail. Erro: {e}")
-        
-    # 6. Notificação para o Administrador
-    try:
-        assunto_admin = f"🚨 NOVO PEDIDO: #{pedido.id}"
-        mensagem_admin = f"""
-        Um novo pedido foi finalizado no Nexus Hub!
-        Cliente: {pedido.cliente.usuario.username}
-        Valor Total: R$ {pedido.total}
-        Data: {pedido.data_criacao.strftime('%d/%m/%Y %H:%M')}
-
-        Acesse o painel para gerenciar a entrega.
-        """
-        email_admin = 'dono@loja.com'
-
-        send_mail(
-            assunto_admin,
-            mensagem_admin,
-            settings.EMAIL_HOST_USER,
-            [email_admin],
-            fail_silently=False,
-        )
-        
-        # Dispara o e-mail para todos da lista ADMINS
-        mail_admins(
-            f"Novo Pedido #{pedido.id}",
-            f"O cliente {pedido.cliente.usuario.username} acabou de comprar R$ {pedido.total}.",
-        )
-    except Exception as e:
-        print(f"Erro ao notificar admin: {e}")
-    
-    messages.success(request, f"Pedido #{pedido.id} realizado com sucesso! Acompanhe o status abaixo.")
-    return redirect('historico_pedidos')
-
-@login_required
-def detalhe_pedido(request, pedido_id):
-    # Busca o pedido ou retorna 404 se não existir
-    # Filtramos pelo usuario do cliente logado por segurança
-    pedido = get_object_or_404(Pedido, id=pedido_id, cliente__usuario=request.user)
-    
-    itens = pedido.itens.all()
-    
-    return render(request, 'detalhe_pedido.html', {
-        'pedido': pedido,
-        'itens': itens,
-        'titulo_aba': 'Detalhes do Pedido | NEXUS Hub',
-    })
-@login_required
-def historico_pedidos(request):
-    # Busca todos os pedidos vinculados ao usuário logado através do modelo Cliente
-    # .order_by('-data_criacao') garante que o mais recente apareça primeiro
-    pedidos = Pedido.objects.filter(
-        cliente__usuario=request.user
-    ).order_by('-data_criacao')
-    
-    return render(request, 'historico.html', {
-        'pedidos': pedidos,
-        'titulo_aba': 'Meus Pedidos | NEXUS Hub'
-    })
 
 # --- CLIENTES ---
 
@@ -639,14 +591,14 @@ def historico_pedidos(request):
 def profile(request):
     return render(request, "profile.html")
     
-@admin_only_required
+@login_required(login_url='login_view')
 def lista_clientes(request):
     clientes = Cliente.objects.all()
     return render(request, 'lista_clientes.html', {
         'clientes': clientes,
         'titulo_aba': 'Lista de Clientes | NEXUS Hub'})
 
-@login_required # Garante que só usuários logados acessem
+@login_required(login_url='login_view')
 def cadastrar_cliente(request):
     if request.method == 'POST':
         # 1. Pegamos os dados do formulário
@@ -654,6 +606,11 @@ def cadastrar_cliente(request):
         telefone = request.POST.get('telefone')
         email = request.POST.get('email')
         endereco = request.POST.get('endereco')
+
+        # Trava de segurança: impede Vendedores de acessar
+        if not request.user.is_superuser and request.user.perfil.nivel == 'VENDEDOR':
+            messages.error(request, "Você não tem permissão para cadastrar clientes.")
+            return redirect('dashboard')
 
         # 2. VALIDAÇÃO DE INTEGRIDADE: Verifica se o e-mail já existe (caso seja unique no model)
         if email and Cliente.objects.filter(email=email).exists():
@@ -686,8 +643,12 @@ def cadastrar_cliente(request):
         'titulo_aba': 'Cadastrar Cliente | NEXUS Hub',
     })
 
-@admin_only_required # Admins edit any client
+@login_required(login_url='login_view')
 def editar_cliente(request, pk):
+
+    if not request.user.is_superuser and request.user.perfil.nivel == 'VENDEDOR':
+        messages.error(request, "Você não tem permissão para editar clientes.")
+        return redirect('lista_clientes')
     cliente = get_object_or_404(Cliente, pk=pk)
     
     if request.method == 'POST':
@@ -703,8 +664,12 @@ def editar_cliente(request, pk):
         'titulo_aba': 'Editar Cliente | NEXUS Hub',
     })
 
-@admin_only_required # Admins delete any client
+@login_required(login_url='login_view')
 def excluir_cliente(request, pk):
+
+    if not request.user.is_superuser and request.user.perfil.nivel == 'VENDEDOR':
+        messages.error(request, "Você não tem permissão para excluir clientes.")
+        return redirect('lista_clientes')
     cliente = get_object_or_404(Cliente, pk=pk)
     
     if request.method == 'POST':
@@ -776,10 +741,15 @@ def ver_loja(request):
     return render(request, 'ver_loja.html', {'loja': loja})
 
 @login_required
-@vendedor_or_admin_required
+@login_required(login_url='login_view')
 def excluir_loja(request):
     # 1. Busca o vendedor vinculado ao usuário logado
     vendedor = Vendedor.objects.filter(usuario=request.user).first()
+
+    # Trava de segurança máxima: apenas DONO ou Superusuário deletam a loja
+    if not request.user.is_superuser and request.user.perfil.nivel in ['GERENTE', 'VENDEDOR']:
+        messages.error(request, "Ação não permitida. Apenas o Dono da loja pode excluí-la.")
+        return redirect('dashboard')
     
     if not vendedor:
         messages.error(request, "Perfil de vendedor não encontrado.")
@@ -804,33 +774,47 @@ def excluir_loja(request):
         
     return render(request, 'dashboard/confirm_delete.html', {'loja': loja})
 
-@admin_only_required
+@login_required(login_url='login_view')
 def adicionar_funcionario(request):
     if request.method == 'POST':
         nome = request.POST.get('nome')
         cargo = request.POST.get('cargo')
         email = request.POST.get('email')
-        
+        telefone = request.POST.get('telefone')  # Capturando o telefone do formulário
+
+        # Trava de segurança: impede Vendedores de acessar
+        if not request.user.is_superuser and request.user.perfil.nivel == 'VENDEDOR':
+            messages.error(request, "Você não tem permissão para cadastrar funcionários.")
+            return redirect('dashboard')
+            
         # Proteção contra e-mail duplicado na equipe
         if Funcionario.objects.filter(email=email).exists():
             messages.error(request, "Este funcionário já está cadastrado.")
-            return render(request, 'funcionario_form.html')
+            # Retorna mantendo os dados digitados preenchidos nos inputs
+            return render(request, 'funcionario_form.html', {
+                'form': request.POST,
+                'titulo_aba': 'Adicionar Funcionário | NEXUS Hub',
+            })
 
+        # Criação do objeto (removida a data_admissao pois o auto_now_add já cuida disso)
         Funcionario.objects.create(
             nome=nome,
             cargo=cargo,
             email=email,
-            usuario_id=request.user,
-            data_admissao=request.POST.get('data_admissao')
+            telefone=telefone,
+            usuario_id=request.user
         )
+        
         messages.success(request, "Funcionário adicionado com sucesso!")
-        return redirect('lista_funcionarios') # Ou a página que você preferir
+        return redirect('lista_funcionarios')
 
+    # Retorno via GET (Carregamento inicial da página)
     return render(request, 'funcionario_form.html', {
+        'form': {},  # Dicionário vazio evita o VariableDoesNotExist nos inputs
         'titulo_aba': 'Adicionar Funcionário | NEXUS Hub',
     })
 
-@admin_only_required
+@login_required(login_url='login_view')
 def lista_funcionarios(request):
     # Se for admin, mostra todos os funcionários
     if request.user.is_superuser:
@@ -843,10 +827,11 @@ def lista_funcionarios(request):
         'funcionarios': funcionarios,
         'titulo_aba': 'Lista de Funcionários | NEXUS Hub',
     })
-@admin_only_required
+@login_required(login_url='login_view')
 def editar_funcionario(request, id):
-    if request.user.is_superuser:
-        funcionario = get_object_or_404(Funcionario, id=id)
+    if not request.user.is_superuser and request.user.perfil.nivel == 'VENDEDOR':
+        messages.error(request, "Você não tem permissão para editar funcionários.")
+        return redirect('lista_funcionarios')
     else:
         funcionario = get_object_or_404(Funcionario, id=id, usuario_id=request.user)
     
@@ -868,10 +853,11 @@ def editar_funcionario(request, id):
         'funcionario': funcionario,
         'titulo_aba': 'Editar Funcionário | NEXUS Hub',
     })
-@admin_only_required
+@vendedor_or_admin_required
 def excluir_funcionario(request, id):
-    if request.user.is_superuser:
-        funcionario = get_object_or_404(Funcionario, id=id)
+    if not request.user.is_superuser and request.user.perfil.nivel == 'VENDEDOR':
+        messages.error(request, "Você não tem permissão para excluir funcionários.")
+        return redirect('lista_funcionarios')
     else:
         funcionario = get_object_or_404(Funcionario, id=id, usuario_id=request.user)
     

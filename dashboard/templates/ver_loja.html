@@ -1,13 +1,203 @@
 {% extends 'base.html' %}
 {% block title %}Perfil da Loja | NEXUS Hub{% endblock %}
-{% block page_title %}PERFIL DA LOJA{% endblock %}
 
 {% block content %}
+<style>
+    /* --- Container do Perfil --- */
+    .nexus-profile-card {
+        background: var(--bg-card);
+        border: 1px solid var(--borda);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin-bottom: 30px;
+    }
+
+    /* --- Foto de Capa --- */
+    .nexus-cover-wrapper {
+        height: 240px;
+        position: relative;
+        background: #1e293b;
+    }
+    .nexus-cover-img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
+        opacity: 0.9; 
+    }
+    .nexus-cover-placeholder { 
+        width: 100%; 
+        height: 100%; 
+        background: linear-gradient(90deg, var(--nexus-blue), #3b82f6); 
+        opacity: 0.7;
+    }
+
+    /* --- Corpo do Bloco de Perfil --- */
+    .card-body-nexus { 
+        padding: 40px; 
+        margin-top: -80px; 
+    }
+
+    /* --- Avatar / Logotipo --- */
+    .nexus-avatar-wrapper {
+        width: 140px; 
+        height: 140px;
+        background: var(--bg-card);
+        border: 5px solid var(--bg-card);
+        border-radius: 25px;
+        overflow: hidden;
+        z-index: 10;
+        flex-shrink: 0;
+        transition: transform 0.3s ease;
+    }
+    .nexus-avatar-img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
+    }
+    .nexus-avatar-placeholder {
+        width: 100%; 
+        height: 100%; 
+        background: #1e293b;
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        font-size: 3.5rem; 
+        color: var(--nexus-blue);
+    }
+
+    /* --- Identidade Textual da Loja --- */
+    .nexus-store-name { 
+        color: var(--texto-principal); 
+        font-weight: 800; 
+        font-size: 2rem; 
+        letter-spacing: 0.5px;
+        margin: 0;
+    }
+    .nexus-store-segment {
+        color: var(--sotaque-glow);
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-top: 4px;
+    }
+
+    /* --- Grid de Informações Detalhadas --- */
+    .nexus-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-top: 35px;
+        padding-top: 35px;
+        border-top: 1px solid var(--borda);
+    }
+
+    .info-item-box {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid var(--borda);
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    html.light-mode .info-item-box {
+        background: rgba(241, 245, 249, 0.6);
+    }
+
+    .info-item-box .info-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--texto-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item-box .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--texto-principal);
+    }
+
+    /* --- Ajustes de Botões --- */
+    .btn-nexus-edit-profile {
+        background: transparent;
+        border: 1px solid var(--nexus-blue);
+        color: var(--texto-principal) !important;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+    .btn-nexus-edit-profile:hover {
+        background: var(--nexus-blue);
+        box-shadow: 0 0 15px var(--nexus-blue-glow);
+        transform: translateY(-2px);
+    }
+
+    /* =======================================================
+       ⚡ MEDIA QUERIES - RESPONSIVIDADE TOTAL (CELULAR) ⚡
+       ======================================================= */
+    @media (max-width: 767.98px) {
+        .nexus-cover-wrapper {
+            height: 150px; /* Reduz altura da capa no mobile */
+        }
+
+        .card-body-nexus {
+            padding: 20px;
+            margin-top: -60px; /* Ajusta a subida do avatar */
+        }
+
+        /* Transforma o alinhamento horizontal em vertical alinhado ao centro */
+        .profile-header-content {
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            gap: 15px !important;
+        }
+
+        .nexus-avatar-wrapper {
+            width: 120px;
+            height: 120px;
+        }
+
+        .nexus-store-name {
+            font-size: 1.6rem;
+        }
+
+        /* Empilha os botões e faz com que ocupem a largura inteira */
+        .profile-header-actions {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .btn-nexus-edit-profile {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .nexus-info-grid {
+            grid-template-columns: 1fr; /* Força uma única coluna no celular */
+            margin-top: 25px;
+            padding-top: 25px;
+        }
+    }
+</style>
+
 <div class="container-fluid fade-in-content">
     <div class="row justify-content-center">
-        <div class="col-md-10">
+        <div class="col-xl-10 col-lg-12">
+            
             <div class="nexus-profile-card">
-                <!-- Foto de Capa -->
                 <div class="nexus-cover-wrapper">
                     {% if loja.foto_capa %}
                         <img src="{{ loja.foto_capa.url }}" class="nexus-cover-img" alt="Capa da Loja">
@@ -16,100 +206,64 @@
                     {% endif %}
                 </div>
 
-                <div class="card-body-nexus position-relative">
-                    <div class="d-flex align-items-end gap-4 profile-header-content">
-                        <!-- Foto de Perfil -->
-                        <div class="nexus-avatar-wrapper">
-                            {% if loja.foto_perfil %}
-                                <img src="{{ loja.foto_perfil.url }}" class="nexus-avatar-img shadow-lg" alt="Logo da Loja">
-                            {% else %}
-                                <div class="nexus-avatar-placeholder shadow-lg">
-                                    <i class="bi bi-shop"></i>
-                                </div>
-                            {% endif %}
-                        </div>
+                <div class="card-body-nexus">
+                    <div class="d-flex align-items-end justify-content-between flex-wrap gap-4 profile-header-content">
                         
-                        <div class="flex-grow-1">
-                            <h2 class="nexus-store-name mb-0">{{ loja.nome }}</h2>
-                            <p class="nexus-owner-text mb-0"><i class="bi bi-person-badge me-2"></i>Proprietário: <span class="fw-bold">{{ user.username }}</span></p>
-                        </div>
-
-                        <div class="pb-2">
-                            <a href="{% url 'editar_loja' %}" class="logout-btn btn-sm px-4 text-decoration-none">
-                                <i class="bi bi-gear-fill me-2"></i>CONFIGURAÇÕES
-                            </a>
-                        </div>
-                    </div>
-
-                    <hr class="nexus-divider">
-
-                    <div class="row mt-4">
-                        <div class="col-md-7">
-                            <h6 class="nexus-label">Sobre a Loja</h6>
-                            <p class="nexus-description mt-3">
-                                {{ loja.descricao|default:"Nenhuma descrição informada." }}
-                            </p>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="contact-box-nexus">
-                                <h6 class="nexus-label mb-3">Contato Direto</h6>
-                                <div class="d-flex align-items-center gap-3 nexus-contact-item">
-                                    <i class="bi bi-envelope-at-fill"></i>
-                                    <span class="fw-500">{{ user.email|default:"Email não disponível" }}</span>
-                                </div>
+                        <div class="d-flex align-items-end gap-4 profile-header-content">
+                            <div class="nexus-avatar-wrapper shadow-lg">
+                                {% if loja.foto_perfil %}
+                                    <img src="{{ loja.foto_perfil.url }}" class="nexus-avatar-img" alt="Logo da Loja">
+                                {% else %}
+                                    <div class="nexus-avatar-placeholder">
+                                        <i class="bi bi-shop"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <h1 class="nexus-store-name">{{ loja.nome }}</h1>
+                                <span class="nexus-store-segment">
+                                    <i class="bi bi-tag-fill me-1"></i>{{ loja.get_segmento_display|default:"Segmento não definido" }}
+                                </span>
                             </div>
                         </div>
+
+                        <div class="profile-header-actions">
+                            {% if user.perfil.nivel == 'DONO' or user.is_superuser %}
+                            <a href="{% url 'editar_loja' %}" class="btn-nexus-edit-profile">
+                                <i class="bi bi-pencil-square"></i> Editar Perfil
+                            </a>
+                            {% endif %}
+                        </div>
+
                     </div>
+
+                    <div class="nexus-info-grid">
+                        <div class="info-item-box">
+                            <span class="info-label"><i class="bi bi-file-earmark-text me-1"></i> CNPJ / Registro</span>
+                            <span class="info-value">{{ loja.cnpj|default:"Não informado" }}</span>
+                        </div>
+
+                        <div class="info-item-box">
+                            <span class="info-label"><i class="bi bi-telephone me-1"></i> Contato Comercial</span>
+                            <span class="info-value">{{ loja.telefone|default:"Não informado" }}</span>
+                        </div>
+
+                        <div class="info-item-box">
+                            <span class="info-label"><i class="bi bi-geo-alt-fill me-1"></i> Localização</span>
+                            <span class="info-value">{{ loja.endereco|default:"Não informado" }}</span>
+                        </div>
+
+                        <div class="info-item-box">
+                            <span class="info-label"><i class="bi bi-calendar-check me-1"></i> Membro Desde</span>
+                            <span class="info-value">{{ loja.criado_em|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+
         </div>
     </div>
 </div>
-
-<style>
-    /* --- Estilo Re-imaginado Nexus Profile --- */
-    .nexus-profile-card {
-        background: var(--bg-card, #0f172a);
-        border: 1px solid var(--borda);
-        border-left: 4px solid var(--nexus-blue);
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: var(--shadow-effect, 0 10px 30px rgba(0,0,0,0.3));
-    }
-
-    .nexus-cover-wrapper { height: 180px; position: relative; background: #1e293b; }
-    .nexus-cover-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
-    .nexus-cover-placeholder { 
-        width: 100%; height: 100%; 
-        background: linear-gradient(90deg, var(--nexus-blue), #3b82f6); 
-        opacity: 0.7;
-    }
-
-    .card-body-nexus { padding: 40px; margin-top: -80px; }
-    .nexus-avatar-wrapper {
-        width: 140px; height: 140px;
-        background: var(--bg-card);
-        border: 5px solid var(--bg-card);
-        border-radius: 25px;
-        overflow: hidden;
-        z-index: 10;
-    }
-    .nexus-avatar-img { width: 100%; height: 100%; object-fit: cover; }
-    .nexus-avatar-placeholder {
-        width: 100%; height: 100%; background: #1e293b;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 3.5rem; color: var(--nexus-blue);
-    }
-
-    .nexus-store-name { color: var(--texto-principal); font-weight: 800; font-size: 2.2rem; }
-    .nexus-owner-text { color: var(--texto-muted); font-size: 0.95rem; }
-    .nexus-divider { border-color: var(--borda); opacity: 0.1; margin: 30px 0; }
-    .nexus-description { color: var(--texto-principal); line-height: 1.8; font-size: 1.05rem; }
-    
-    .contact-box-nexus { 
-        background: rgba(37, 99, 235, 0.05); padding: 25px; 
-        border-radius: 15px; border: 1px solid var(--borda); 
-    }
-    .nexus-contact-item i { color: var(--nexus-blue); font-size: 1.2rem; }
-</style>
 {% endblock %}
