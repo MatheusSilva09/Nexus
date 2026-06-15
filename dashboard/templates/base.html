@@ -6,12 +6,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ titulo_aba|default:"NEXUS Hub" }}{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link class="icon" type="image/png" href="{% static 'img/favicon.png' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon_nexushub.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    <!-- Script preventivo para evitar flickering de tema -->
+    <!-- Script preventive para evitar flickering de tema -->
     <script>
         const savedTheme = localStorage.getItem('theme') || 'dark';
         if (savedTheme === 'light') {
@@ -20,76 +20,44 @@
     </script>
 
     <style>
-        /* --- Variáveis de Cor Dinâmicas (Cyberpunk Corporativo Mantido) --- */
+        /* --- VARIÁVEIS DE COR E GLOBAIS --- */
         :root {
-            --nexus-blue: #2563eb;
-            --nexus-blue-glow: rgba(37, 99, 235, 0.4);
-            --azul-profundo: #020617;
-            --azul-card: #0f172a;
-            --borda: #1e293b;
-            --texto-muted: #94a3b8;
-            --turquesa-brilhante: #00f2fe;
-            --turquesa-glow: rgba(0, 242, 254, 0.3);
-
+            /* Modo Escuro (Foco em Brilho e Identidade) */
+            --nexus-turquesa-base: #00a8b5;
+            --nexus-turquesa-ativo: #00f2fe;
+            --turquesa-glow: rgba(0, 242, 254, 0.25);
+            
             --bg-principal: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 100%);
             --bg-navbar: rgba(15, 23, 42, 0.8);
             --bg-card: #0f172a;
+            --borda: #1e293b;
             --texto-principal: #f8fafc;
-            --sotaque-glow: var(--turquesa-brilhante);
+            --texto-muted: #94a3b8;
             --bg-alert: #1e293b;
-            --border-alert: #0ea5e9;
+            --border-alert: #00a8b5;
         }
 
         html.light-mode {
+            /* Modo Claro (Foco em Contraste, Azul Turquesa Denso e Elegante) */
+            --nexus-turquesa-base: #006b75;   /* Turquesa escuro e encorpado */
+            --nexus-turquesa-ativo: #00525a;  /* Tom ainda mais denso para estados ativos */
+            --turquesa-glow: transparent;     /* Sem efeitos de brilho no modo claro */
+            
             --bg-principal: #f8fafc;
-            --bg-navbar: rgba(255, 255, 255, 0.85);
+            --bg-navbar: rgba(255, 255, 255, 0.95);
             --bg-card: #ffffff;
+            --borda: #e2e8f0;
             --texto-principal: #0f172a;
-            --texto-secundario: #475569;
-            --sotaque-glow: #0891b2;
-            --border-color: #e2e8f0;
-            --shadow-effect: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            --borda: #cbd5e1;
             --texto-muted: #64748b;
             --bg-alert: #e0f2fe;
-            --border-alert: #38bdf8;
-        }
-
-        /* --- ESTILOS GLOBAIS DE BOTÕES DE AÇÃO (TABELAS) --- */
-        .action-buttons {
-            display: flex;
-            gap: 18px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .btn-action {
-            font-size: 1.15rem;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            color: var(--texto-muted);
-        }
-
-        .btn-action.edit {
-            color: var(--nexus-blue) !important;
-        }
-
-        .btn-action.edit:hover {
-            color: var(--turquesa-brilhante) !important;
-            filter: drop-shadow(0 0 8px var(--turquesa-glow));
-        }
-
-        .btn-action.delete:hover {
-            color: #ef4444 !important;
-            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4));
+            --border-alert: #006b75;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
@@ -107,127 +75,327 @@
             background: var(--bg-navbar) !important;
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--borda);
-            padding: 0.75rem 2rem;
+            padding: 0.5rem 2rem;
             position: sticky;
             top: 0;
             z-index: 1040;
+            transition: background 0.3s ease, border 0.3s ease;
         }
 
+        /* Logo do Hub com Efeito Traseiro em Cápsula */
         .brand-logo-hub {
-            height: 38px;
+            height: 90px;
             width: auto;
-            filter: drop-shadow(0 0 6px rgba(0, 150, 255, 0.2));
-            transition: transform 0.3s ease;
+            margin-top: -5px;
+            margin-bottom: -5px;
+            padding: 4px 14px;
+            background: rgba(0, 168, 181, 0.03);
+            border-radius: 12px;
+            filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.25)); 
+            box-shadow: 
+                inset 0 0 12px rgba(0, 168, 181, 0.15),
+                0 0 20px rgba(0, 168, 181, 0.1); 
+            transition: all 0.3s ease;
         }
 
         .brand-logo-hub:hover {
-            transform: scale(1.02);
+            transform: scale(1.03);
+            background: rgba(0, 242, 254, 0.05);
+            filter: drop-shadow(0 0 12px rgba(0, 242, 254, 0.4));
+            box-shadow: 
+                inset 0 0 16px rgba(0, 242, 254, 0.2),
+                0 0 25px rgba(0, 168, 181, 0.15);
         }
 
+        html.light-mode .brand-logo-hub {
+            background: transparent;
+            filter: none;
+            box-shadow: none;
+        }
+        html.light-mode .brand-logo-hub:hover {
+            background: rgba(0, 107, 117, 0.04);
+            filter: none;
+            box-shadow: none;
+        }
+
+        /* Tipografia e Links das Guias */
         .navbar-nav .nav-link {
             color: var(--texto-muted) !important;
-            font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem !important;
+            font-weight: 700;
+            font-size: 0.82rem; 
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 0.6rem 1.1rem !important;
+            border: 1px solid transparent; 
             border-radius: 8px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             transition: all 0.2s ease;
         }
 
         .navbar-nav .nav-link i {
-            width: 1.5rem;
+            width: 1.6rem;
             display: flex;
             justify-content: center;
-            font-size: 1.1rem;
-            color: var(--nexus-blue);
+            font-size: 1.2rem;
+            color: var(--nexus-turquesa-base); 
+            transition: all 0.2s ease;
         }
 
-        .navbar-nav .nav-link:hover, 
-        .navbar-nav .nav-item.active .nav-link {
+        .navbar-nav .nav-link:hover {
             color: var(--texto-principal) !important;
-            background: rgba(37, 99, 235, 0.1);
+            background: rgba(0, 168, 181, 0.08);
         }
 
-        .navbar-nav .nav-item.active .nav-link i {
-            color: var(--turquesa-brilhante);
-            filter: drop-shadow(0 0 5px var(--turquesa-glow));
+        html.light-mode .navbar-nav .nav-link:hover {
+            background: rgba(0, 107, 117, 0.06);
         }
 
-        /* Dropdowns customizados */
+        /* --- COMPORTAMENTO DAS ABAS ATIVAS --- */
+        .navbar-nav .nav-item.active .nav-link,
+        .navbar-nav .dropdown.active .nav-link {
+            color: var(--texto-principal) !important;
+            background: rgba(15, 23, 42, 0.6) !important; 
+            border: 1px solid rgba(0, 242, 254, 0.3) !important; 
+            border-radius: 8px !important;
+            box-shadow: 0 0 15px var(--turquesa-glow); 
+        }
+
+        .navbar-nav .nav-item.active .nav-link i,
+        .navbar-nav .dropdown.active .nav-link i {
+            color: var(--nexus-turquesa-ativo) !important;
+            filter: drop-shadow(0 0 6px var(--turquesa-glow));
+        }
+
+        /* Especificidades do Modo Claro para Abas Ativas */
+        html.light-mode .navbar-nav .nav-item.active .nav-link,
+        html.light-mode .navbar-nav .dropdown.active .nav-link {
+            color: var(--nexus-turquesa-base) !important; 
+            background: #ffffff !important; 
+            border: 1px solid rgba(0, 107, 117, 0.3) !important; 
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(0, 107, 117, 0.08) !important; 
+        }
+
+        html.light-mode .navbar-nav .nav-item.active .nav-link i,
+        html.light-mode .navbar-nav .dropdown.active .nav-link i {
+            color: var(--nexus-turquesa-base) !important;
+            filter: none !important;
+        }
+
+        /* Dropdowns e Submenu */
         .dropdown-menu-nexus {
             background: var(--bg-card) !important;
             border: 1px solid var(--borda) !important;
             border-radius: 12px !important;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
-            padding: 0.5rem !important;
+            padding: 0.6rem !important;
+            min-width: 240px;
+        }
+
+        html.light-mode .dropdown-menu-nexus {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
         }
 
         .dropdown-menu-nexus .dropdown-item {
             color: var(--texto-muted) !important;
-            padding: 0.6rem 1rem;
+            padding: 0.7rem 1.2rem;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
             display: flex;
             align-items: center;
+            gap: 10px;
             transition: all 0.2s ease;
         }
 
+        .dropdown-menu-nexus .dropdown-item i {
+            font-size: 1.1rem;
+            color: var(--nexus-turquesa-base);
+        }
+
         .dropdown-menu-nexus .dropdown-item:hover {
-            background: rgba(37, 99, 235, 0.15) !important;
+            background: rgba(0, 168, 181, 0.15) !important;
             color: var(--texto-principal) !important;
         }
 
-        .navbar-toggler-nexus {
-            border: 1px solid var(--borda) !important;
-            color: var(--texto-principal) !important;
-            padding: 0.5rem;
-            border-radius: 8px;
+        html.light-mode .dropdown-menu-nexus .dropdown-item:hover {
+            background: rgba(0, 107, 117, 0.06) !important;
+            color: var(--nexus-turquesa-base) !important;
+        }
+
+        .dropdown-menu-nexus .dropdown-item:hover i {
+            color: var(--nexus-turquesa-ativo);
+        }
+
+        html.light-mode .dropdown-menu-nexus .dropdown-item:hover i {
+            color: var(--nexus-turquesa-ativo);
         }
 
         /* Botão União de Tema */
         .theme-toggle-btn {
             background: none;
             border: none;
-            color: var(--sotaque-glow);
+            color: var(--texto-muted);
             cursor: pointer;
             padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s ease;
+            transition: all 0.2s ease;
             font-size: 1.25rem;
         }
 
         .theme-toggle-btn:hover {
             transform: scale(1.1);
+            color: var(--nexus-turquesa-ativo);
         }
 
-        /* Botão Vitrine Lateral/Superior */
+        /* Botão NEXUS Store */
         .btn-nexus-store-brand {
-            background: linear-gradient(90deg, #087cb2, #2ab6dc);
-            color: #0f172a !important;
-            padding: 8px 16px;
-            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--texto-principal) !important;
+            padding: 10px 18px;
+            border-radius: 8px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.8rem;
-            transition: 0.3s;
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
-            border: none;
+            font-size: 0.78rem;
+            border: 1px solid var(--nexus-turquesa-base);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 168, 181, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .btn-nexus-store-brand i {
+            color: var(--nexus-turquesa-base);
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
         }
 
         .btn-nexus-store-brand:hover {
             transform: translateY(-2px);
-            background: var(--turquesa-brilhante) !important;
-            box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
-            color: #0f172a !important;
+            background: rgba(0, 168, 181, 0.1);
+            border-color: var(--nexus-turquesa-ativo);
+            box-shadow: 0 0 15px var(--turquesa-glow);
+            color: var(--texto-principal) !important;
+        }
+
+        .btn-nexus-store-brand:hover i {
+            color: var(--nexus-turquesa-ativo);
+            filter: drop-shadow(0 0 4px var(--turquesa-glow));
+        }
+
+        html.light-mode .btn-nexus-store-brand {
+            background: #ffffff;
+            color: var(--nexus-turquesa-base) !important;
+            border: 1px solid #cbd5e1;
+            box-shadow: none;
+        }
+
+        html.light-mode .btn-nexus-store-brand:hover {
+            background: rgba(0, 107, 117, 0.04);
+            border-color: var(--nexus-turquesa-base);
+            box-shadow: 0 4px 12px rgba(0, 107, 117, 0.08);
+            color: var(--nexus-turquesa-base) !important;
+        }
+
+        /* Mensagem de Boas-Vindas */
+        .user-welcome-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--texto-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-welcome-text i {
+            font-size: 1.35rem;
+            color: var(--nexus-turquesa-base);
+        }
+
+        html.light-mode .user-welcome-text { 
+            color: #475569 !important; 
+        }
+
+        /* Botão SAIR */
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid #ef4444;
+            color: #ef4444 !important;
+            padding: 8px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+        }
+
+        html.light-mode .logout-btn {
+            background: #ffffff;
+            border-color: #fca5a5;
+            box-shadow: none;
+        }
+
+        html.light-mode .logout-btn:hover {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: #ffffff !important;
+        }
+
+        /* --- BOTOES DE AÇÃO EM TABELAS --- */
+        .action-buttons {
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-action {
+            font-size: 1.15rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            color: var(--texto-muted);
+        }
+
+        .btn-action.edit {
+            color: var(--nexus-turquesa-base) !important;
+        }
+
+        .btn-action.edit:hover {
+            color: var(--nexus-turquesa-ativo) !important;
+            filter: drop-shadow(0 0 8px var(--turquesa-glow));
+        }
+
+        .btn-action.delete:hover {
+            color: #ef4444 !important;
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4));
+        }
+
+        html.light-mode .btn-action.delete:hover {
+            filter: none;
         }
 
         /* --- CONTEÚDO PRINCIPAL --- */
@@ -246,7 +414,7 @@
             animation: fadeInUp 0.5s ease-out forwards;
         }
 
-        /* --- Formulários Globais --- */
+        /* --- FORMULÁRIOS --- */
         label {
             color: var(--texto-muted);
             font-weight: 600;
@@ -267,7 +435,7 @@
         }
 
         .form-control:focus, .form-select:focus {
-            border-color: var(--sotaque-glow) !important;
+            border-color: var(--nexus-turquesa-base) !important;
             box-shadow: 0 0 15px var(--turquesa-glow) !important;
             background: rgba(15, 23, 42, 0.8) !important;
         }
@@ -278,7 +446,7 @@
             color: #0f172a !important;
         }
 
-        /* --- Rodapé --- */
+        /* --- RODAPÉ --- */
         .rodape {
             padding: 25px;
             text-align: center;
@@ -296,7 +464,7 @@
         }
 
         .footer-brand {
-            color: var(--sotaque-glow);
+            color: var(--nexus-turquesa-ativo);
             text-shadow: 0 0 8px var(--turquesa-glow);
         }
 
@@ -306,9 +474,9 @@
         }
 
         html.light-mode .rodape p { color: #475569 !important; }
-        html.light-mode .footer-brand { color: #2563eb !important; text-shadow: none !important; }
+        html.light-mode .footer-brand { color: var(--nexus-turquesa-base) !important; text-shadow: none !important; }
 
-        /* --- Modal de Exclusão Nexus --- */
+        /* --- MODAL DE EXCLUSÃO --- */
         .nexus-modal-overlay {
             display: none;
             position: fixed;
@@ -334,14 +502,13 @@
 
         html.light-mode .nexus-modal-overlay {
             background: rgba(241, 245, 249, 0.5) !important;
-            backdrop-filter: blur(8px) !important;
         }
 
         html.light-mode .nexus-modal-content {
             background: rgba(255, 255, 255, 0.8) !important;
-            backdrop-filter: blur(12px) !important;
             border: 1px solid #fecaca !important;
             border-top: 4px solid #ef4444 !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important;
         }
 
         .modal-header-alert {
@@ -396,49 +563,17 @@
         }
 
         .btn-nexus-confirm:hover { background: #dc2626; box-shadow: 0 0 25px #ef4444; }
-        html.light-mode .btn-nexus-confirm { background: #ef4444 !important; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important; }
+        html.light-mode .btn-nexus-confirm { background: #ef4444 !important; box-shadow: none !important; }
 
-        .user-welcome-text {
-            font-size: 0.95rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            color: var(--texto-principal);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-welcome-text i {
-            font-size: 1.25rem;
-            color: var(--sotaque-glow);
-            filter: drop-shadow(0 0 5px var(--turquesa-glow));
-        }
-
-        html.light-mode .user-welcome-text { color: #334155 !important; }
-
-        .logout-btn {
-            border: 1px solid var(--sotaque-glow);
-            color: var(--sotaque-glow);
-            padding: 6px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            transition: 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: var(--sotaque-glow);
-            color: #fff;
-            box-shadow: 0 0 15px var(--turquesa-glow);
-            transform: translateY(-2px);
+        /* --- RESPONSIVIDADE E TELAS ULTRA-WIDE --- */
+        @media (min-width: 1200px) {
+            .navbar-nav .nav-link { font-size: 0.88rem; padding: 0.6rem 1.3rem !important; letter-spacing: 1.5px; }
+            .navbar-nav .nav-link i { font-size: 1.3rem; }
+            .dropdown-menu-nexus .dropdown-item { font-size: 0.85rem; }
         }
 
         @media (max-width: 991.98px) {
-            .navbar-collapse {
-                padding-top: 1rem;
-            }
+            .navbar-collapse { padding-top: 1rem; }
             .mobile-actions-wrapper {
                 flex-direction: column;
                 align-items: flex-start !important;
@@ -447,9 +582,7 @@
                 padding-top: 15px;
                 border-top: 1px solid var(--borda);
             }
-            .nexus-main-content {
-                padding: 20px 15px;
-            }
+            .nexus-main-content { padding: 20px 15px; }
         }
     </style>
 </head>
@@ -476,8 +609,8 @@
                     <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                         <a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-house-door-fill"></i> Painel</a>
                     </li>
-                    <li class="nav-item {% if request.resolver_match.url_name == 'lista_clientes' %}active{% endif %}">
-                        <a class="nav-link" href="{% url 'lista_clientes' %}"><i class="bi bi-people-fill"></i> Clientes</a>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'base_clientes' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'base_clientes' %}"><i class="bi bi-people-fill"></i> Clientes</a>
                     </li>
                     <li class="nav-item {% if request.resolver_match.url_name == 'lista_funcionarios' %}active{% endif %}">
                         <a class="nav-link" href="{% url 'lista_funcionarios' %}"><i class="bi bi-person-badge-fill"></i> Funcionários</a>
@@ -497,55 +630,43 @@
                         </li>
                         {% endif %}
 
-                        <li class="nav-item dropdown">
+                        <li class="nav-item dropdown {% if request.resolver_match.url_name == 'ver_loja' or request.resolver_match.url_name == 'editar_loja' or request.resolver_match.url_name == 'criar_loja' %}active{% endif %}">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-shop"></i> Loja
                             </a>
                             <ul class="dropdown-menu dropdown-menu-nexus">
                                 {% if loja %}
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'ver_loja' %}">
-                                        <i class="bi bi-eye-fill me-2" style="color: var(--nexus-blue);"></i> Visualizar
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'editar_loja' %}">
-                                        <i class="bi bi-gear-fill me-2" style="color: var(--nexus-blue);"></i> Editar
-                                    </a>
-                                </li>
+                                <li><a class="dropdown-item" href="{% url 'ver_loja' %}"><i class="bi bi-eye-fill"></i> Visualizar</a></li>
+                                <li><a class="dropdown-item" href="{% url 'editar_loja' %}"><i class="bi bi-gear-fill"></i> Editar</a></li>
                                 <li><hr class="dropdown-divider" style="border-color: var(--borda);"></li>
                                 <li>
-                                    <a class="dropdown-item" href="javascript:void(0)" onclick="openNexusModal()" style="color: #ef4444;">
-                                        <i class="bi bi-trash3-fill me-2"></i> Excluir {{ loja.nome }}
+                                    <a class="dropdown-item" href="javascript:void(0)" onclick="openNexusModal()" style="color: #ef4444 !important;">
+                                        <i class="bi bi-trash3-fill" style="color: #ef4444 !important;"></i> Excluir {{ loja.nome }}
                                     </a>
                                 </li>
                                 {% else %}
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'criar_loja' %}">
-                                        <i class="bi bi-plus-circle me-2" style="color: var(--nexus-blue);"></i> Criar Loja
-                                    </a>
-                                </li>
+                                <li><a class="dropdown-item" href="{% url 'criar_loja' %}"><i class="bi bi-plus-circle"></i> Criar Loja</a></li>
                                 {% endif %}
                             </ul>
                         </li>
                     {% endif %}
                 </ul>
 
-                <!-- Lado Direito: Ações, Tema e Sessão -->
+                <!-- Lado Direito: Sessão e Tema -->
                 <div class="d-flex align-items-center gap-3 mobile-actions-wrapper">
                     <button id="theme-toggle" class="theme-toggle-btn" title="Alternar Tema">
                         <i id="theme-icon" class="bi bi-sun-fill"></i>
                     </button>
 
                     <a href="{% url 'vitrine' %}" class="btn-nexus-store-brand">
-                        <i class="bi bi-cart4 me-2" style="color: inherit !important;"></i> NEXUS Store
+                        <i class="bi bi-cart4 me-2"></i> NEXUS Store
                     </a>
 
                     {% if user.is_authenticated %}
                     <div class="user-info d-flex align-items-center gap-3">
                         <div class="user-welcome-text">
                             <i class="bi bi-person-circle"></i>
-                            <span>Olá, <span style="color: var(--sotaque-glow);">{{ user.username }}</span>!</span>
+                            <span>Olá, <span style="color: var(--texto-principal);">{{ user.username }}</span>!</span>
                         </div>
                         <a href="{% url 'logout_view' %}" class="logout-btn">Sair</a>
                     </div>
@@ -555,12 +676,12 @@
         </div>
     </nav>
 
-    <!-- CONTEÚDO PRINCIPAL (FADE-IN REATIVADO) -->
+    <!-- CONTEÚDO PRINCIPAL -->
     <div class="nexus-main-content" id="main-content">
         {% if messages %}
         <div class="messages-container" style="padding: 0 0 20px 0; width: 100%;">
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}" style="background: var(--bg-alert); color: var(--sotaque-glow); border: 1px solid var(--border-alert); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+            <div class="alert alert-{{ message.tags }}" style="background: var(--bg-alert); color: var(--nexus-turquesa-base); border: 1px solid var(--border-alert); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                 {{ message }}
             </div>
             {% endfor %}
@@ -571,12 +692,12 @@
         {% endblock %}
     </div>
 
-    <!-- RODAPÉ CORRIGIDO -->
+    <!-- RODAPÉ -->
     <footer class="rodape">
         <p>&copy; {% now "Y" %} <span class="footer-brand">NEXUS Hub</span> — Gestão Modular Inteligente | Todos os direitos reservados.</p>
     </footer>
 
-    <!-- MODAL DE EXCLUSÃO (USANDO EXCLUIR_LOJA) -->
+    <!-- MODAL DE EXCLUSÃO -->
     <div id="nexusDeleteModal" class="nexus-modal-overlay">
         <div class="nexus-modal-content">
             <div class="modal-header-alert">
@@ -605,9 +726,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const content = document.getElementById('main-content');
-            if (content) {
-                content.classList.add('fade-in-content');
-            }
+            if (content) { content.classList.add('fade-in-content'); }
         });
 
         const themeToggleBtn = document.getElementById('theme-toggle');
@@ -624,34 +743,22 @@
 
         themeToggleBtn.addEventListener('click', function() {
             document.documentElement.classList.toggle('light-mode');
-            if (document.documentElement.classList.contains('light-mode')) {
-                localStorage.setItem('theme', 'light');
-            } else {
-                localStorage.setItem('theme', 'dark');
-            }
+            localStorage.setItem('theme', document.documentElement.classList.contains('light-mode') ? 'light' : 'dark');
             updateIcon();
         });
 
-        function openNexusModal() {
-            document.getElementById('nexusDeleteModal').style.display = 'flex';
-        }
-        function closeNexusModal() {
-            document.getElementById('nexusDeleteModal').style.display = 'none';
-        }
+        function openNexusModal() { document.getElementById('nexusDeleteModal').style.display = 'flex'; }
+        function closeNexusModal() { document.getElementById('nexusDeleteModal').style.display = 'none'; }
         window.onclick = function (event) {
             const modal = document.getElementById('nexusDeleteModal');
-            if (event.target == modal) {
-                closeNexusModal();
-            }
+            if (event.target == modal) { closeNexusModal(); }
         }
     </script>
     
     <script src="https://unpkg.com/imask"></script>
     <script>
         var element = document.getElementById('id_telefone');
-        if (element) {
-            IMask(element, { mask: '(00) 00000-0000' });
-        }
+        if (element) { IMask(element, { mask: '(00) 00000-0000' }); }
 
         var priceElement = document.getElementById('id_preco');
         if (priceElement) {

@@ -16,7 +16,7 @@ urlpatterns = [
     path('dashboard/registrar/', views.signup_view, name='registrar'),
 
     # --- Rotas de Clientes ---
-    path('dashboard/clientes/', views.lista_clientes, name='lista_clientes'),
+    path('dashboard/clientes/', views.base_clientes, name='base_clientes'),
     path('dashboard/clientes/novo/', views.cadastrar_cliente, name='cadastrar_cliente'),
     path('dashboard/clientes/editar/<int:pk>/', views.editar_cliente, name='editar_cliente'),
     path('dashboard/clientes/excluir/<int:pk>/', views.excluir_cliente, name='excluir_cliente'),

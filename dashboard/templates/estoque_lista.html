@@ -180,7 +180,7 @@
     .nexus-input {
         width: 100%;
         background: rgba(15, 23, 42, 0.8) !important;
-        border: 1px solid var(--nexus-blue);
+        border: 1px solid var(--nexus-turquesa-base);
         border-radius: 30px;
         padding: 10px 20px 10px 45px;
         color: #fff !important;
@@ -211,7 +211,7 @@
         background: rgba(15, 23, 42, 0.6);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
-        border-left: 4px solid var(--nexus-blue, #2563eb);
+        border-left: 4px solid var(--nexus-turquesa-base, #00a8b5);
         gap: 20px;
         background: var(--azul-card);
         border: 1px solid var(--borda);
@@ -228,7 +228,7 @@
 
     .stat-icon {
         background: rgba(37, 99, 235, 0.1);
-        color: var(--nexus-blue, #2563eb);
+        color: var(--nexus-turquesa-base, #00a8b5);
         width: 48px;
         height: 48px;
         border-radius: 12px;
@@ -239,8 +239,8 @@
     }
     .stat-card:hover {
         transform: translateY(-5px);
-        border-color: rgba(37, 99, 235, 0.4);
-        border-color: var(--nexus-blue);
+        border-color: var(--nexus-turquesa-ativo);
+        box-shadow: 0 10px 30px -10px rgba(0, 242, 254, 0.2);
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         transform: translateY(-5px);
     }
@@ -263,12 +263,20 @@
     .stat-trend.trend-up { color: #4ade80 !important; text-shadow: 0 0 8px rgba(74, 222, 128, 0.3); }
 
     .stat-card.warning {
-        border-left: 4px solid #ef4444;
+        background: rgba(220, 38, 38, 0.1) !important;
+        border: 1px solid rgba(239, 68, 68, 0.25) !important;
+        border-left: 4px solid #ef4444 !important;
+        box-shadow: 0 10px 30px -15px rgba(239, 68, 68, 0.2) !important;
     }
     
     .stat-card.warning .stat-icon {
-        color: #ef4444;
-        background: rgba(239, 68, 68, 0.1);
+        background: rgba(239, 68, 68, 0.2) !important;
+        color: #ef4444 !important;
+    }
+
+    .stat-card.warning .stat-value {
+        color: #ef4444 !important;
+        text-shadow: 0 0 10px rgba(239, 68, 68, 0.2) !important;
     }
 
     .stat-value {
@@ -316,7 +324,7 @@
 
     .table-nexus th {
         padding: 18px 20px;
-        color: var(--nexus-blue);
+        color: var(--nexus-turquesa-base);
         font-size: 0.75rem;
         text-transform: uppercase;
         border-bottom: 2px solid var(--borda);
@@ -386,36 +394,36 @@
 
     /* Light Mode Tipografia para Título do Estoque */
     html.light-mode .nexus-title-inventory {
-        color: #2563eb !important;
+        color: var(--nexus-turquesa-base, #006b75) !important;
     }
     html.light-mode .bi-layers-half {
-        color: #2563eb !important;
+        color: var(--nexus-turquesa-base, #006b75) !important;
     }
 
     /* --- PADRONIZAÇÃO LIGHT MODE --- */
     html.light-mode .btn-header-nexus {
-        background-color: #2563EB !important;
+        background-color: var(--nexus-turquesa-base, #006b75) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+        box-shadow: 0 4px 12px rgba(0, 107, 117, 0.2) !important;
         font-weight: 600 !important;
     }
 
     html.light-mode .btn-header-nexus:hover {
-        background-color: #1d4ed8 !important;
+        background-color: var(--nexus-turquesa-ativo, #00525a) !important;
         transform: translateY(-2px);
     }
 
     /* --- PADRONIZAÇÃO LIGHT MODE --- */
     html.light-mode .nexus-title-inventory {
-        color: #2563eb !important;
+        color: var(--nexus-turquesa-base, #006b75) !important;
     }
 
     /* --- PADRONIZAÇÃO DA TABELA NO MODO LIGHT --- */
     html.light-mode .table-responsive-nexus {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-left: 4px solid #2563EB !important;
+        border-left: 4px solid var(--nexus-turquesa-base, #006b75) !important;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important;
         backdrop-filter: none !important;
     }
@@ -457,11 +465,11 @@
     }
 
     html.light-mode .sku-highlight {
-        color: #2563eb !important;
+        color: var(--nexus-turquesa-base, #006b75) !important;
         text-shadow: none !important;
         font-weight: 700 !important;
     }
-    html.light-mode .bi-layers-half { color: #2563eb !important; }
+    html.light-mode .bi-layers-half { color: var(--nexus-turquesa-base, #006b75) !important; }
 
     html.light-mode .badge-category {
         background: #f1f5f9 !important;
@@ -473,24 +481,45 @@
     html.light-mode .stat-card {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-left: 4px solid #2563EB !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+        border-left: 4px solid var(--nexus-turquesa-base, #006b75) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important;
     }
 
     html.light-mode .stat-card:hover {
-        background: #f8fafc !important;
-        border-color: #2563eb !important;
+        transform: translateY(-5px) !important;
+        border-color: var(--nexus-turquesa-base, #006b75) !important;
+        background: rgba(0, 107, 117, 0.05) !important;
+        box-shadow: 0 12px 25px rgba(0, 107, 117, 0.2) !important;
+    }
+
+    html.light-mode .stat-icon {
+        background: rgba(0, 107, 117, 0.1) !important;
+        color: var(--nexus-turquesa-base, #006b75) !important;
     }
 
     html.light-mode .stat-label { color: #475569 !important; }
     html.light-mode .stat-value { color: #0f172a !important; }
     html.light-mode .stat-trend.trend-up { color: #166534 !important; }
-    html.light-mode .stat-trend.text-info { color: #1d4ed8 !important; }
+    html.light-mode .stat-trend.text-info { color: var(--nexus-turquesa-base, #006b75) !important; }
 
     html.light-mode .stat-card.warning {
         background: #fff5f5 !important;
+        border: 1px solid #fecaca !important;
         border-left: 4px solid #ef4444 !important;
+        box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.08) !important;
     }
+
+    html.light-mode .stat-card.warning:hover {
+        background: #fff5f5 !important;
+        border-color: #ef4444 !important;
+        box-shadow: 0 12px 25px rgba(239, 68, 68, 0.2) !important;
+    }
+
+    html.light-mode .stat-card.warning .stat-icon {
+        background: rgba(220, 38, 38, 0.12) !important;
+        color: #dc2626 !important;
+    }
+
     html.light-mode .stat-trend.text-alert-red { color: #b91c1c !important; }
 
     html.light-mode .nexus-input {
@@ -501,8 +530,8 @@
     }
 
     html.light-mode .nexus-input:focus {
-        border-color: #2563eb !important;
-        box-shadow: 0 0 10px rgba(37, 99, 235, 0.1) !important;
+        border-color: var(--nexus-turquesa-base, #006b75) !important;
+        box-shadow: 0 0 10px rgba(0, 107, 117, 0.1) !important;
         background: #ffffff !important;
     }
 
@@ -511,7 +540,7 @@
     }
 
     html.light-mode .search-icon {
-        color: #2563eb !important;
+        color: var(--nexus-turquesa-base, #006b75) !important;
     }
 
     /* --- REPAGINAÇÃO DOS BOTÕES DE AÇÃO NO MODO LIGHT --- */

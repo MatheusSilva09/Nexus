@@ -600,11 +600,11 @@ def profile(request):
     return render(request, "profile.html")
     
 @login_required(login_url='login_view')
-def lista_clientes(request):
+def base_clientes(request):
     clientes = Cliente.objects.all()
-    return render(request, 'lista_clientes.html', {
+    return render(request, 'base_clientes.html', {
         'clientes': clientes,
-        'titulo_aba': 'Lista de Clientes | NEXUS Hub'})
+        'titulo_aba': 'Base de Clientes | NEXUS Hub'})
 
 @login_required(login_url='login_view')
 def cadastrar_cliente(request):
@@ -640,7 +640,7 @@ def cadastrar_cliente(request):
             # 4. Salvamento seguro
             novo_cliente.save()
             messages.success(request, f"Cliente {nome} cadastrado com sucesso!")
-            return redirect('lista_clientes')
+            return redirect('base_clientes')
             
         except Exception as e:
             # Captura qualquer outro erro de integridade não previsto
@@ -656,7 +656,7 @@ def editar_cliente(request, pk):
 
     if not request.user.is_superuser and request.user.perfil.nivel == 'VENDEDOR':
         messages.error(request, "Você não tem permissão para editar clientes.")
-        return redirect('lista_clientes')
+        return redirect('base_clientes')
     cliente = get_object_or_404(Cliente, pk=pk)
     
     if request.method == 'POST':
@@ -665,7 +665,7 @@ def editar_cliente(request, pk):
         cliente.email = request.POST.get('email')
         cliente.endereco = request.POST.get('endereco')
         cliente.save()
-        return redirect('lista_clientes')
+        return redirect('base_clientes')
     
     return render(request, 'cliente_form.html', {
         'cliente': cliente,
@@ -677,13 +677,13 @@ def excluir_cliente(request, pk):
 
     if not request.user.is_superuser and request.user.perfil.nivel == 'VENDEDOR':
         messages.error(request, "Você não tem permissão para excluir clientes.")
-        return redirect('lista_clientes')
+        return redirect('base_clientes')
     cliente = get_object_or_404(Cliente, pk=pk)
     
     if request.method == 'POST':
         cliente.delete()
         messages.success(request, f"Cliente {cliente.nome} removido com sucesso.")
-        return redirect('lista_clientes')
+        return redirect('base_clientes')
         
     return render(request, 'confirmar_exclusao_cliente.html', {'cliente': cliente})
 

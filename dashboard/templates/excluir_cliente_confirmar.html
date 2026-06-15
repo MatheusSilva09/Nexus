@@ -1,4 +1,8 @@
-{% block content %}
+{% extends 'base.html' %}
+
+{% block title %}Excluir Cliente | NEXUS Hub{% endblock %}
+{% block page_title %}Confirmar Exclusão de Cliente{% endblock %}
+
 <style>
     .btn-cancel-nexus {
         background: transparent !important;
@@ -19,10 +23,6 @@
         color: #ef4444 !important;
     }
 </style>
-{% extends 'base.html' %}
-
-{% block title %}Excluir Cliente | NEXUS Hub{% endblock %}
-{% block page_title %}Confirmar Exclusão de Cliente{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -43,7 +43,7 @@
                     Sim, Excluir Cliente
                 </button>
 
-                <a href="{% url 'lista_clientes' %}" class="btn-cancel-nexus px-5">
+                <a href="{% url 'base_clientes' %}" class="btn-cancel-nexus px-5">
                     Cancelar
                 </a>
             </div>

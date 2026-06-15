@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{% if cliente %}Editar Informações do Cliente{% else %}Cadastro de Cliente{% endif %} | NEXUS Hub{% endblock %}
+{% block title %}{% if cliente %}Editar Perfil{% else %}Cadastro de Cliente{% endif %} | NEXUS Hub{% endblock %}
 
 {% block content %}
 <style>
@@ -29,7 +29,7 @@
 
     .nexus-form-header i {
         font-size: 2.2rem;
-        color: var(--turquesa-brilhante);
+        color: var(--nexus-turquesa-base);
         filter: drop-shadow(0 0 8px var(--turquesa-glow));
     }
 
@@ -63,7 +63,7 @@
     .input-wrapper-nexus i {
         position: absolute;
         left: 20px;
-        color: var(--nexus-blue);
+        color: var(--nexus-turquesa-base);
         font-size: 1.2rem;
         pointer-events: none;
     }
@@ -131,16 +131,16 @@
     }
 
     .btn-nexus-save {
-        background: linear-gradient(90deg, #2563eb, #00f2fe);
+        background: var(--nexus-turquesa-base) !important;
         color: #ffffff !important;
-        border: none;
+        border: 1px solid rgba(0, 242, 254, 0.3) !important;
         padding: 14px 35px;
         border-radius: 12px;
         font-weight: 700;
         font-size: 0.95rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        box-shadow: 0 4px 15px var(--nexus-blue-glow);
+        box-shadow: 0 0 15px var(--turquesa-glow) !important;
         transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
@@ -150,17 +150,19 @@
     }
 
     .btn-nexus-save:hover {
+        background: var(--nexus-turquesa-ativo) !important;
+        color: #020617 !important;
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px var(--turquesa-glow);
+        box-shadow: 0 0 25px var(--turquesa-glow) !important;
         filter: brightness(1.1);
     }
 
     /* --- Modo Claro (Light Mode) Integrado --- */
     html.light-mode .nexus-form-container { background: #ffffff; }
-    html.light-mode .nexus-form-header i { color: #2563eb; filter: none; }
+    html.light-mode .nexus-form-header i { color: var(--nexus-turquesa-base); filter: none; }
     html.light-mode .nexus-form-header h2 { color: #0f172a; }
     html.light-mode .label-nexus { color: #475569 !important; }
-    html.light-mode .input-wrapper-nexus i { color: #2563eb !important; }
+    html.light-mode .input-wrapper-nexus i { color: var(--nexus-turquesa-base) !important; }
     html.light-mode .form-control-nexus,
     html.light-mode .input-wrapper-nexus input,
     html.light-mode .input-wrapper-nexus textarea {
@@ -172,15 +174,16 @@
     html.light-mode .form-control-nexus:focus,
     html.light-mode .input-wrapper-nexus input:focus,
     html.light-mode .input-wrapper-nexus textarea:focus {
-        border-color: #2563eb !important;
-        box-shadow: 0 0 10px rgba(37, 99, 235, 0.15) !important;
+        border-color: var(--nexus-turquesa-base) !important;
+        box-shadow: 0 0 10px rgba(0, 107, 117, 0.1) !important;
     }
     html.light-mode .btn-nexus-save {
-        background: linear-gradient(90deg, #2563eb, #1d4ed8);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+        background: var(--nexus-turquesa-base) !important;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(0, 107, 117, 0.2) !important;
     }
-    html.light-mode .btn-nexus-cancel { border-color: #dc2626; color: #dc2626; }
-    html.light-mode .btn-nexus-cancel:hover { background: #dc2626; color: #fff; }
+    html.light-mode .btn-nexus-cancel { background: #dc2626 !important; border: none !important; color: #fff !important; }
+    html.light-mode .btn-nexus-cancel:hover { background: #b91c1c !important; transform: translateY(-2px); }
 
     /* =======================================================
        ⚡ MEDIA QUERIES - RESPONSIVIDADE TOTAL (TELEMÓVEL) ⚡
@@ -223,7 +226,7 @@
             <div class="nexus-form-container">
                 <div class="nexus-form-header">
                     <i class="bi {% if cliente %}bi-person-gear{% else %}bi-person-plus-fill{% endif %}"></i>
-                    <h2>{% if cliente %}Editar Cliente{% else %}Novo Cliente{% endif %}</h2>
+                    <h2>{% if cliente %}Editar Perfil{% else %}Novo Cliente{% endif %}</h2>
                 </div>
 
                 <form method="POST">
@@ -261,17 +264,17 @@
                     <div class="mb-4">
                         <label class="label-nexus">Endereço / Complemento</label>
                         <div class="input-wrapper-nexus">
-                            <textarea name="endereco" rows="3" class="form-control-nexus" placeholder="Rua, número, bairro, referências providenciais...">{{ form.endereco.value|default:'' }}</textarea>
+                            <textarea name="endereco" rows="3" class="form-control-nexus" placeholder="Rua, número, bairro, ponto de referência...">{{ form.endereco.value|default:'' }}</textarea>
                         </div>
                     </div>
 
                     <!-- Rodapé de Ações -->
                     <div class="nexus-form-footer">
-                        <a href="{% url 'lista_clientes' %}" class="btn-nexus-cancel">
+                        <a href="{% url 'base_clientes' %}" class="btn-nexus-cancel">
                             <i class="bi bi-x-circle"></i> Cancelar
                         </a>
                         <button type="submit" class="btn-nexus-save">
-                            <i class="bi bi-check2-circle"></i> {% if cliente %}Salvar Alterações{% else %}Cadastrar Cliente{% endif %}
+                            <i class="bi bi-check2-circle"></i> {% if cliente %}Salvar{% else %}Cadastrar{% endif %}
                         </button>
                     </div>
                 </form>

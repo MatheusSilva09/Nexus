@@ -155,16 +155,20 @@
         border-bottom: 1px solid rgba(0, 229, 255, 0.1);
     }
 
-    .nexus-form-header i { color: #00e5ff; font-size: 1.8rem; }
+    .nexus-form-header i { 
+        color: var(--nexus-turquesa-base); 
+        font-size: 1.8rem;
+        filter: drop-shadow(0 0 8px var(--turquesa-glow));
+    }
     .form-title-nexus { color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
     .form-subtitle-nexus { color: rgba(255,255,255,0.5); margin: 0; font-size: 0.9rem; }
-    .highlight-nexus { color: #00e5ff; font-weight: 700; }
+    .highlight-nexus { color: var(--nexus-turquesa-base); font-weight: 700; }
 
     /* --- Stat Cards --- */
     .stat-card {
         background: rgba(15, 23, 42, 0.6);
         border: 1px solid rgba(255, 255, 255, 0.05);
-        border-left: 4px solid #2563eb;
+        border-left: 4px solid var(--nexus-turquesa-base);
         border-radius: 12px;
         padding: 24px;
         display: flex;
@@ -173,8 +177,8 @@
         transition: 0.3s;
     }
     .stat-icon {
-        background: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
+        background: rgba(0, 168, 181, 0.1);
+        color: var(--nexus-turquesa-base);
         width: 48px; height: 48px;
         border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
@@ -199,7 +203,7 @@
         background: rgba(30, 41, 59, 0.4);
         padding: 18px 25px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        color: #00e5ff;
+        color: var(--nexus-turquesa-base);
         font-weight: 600;
         font-size: 0.95rem;
         text-transform: uppercase;
@@ -244,9 +248,9 @@
 
     /* --- Botões Base (Dark Mode) --- */
     .btn-nexus-save {
-        background: #00e5ff !important;
-        color: #000 !important;
-        border: none !important;
+        background: var(--nexus-turquesa-base) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(0, 242, 254, 0.3) !important;
         padding: 0 28px !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
@@ -255,23 +259,30 @@
         height: 42px !important;
         display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         transition: 0.3s;
+        box-shadow: 0 0 15px var(--turquesa-glow) !important;
     }
-    .btn-nexus-save:hover { background: #00f2ff !important; box-shadow: 0 0 25px rgba(0, 229, 255, 0.4) !important; transform: translateY(-2px); }
+    .btn-nexus-save:hover { 
+        background: var(--nexus-turquesa-ativo) !important; 
+        color: #020617 !important;
+        box-shadow: 0 0 25px var(--turquesa-glow) !important; 
+        transform: translateY(-2px); 
+    }
 
     .btn-nexus-cancel {
-        color: #ff4d4d;
+        color: #ff4d4d !important;
         text-decoration: none;
         font-weight: 600;
         text-transform: uppercase;
         font-size: 0.85rem;
         padding: 0 24px;
         height: 42px;
-        border: 1px solid rgba(255, 77, 77, 0.3);
+        border: 1px solid rgba(255, 77, 77, 0.4) !important;
         border-radius: 8px;
+        background: rgba(255, 77, 77, 0.05) !important;
         display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-        transition: 0.3s;
+        transition: all 0.3s ease;
     }
-    .btn-nexus-cancel:hover { background: rgba(255, 77, 77, 0.1); border-color: #ff4d4d; }
+    .btn-nexus-cancel:hover { background: rgba(255, 77, 77, 0.15) !important; border-color: #ff4d4d !important; transform: translateY(-2px); }
 
     /* =======================================================
        HERANÇA DE ALTA PRECISÃO PARA O MODO CLARO (LIGHT-MODE)
@@ -284,16 +295,16 @@
     html.light-mode .nexus-form-header { border-bottom-color: #e2e8f0 !important; }
     html.light-mode .form-title-nexus { color: #0f172a !important; }
     html.light-mode .form-subtitle-nexus { color: #64748b !important; }
-    html.light-mode .nexus-form-header i { color: #2563eb !important; }
-    html.light-mode .highlight-nexus { color: #2563eb !important; }
+    html.light-mode .nexus-form-header i { color: var(--nexus-turquesa-base) !important; }
+    html.light-mode .highlight-nexus { color: var(--nexus-turquesa-base) !important; }
     
     html.light-mode .stat-card {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-left: 4px solid #2563eb !important;
+        border-left: 4px solid var(--nexus-turquesa-base) !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
     }
-    html.light-mode .stat-icon { background: rgba(37, 99, 235, 0.1) !important; color: #2563eb !important; }
+    html.light-mode .stat-icon { background: rgba(0, 107, 117, 0.1) !important; color: var(--nexus-turquesa-base) !important; }
     html.light-mode .stat-label { color: #475569 !important; }
     html.light-mode .stat-value { color: #0f172a !important; }
     
@@ -302,7 +313,7 @@
     html.light-mode .stat-card.low-stock .stat-value { color: #f59e0b !important; }
 
     html.light-mode .detail-card-nexus { background: #ffffff !important; border-color: #e2e8f0 !important; }
-    html.light-mode .card-header-nexus { background: #f8fafc !important; border-bottom-color: #e2e8f0 !important; color: #0f172a !important; }
+    html.light-mode .card-header-nexus { background: #f8fafc !important; border-bottom-color: #e2e8f0 !important; color: var(--nexus-turquesa-base) !important; }
     html.light-mode .info-label { color: #64748b !important; }
     html.light-mode .info-value { color: #0f172a !important; }
     html.light-mode .info-row { border-bottom-color: #f1f5f9 !important; }
@@ -317,7 +328,7 @@
 
     /* BOTÃO EDITAR (LIGHT MODE) */
     html.light-mode .btn-nexus-save { 
-        background: #2563eb !important; 
+        background: var(--nexus-turquesa-base) !important; 
         color: #ffffff !important; 
         border: none !important; 
         padding: 0 28px !important; 
@@ -332,7 +343,7 @@
         align-items: center !important; 
         justify-content: center !important;
         gap: 8px !important; 
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
+        box-shadow: 0 4px 12px rgba(0, 107, 117, 0.2) !important;
         transition: all 0.25s ease-in-out !important; 
     }
     html.light-mode .btn-nexus-save i {
@@ -342,16 +353,16 @@
         display: inline-block !important;
     }
     html.light-mode .btn-nexus-save:hover { 
-        background-color: #1d4ed8 !important; 
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35) !important;
+        background-color: var(--nexus-turquesa-ativo) !important; 
+        box-shadow: 0 6px 20px rgba(0, 107, 117, 0.3) !important;
         transform: translateY(-2px) !important; 
     }
     
     /* BOTÃO VOLTAR (LIGHT MODE) */
     html.light-mode .btn-nexus-cancel { 
-        background: #f8fafc !important; 
-        color: #dc2626 !important; 
-        border: 1px solid #dc2626 !important; 
+        background: #dc2626 !important; 
+        color: #ffffff !important; 
+        border: none !important; 
         padding: 0 24px !important; 
         border-radius: 8px !important; 
         font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
@@ -364,21 +375,20 @@
         align-items: center !important; 
         justify-content: center !important;
         gap: 4px !important; 
-        box-shadow: none !important;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2) !important;
         transition: all 0.2s ease-in-out !important;
     }
     html.light-mode .btn-nexus-cancel i {
-        color: #dc2626 !important;
+        color: #ffffff !important;
         font-size: 1.35rem !important; /* Ícone short levemente maior para melhor proporção */
         line-height: 1 !important;
         display: inline-block !important;
         transition: color 0.2s;
     }
     html.light-mode .btn-nexus-cancel:hover { 
-        background: #dc2626 !important; 
-        border-color: #dc2626 !important;
+        background: #b91c1c !important; 
         color: #ffffff !important; 
-        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2) !important;
+        box-shadow: 0 6px 14px rgba(220, 38, 38, 0.3) !important;
         transform: translateY(-2px) !important;
     }
     html.light-mode .btn-nexus-cancel:hover i {

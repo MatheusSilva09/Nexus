@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Lista de Funcionários | NEXUS Hub{% endblock %}
+{% block title %}Quadro de Funcionários | NEXUS Hub{% endblock %}
 
 {% block content %}
 <style>
@@ -23,29 +23,28 @@
 
     /* --- Botão Novo Funcionário Slim --- */
     .btn-header-nexus {
-        min-width: 180px;
-        height: 42px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.85rem !important;
-        font-weight: 700;
+        font-size: 0.8rem !important;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
         text-decoration: none;
-        background: linear-gradient(90deg, #2563eb, #00f2fe);
+        background: var(--nexus-turquesa-base) !important;
         color: #ffffff !important;
         border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px var(--nexus-blue-glow);
-        transition: all 0.3s ease;
-        gap: 10px;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        gap: 8px;
     }
 
     .btn-header-nexus:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px var(--turquesa-glow);
-        filter: brightness(1.1);
+        background: var(--nexus-turquesa-ativo) !important;
+        transform: none;
+        box-shadow: none;
+        filter: none;
     }
 
     /* --- Container de Filtro/Pesquisa --- */
@@ -71,7 +70,7 @@
         left: 15px;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--nexus-blue);
+        color: var(--nexus-turquesa-base);
     }
 
     .search-input-nexus {
@@ -135,12 +134,13 @@
     }
 
     /* --- Modos Claros Adaptados --- */
-    html.light-mode .nexus-title { color: #2563eb !important; }
+    html.light-mode .nexus-title { color: var(--nexus-turquesa-base) !important; }
     html.light-mode .search-input-nexus { background: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
     html.light-mode .table-nexus-mod th { background: #f8fafc; color: #64748b; }
     html.light-mode .table-nexus-mod td { color: #334155; }
     html.light-mode .staff-name-highlight { color: #0f172a; }
-    html.light-mode .btn-header-nexus { background: linear-gradient(90deg, #2563eb, #1d4ed8); }
+    html.light-mode .btn-header-nexus { background: var(--nexus-turquesa-base) !important; }
+    html.light-mode .btn-header-nexus:hover { background: var(--nexus-turquesa-ativo) !important; }
 
     /* --- Modal de Exclusão Customizado --- */
     .nexus-modal-overlay {
@@ -264,7 +264,7 @@
     <!-- Cabeçalho Principal -->
     <div class="nexus-header d-flex justify-content-between align-items-center mb-4">
         <h1 class="nexus-title">
-            <i class="bi bi-people-fill me-2" style="color: var(--nexus-blue);"></i>Controle de Equipe
+            <i class="bi bi-people-fill me-2" style="color: var(--nexus-turquesa-base);"></i>Quadro de Funcionários
         </h1>
         <a href="{% url 'adicionar_funcionario' %}" class="btn-header-nexus">
             <i class="bi bi-person-plus-fill" style="font-size: 1.1rem; color: inherit !important;"></i> Novo Funcionário
@@ -296,14 +296,14 @@
                 {% for f in funcionarios %}
                 <tr>
                     <td class="staff-name-highlight">
-                        <i class="bi bi-person-badge me-2" style="color: var(--nexus-blue);"></i>{{ f.nome }}
+                        <i class="bi bi-person-badge me-2" style="color: var(--nexus-turquesa-base);"></i>{{ f.nome }}
                     </td>
                     <td><span class="badge bg-dark text-light border border-secondary px-2 py-1" style="font-size: 0.8rem;">{{ f.cargo }}</span></td>
                     <td class="text-center">
                         {% if f.id %}
                         <div class="action-buttons d-flex gap-3 justify-content-center">
                             <a href="{% url 'editar_funcionario' id=f.id %}" class="btn-action edit" title="Editar dados">
-                                <i class="bi bi-pencil-square" style="font-size: 1.2rem; color: var(--nexus-blue);"></i>
+                                <i class="bi bi-pencil-square" style="font-size: 1.2rem; color: var(--nexus-turquesa-base);"></i>
                             </a>
                             <a href="javascript:void(0)" onclick="abrirModalExclusao('{{ f.id }}', '{{ f.nome }}')" class="btn-action delete" title="Remover da equipe">
                                 <i class="bi bi-trash3-fill" style="font-size: 1.2rem; color: #ef4444;"></i>

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Editar Informações do Produto | NEXUS Hub{% endblock %}
-{% block page_title %}EDITAR INFORMAÇÕES DO PRODUTO{% endblock %}
+{% block title %}Editar Produto | NEXUS Hub{% endblock %}
+{% block page_title %}EDITAR PRODUTO{% endblock %}
 
 {% block content %}
 <div class="fade-in-content container-fluid">
@@ -10,7 +10,7 @@
         <div class="nexus-form-header">
             <i class="bi bi-pencil-square"></i>
             <div>
-                <h2 style="color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">PRODUTO</h2>
+                <h2 style="color: #ffffff; margin: 0; font-size: 1.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">EDITAR PRODUTO</h2>
                 <p style="color: rgba(255,255,255,0.5); margin: 0; font-size: 0.9rem;">Atualize as informações do item selecionado</p>
             </div>
         </div>
@@ -38,7 +38,7 @@
     <div style="flex: 1;">
         <label class="label-nexus">CATEGORIA</label>
         <div class="input-wrapper-nexus">
-            <i class="bi bi-layers-fill"></i>
+            <i class="bi bi-layers-fill" style="color: var(--nexus-turquesa-base);"></i>
             <select name="categoria" class="form-control-nexus select-nexus" required style="padding-left: 45px !important;">
                 <option value="">Selecione...</option>
                 {% for cat in categorias %}
@@ -48,8 +48,7 @@
                 {% endfor %}
             </select>
         </div>
-        <a href="javascript:void(0)" onclick="openCategoryModal()" class="category-link"
-            style="color: var(--nexus-blue); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block; cursor: pointer;">
+        <a href="javascript:void(0)" onclick="openCategoryModal()" class="category-link">
             <i class="bi bi-plus-circle"></i> Criar nova categoria
         </a>
     </div>
@@ -57,7 +56,7 @@
     <div style="flex: 1;">
         <label class="label-nexus">ADICIONAR IMAGENS À GALERIA</label>
         <div class="input-wrapper-nexus">
-            <i class="bi bi-images"></i>
+            <i class="bi bi-images" style="color: var(--nexus-turquesa-base);"></i>
             <input type="file" name="imagens_galeria" class="form-control-nexus" multiple accept="image/*" style="padding: 10px 15px 10px 45px !important;">
         </div>
         <small style="color: rgba(255,255,255,0.4); font-size: 0.7rem; display: block; margin-top: 5px;">
@@ -67,7 +66,7 @@
         {% if imagens_atuais %}
         <div style="margin-top: 15px;">
             <p style="font-size: 0.7rem; color: var(--nexus-blue); font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-                Galeria de Imagens (Defina a ordem numérica e clique em Salvar):
+                Galeria de Imagens (Defina a ordem numérica e clique em Salvar): <span style="color: var(--nexus-turquesa-base);">{{ produto.nome }}</span>
             </p>
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 {% for img in imagens_atuais %}
@@ -97,7 +96,7 @@
                 <div style="flex: 1;">
                     <label class="label-nexus">PREÇO SUGERIDO</label>
                     <div class="input-wrapper-nexus">
-                        <span class="currency-prefix">R$</span>
+                        <span class="currency-prefix" style="color: var(--nexus-turquesa-base);">R$</span>
                         <input type="text" name="preco" id="id_preco" value="{{ preco_formatado }}" placeholder="0,00" required style="padding-left: 45px !important;">
                     </div>
                 </div>
@@ -107,7 +106,7 @@
     <div style="display: flex; align-items: center; gap: 10px; padding-top: 25px;">
         <input type="checkbox" name="em_oferta" id="id_em_oferta" class="form-check-input-nexus" 
                {% if form.em_oferta.value or produto.em_oferta %}checked{% endif %} style="width: 20px; height: 20px; cursor: pointer;">
-        <label for="id_em_oferta" class="label-nexus" style="margin: 0; cursor: pointer; font-weight: bold; color: var(--nexus-blue);">
+        <label for="id_em_oferta" class="label-nexus" style="margin: 0; cursor: pointer; font-weight: bold; color: var(--nexus-turquesa-base);">
             ATIVAR PROMOÇÃO?
         </label>
     </div>
@@ -115,7 +114,7 @@
     <div style="flex: 1;">
         <label class="label-nexus">PREÇO COM DESCONTO (R$)</label>
         <div class="input-wrapper-nexus">
-            <i class="bi bi-tag-fill"></i>
+            <i class="bi bi-tag-fill" style="color: var(--nexus-turquesa-base);"></i>
             <input type="text" name="preco_promocional" id="id_preco_promocional" class="form-control-nexus" 
                    value="{{ form.preco_promocional.value|default:produto.preco_promocional|default:'' }}" 
                    placeholder="Ex: 599,99" style="padding: 10px 15px 10px 45px !important;">
@@ -126,7 +125,7 @@
                 <div style="flex: 1;">
                     <label class="label-nexus">QUANTIDADE ATUAL</label>
                     <div class="input-wrapper-nexus">
-                        <i class="bi bi-box-seam-fill"></i>
+                        <i class="bi bi-box-seam-fill" style="color: var(--nexus-turquesa-base);"></i>
                         <input type="number" name="estoque" id="id_estoque" value="{{ produto.estoque|default:'0' }}" placeholder="0" required oninput="validarEstoque()">
                     </div>
                     <small id="estoque_msg" class="text-danger" style="display: none; font-size: 0.7rem; margin-top: 5px; font-weight: 600;">A quantidade inicial deve ser maior que o estoque mínimo.</small>
@@ -154,12 +153,12 @@
 </div>
 
 <div id="modalCategoria" class="nexus-modal-backdrop" style="display: none;">
-    <div class="nexus-modal-card">
-        <div class="nexus-modal-icon"><i id="modalIcon" class="bi bi-folder-plus"></i></div>
+    <div class="nexus-modal-card" style="border-top: 4px solid var(--nexus-turquesa-base);">
+        <div class="nexus-modal-icon"><i id="modalIcon" class="bi bi-folder-plus" style="color: var(--nexus-turquesa-base);"></i></div>
         <h2 id="modalTitle" class="nexus-modal-title">NOVA CATEGORIA</h2>
         <div class="p-3">
             <div class="input-wrapper-nexus">
-                <i class="bi bi-tag-fill"></i>
+                <i class="bi bi-tag-fill" style="color: var(--nexus-turquesa-base);"></i>
                 <input type="text" id="nova_categoria_nome" placeholder="Nome da categoria...">
             </div>
             <div id="categoria_error" class="text-danger small mt-2" style="display: none;"></div>
@@ -198,7 +197,10 @@
         border-bottom: 1px solid rgba(0, 229, 255, 0.1);
     }
 
-    .nexus-form-header i { color: #00e5ff; font-size: 1.8rem; }
+    .nexus-form-header i { 
+        color: var(--nexus-turquesa-base); 
+        font-size: 1.8rem; 
+        filter: drop-shadow(0 0 8px var(--turquesa-glow)); }
 
     /* Labels e Inputs */
     .nexus-label {
@@ -222,7 +224,7 @@
     .input-wrapper-nexus i, .currency-prefix {
         position: absolute;
         left: 15px;
-        color: #00e5ff;
+        color: var(--nexus-turquesa-base);
         z-index: 10;
     }
     .currency-prefix { font-weight: 800; font-size: 0.9rem; }
@@ -244,17 +246,16 @@
     .input-wrapper-nexus input:focus, 
     .input-wrapper-nexus textarea:focus, 
     .input-wrapper-nexus select:focus {
-        border-color: #00e5ff !important;
-        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2) !important;
+        border-color: var(--nexus-turquesa-base) !important;
+        box-shadow: 0 0 10px var(--turquesa-glow) !important;
     }
 
     /* Select Custom */
     .select-nexus { appearance: none; }
 
     /* Category Links */
-    .category-link { color: #00f2fe !important; transition: 0.3s; }
-    html.light-mode .category-link { color: #2563eb !important; }
-    html.light-mode .category-link:hover { text-decoration: underline !important; }
+    .category-link { color: var(--nexus-turquesa-base); font-size: 0.8rem; text-decoration: none; margin-top: 8px; display: inline-block; cursor: pointer; transition: color 0.2s; }
+    .category-link:hover { color: var(--nexus-turquesa-ativo); }
 
     /* Footer e Botões Gerais */
     .nexus-form-footer {
@@ -267,26 +268,31 @@
     }
 
     .btn-nexus-cancel {
-        color: #ff4d4d;
+        color: #ff4d4d !important;
         text-decoration: none;
         font-weight: 600;
         text-transform: uppercase;
         font-size: 0.85rem;
         padding: 12px 25px;
-        border: 1px solid rgba(255, 77, 77, 0.3);
+        border: 1px solid rgba(255, 77, 77, 0.4) !important; /* Borda mais visível */
         border-radius: 8px;
-        display: flex; align-items: center; gap: 8px;
-        transition: 0.3s;
+        background: rgba(255, 77, 77, 0.05) !important; /* Fundo sutil */
+        display: flex; 
+        align-items: center; 
+        gap: 8px;
+        transition: all 0.3s ease;
     }
+    .btn-nexus-cancel i { color: inherit !important; }
     .btn-nexus-cancel:hover { 
-        background: rgba(255, 77, 77, 0.1); 
-        border-color: #ff4d4d; 
+        background: rgba(255, 77, 77, 0.15) !important; 
+        border-color: #ff4d4d !important;
+        transform: translateY(-2px);
     }
 
     .btn-nexus-save {
-        background: #00e5ff !important;
-        color: #000 !important;
-        border: none !important;
+        background: var(--nexus-turquesa-base) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(0, 242, 254, 0.3) !important;
         padding: 12px 35px !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
@@ -296,10 +302,12 @@
         display: inline-flex;
         align-items: center;
         gap: 10px;
+        box-shadow: 0 0 15px var(--turquesa-glow) !important;
     }
     .btn-nexus-save:hover {
-        background: #00f2ff !important;
-        box-shadow: 0 0 25px rgba(0, 229, 255, 0.4) !important;
+        background: var(--nexus-turquesa-ativo) !important;
+        color: #020617 !important;
+        box-shadow: 0 0 25px var(--turquesa-glow) !important;
         transform: translateY(-2px) !important;
     }
 
@@ -307,41 +315,34 @@
     html.light-mode .nexus-form-container {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-left: 4px solid #2563EB !important;
+        border-left: 4px solid var(--nexus-turquesa-base) !important;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
     }
     html.light-mode .nexus-form-header { border-bottom: 1px solid #e2e8f0; }
-    html.light-mode .nexus-form-header h2 { color: #0f172a !important; }
-    html.light-mode .nexus-form-header i { color: #2563eb; }
+    html.light-mode .nexus-form-header h2 { color: var(--texto-principal) !important; }
+    html.light-mode .nexus-form-header i { color: var(--nexus-turquesa-base); filter: none; }
     html.light-mode .label-nexus, html.light-mode .nexus-label { color: #475569 !important; }
-    html.light-mode .input-wrapper-nexus i, html.light-mode .currency-prefix { color: #2563eb !important; }
+    html.light-mode .input-wrapper-nexus i, html.light-mode .currency-prefix { color: var(--nexus-turquesa-base) !important; }
     html.light-mode .input-wrapper-nexus input, html.light-mode .input-wrapper-nexus textarea, html.light-mode .input-wrapper-nexus select {
         background: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         color: #0f172a !important;
     }
-    html.light-mode .input-wrapper-nexus input:focus { border-color: #2563EB !important; }
+    html.light-mode .input-wrapper-nexus input:focus { 
+        border-color: var(--nexus-turquesa-base) !important; 
+        box-shadow: 0 0 10px rgba(0, 107, 117, 0.1) !important; 
+    }
     html.light-mode ::placeholder { color: #94a3b8 !important; }
 
     html.light-mode .btn-nexus-save {
-        background-color: #2563EB !important;
+        background: var(--nexus-turquesa-base) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
-        min-width: 180px;
-        height: 42px;
-        font-weight: 600 !important;
+        box-shadow: 0 4px 12px rgba(0, 107, 117, 0.2) !important;
     }
-    html.light-mode .btn-nexus-cancel {
-        border: 1px solid #dc2626 !important;
-        color: #dc2626 !important;
-        min-width: 180px;
-        height: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    html.light-mode .btn-nexus-cancel:hover { background: #dc2626 !important; color: #ffffff !important; }
+    html.light-mode .btn-nexus-save:hover { background: var(--nexus-turquesa-ativo) !important; transform: translateY(-2px); }
+    html.light-mode .btn-nexus-cancel { background: #dc2626 !important; border: none !important; color: #fff !important; }
+    html.light-mode .btn-nexus-cancel:hover { background: #b91c1c !important; transform: translateY(-2px); }
 
     /* Animação de Erro */
     .shake-animation {
@@ -375,7 +376,7 @@
     .nexus-modal-card {
         background: #0b1120;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-top: 4px solid #00e5ff;
+        border-top: 4px solid var(--nexus-turquesa-base);
         border-radius: 20px;
         padding: 40px;
         max-width: 450px;
@@ -383,7 +384,7 @@
         text-align: center;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
-    .nexus-modal-icon { color: #00e5ff; font-size: 3.5rem; margin-bottom: 15px; }
+    .nexus-modal-icon { color: var(--nexus-turquesa-base); font-size: 3.5rem; margin-bottom: 15px; }
     .nexus-modal-title { color: #ffffff; font-weight: 800; letter-spacing: 1px; margin-bottom: 20px; }
 
     html.light-mode .nexus-modal-backdrop { background: rgba(241, 245, 249, 0.6); }
@@ -394,7 +395,7 @@
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1) !important;
     }
     html.light-mode .nexus-modal-title { color: #0f172a !important; }
-    html.light-mode .nexus-modal-icon { color: #2563eb !important; }
+    html.light-mode .nexus-modal-icon { color: var(--nexus-turquesa-base) !important; }
 
     /* =======================================================
        CORREÇÃO E ALINHAMENTO DE BOTÕES DO POP-UP
@@ -410,7 +411,7 @@
     }
 
     .btn-nexus-modal-save {
-        background-color: #2563EB !important;
+        background-color: var(--nexus-turquesa-base) !important;
         color: #ffffff !important;
         border: none !important;
         padding: 10px 24px !important;
@@ -428,7 +429,7 @@
         transition: 0.2s all !important;
     }
     .btn-nexus-modal-save:hover {
-        background-color: #1d4ed8 !important;
+        background-color: var(--nexus-turquesa-ativo) !important;
         transform: translateY(-1px) !important;
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
     }
@@ -458,10 +459,10 @@
     }
 
     /* Cores se o pop-up for renderizado no Dark Mode nativo */
-    html:not(.light-mode) .nexus-modal-card { border-top-color: #00e5ff !important; }
-    html:not(.light-mode) .nexus-modal-icon { color: #00e5ff !important; }
+    html:not(.light-mode) .nexus-modal-card { border-top-color: var(--nexus-turquesa-base) !important; }
+    html:not(.light-mode) .nexus-modal-icon { color: var(--nexus-turquesa-base) !important; }
     html:not(.light-mode) .nexus-modal-footer .btn-nexus-modal-save {
-        background-color: #00e5ff !important;
+        background-color: var(--nexus-turquesa-base) !important;
         color: #000000 !important;
     }
     html:not(.light-mode) .nexus-modal-footer .btn-nexus-modal-cancel {

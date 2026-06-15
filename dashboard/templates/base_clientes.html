@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Base de Clientes | NEXUS Hub{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Estilos Gerais do Módulo de Clientes (Sincronizado com Funcionários) --- */
+    .nexus-container {
+        padding: 20px;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Atualizado: Cor padrão definida como branco (modo escuro por padrão), com peso e espaçamento corporativos */
+    .nexus-title {
+        font-size: 1.45rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        color: #ffffff !important; /* Branco no modo escuro */
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        line-height: 1;
+    }
+
+    /* --- Botão Novo Cliente Sincronizado em Cor, Proporção e Tipologia --- */
+    .btn-header-nexus {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        text-decoration: none;
+        background: #007a87 !important;
+        color: #ffffff !important;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        gap: 8px;
+    }
+
+    .btn-header-nexus:hover {
+        background: #005662 !important;
+        transform: none;
+        box-shadow: none;
+        filter: none;
+    }
+
+    /* --- Container de Filtro/Pesquisa --- */
+    .nexus-filter-container {
+        background: var(--bg-card);
+        border: 1px solid var(--borda);
+        border-radius: 12px;
+        padding: 15px 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .search-box-nexus {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .search-box-nexus i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--nexus-blue);
+    }
+
+    .search-input-nexus {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid var(--borda) !important;
+        border-radius: 10px;
+        padding: 10px 15px 10px 45px;
+        color: #fff !important;
+        font-size: 0.9rem;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .search-input-nexus:focus {
+        border-color: var(--turquesa-brilhante) !important;
+        box-shadow: 0 0 12px var(--turquesa-glow) !important;
+    }
+
+    /* --- Tabela Customizada Nexus --- */
+    .table-container-nexus {
+        background: var(--bg-card);
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        margin-top: 25px;
+        overflow: hidden;
+    }
+
+    .table-nexus-mod {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .table-nexus-mod th {
+        background: rgba(15, 23, 42, 0.8);
+        color: var(--texto-muted);
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--borda);
+    }
+
+    .table-nexus-mod td {
+        padding: 16px 20px;
+        color: #e2e8f0;
+        font-size: 0.95rem;
+        border-bottom: 1px solid var(--borda);
+        vertical-align: middle;
+    }
+
+    .client-name-highlight {
+        font-weight: 500;
+        color: #ffffff;
+    }
+
+    /* --- Modos Claros Adaptados --- */
+    html.light-mode .nexus-title { color: #007a87 !important; } /* Força o Turquesa apenas no Modo Claro */
+    html.light-mode .search-input-nexus { background: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+    html.light-mode .table-nexus-mod th { background: #f8fafc; color: #64748b; }
+    html.light-mode .table-nexus-mod td { color: #334155; }
+    html.light-mode .client-name-highlight { color: #0f172a; }
+    html.light-mode .btn-header-nexus { background: #007a87 !important; }
+    html.light-mode .btn-header-nexus:hover { background: #005662 !important; }
+
+    @media (max-width: 767.98px) {
+        .nexus-header {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+            align-items: center !important;
+            padding: 0;
+        }
+        .btn-header-nexus { width: 100%; }
+        .nexus-filter-container { flex-direction: column; padding: 20px; }
+        .search-box-nexus { max-width: 100%; }
+    }
+</style>
+
+<div class="nexus-container container-fluid fade-in-content">
+
+    <div class="nexus-header d-flex justify-content-between align-items-center mb-4">
+        <h1 class="nexus-title">
+            <i class="bi bi-people-fill me-2" style="color: #007a87; font-size: 1.5rem; vertical-align: -1px;"></i>Base de Clientes
+        </h1>
+        <a href="{% url 'cadastrar_cliente' %}" class="btn-header-nexus">
+            <i class="bi bi-person-plus-fill" style="font-size: 1.1rem; color: inherit !important;"></i> Novo Cliente
+        </a>
+    </div>
+
+    <div class="nexus-filter-container">
+        <div class="search-box-nexus">
+            <i class="bi bi-search"></i>
+            <input type="text" id="nexusSearch" class="search-input-nexus" placeholder="Buscar clientes por nome, e-mail ou telefone...">
+        </div>
+        <div style="color: var(--texto-muted); font-size: 0.85rem; font-weight: 600;">
+            <i class="bi bi-info-circle me-1"></i> Filtragem em tempo real
+        </div>
+    </div>
+
+    <div class="table-container-nexus table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table class="table-nexus-mod" style="min-width: 850px;">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Telefone</th>
+                    <th>Data de Cadastro</th>
+                    <th class="text-center" style="width: 120px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="clientesTable">
+                {% for cliente in clientes %}
+                <tr>
+                    <td class="client-name-highlight">
+                        <i class="bi bi-person-badge me-2" style="color: var(--nexus-blue); opacity: 0.8;"></i>{{ cliente.nome }}
+                    </td>
+                    <td>{{ cliente.email|default:"—" }}</td>
+                    <td>{{ cliente.telefone|default:"—" }}</td>
+                    <td>{{ cliente.data_cadastro|date:"d/m/Y" }}</td>
+                    <td class="text-center">
+                        <div class="action-buttons d-flex justify-content-center gap-3">
+                            <a href="{% url 'editar_cliente' cliente.pk %}" class="btn-action edit" title="Editar Cliente">
+                                <i class="bi bi-pencil-square" style="font-size: 1.2rem; color: var(--nexus-blue);"></i>
+                            </a>
+                            <a href="{% url 'excluir_cliente' cliente.pk %}" class="btn-action delete" title="Excluir Cliente">
+                                <i class="bi bi-trash3-fill" style="font-size: 1.2rem; color: #ef4444;"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-secondary">
+                        <i class="bi bi-person-exclamation d-block mb-3" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                        Nenhum cliente cadastrado na base até o momento.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Filtro Estável em JavaScript por Linha (Sincronizado com Funcionários)
+    document.getElementById('nexusSearch').addEventListener('keyup', function () {
+        const value = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#clientesTable tr');
+
+        rows.forEach(row => {
+            if(row.cells.length > 1) { 
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(value) ? '' : 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

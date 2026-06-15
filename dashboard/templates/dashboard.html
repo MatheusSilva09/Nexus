@@ -60,31 +60,43 @@
     <!-- BLOCO 2: Métricas de Valor e Alertas Críticos -->
     <div class="row g-4 mb-5">
         <div class="col-md-3">
-            <div class="metric-card">
-                <div class="metric-label">Valor Total de Produtos</div>
-                <div class="metric-value">R$ {{ valor_estoque }}</div>
-                <div class="text-info">Disponível</div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+                <div class="stat-content">
+                    <span class="stat-label">Valor Total de Produtos</span>
+                    <h3 class="stat-value" style="font-size: 1.4rem;">R$ {{ valor_estoque }}</h3>
+                    <span class="stat-trend text-info">Disponível</span>
+                </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="metric-card warning">
-                <div class="metric-label">Alerta Crítico</div>
-                <div class="metric-value" style="color: #ef4444;">{{ alertas_criticos|stringformat:"01d" }}</div>
-                <div class="text-alert-red">Ruptura (Estoque Zero)</div>
+            <div class="stat-card warning">
+                <div class="stat-icon"><i class="bi bi-exclamation-octagon"></i></div>
+                <div class="stat-content">
+                    <span class="stat-label">Alerta Crítico</span>
+                    <h3 class="stat-value" style="color: #ef4444;">{{ alertas_criticos|stringformat:"01d" }}</h3>
+                    <span class="stat-trend text-alert-red">Ruptura (Estoque Zero)</span>
+                </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="metric-card">
-                <div class="metric-label">Novos Clientes</div>
-                <div class="metric-value">{{ novos_clientes_hoje|default:"0" }}</div>
-                <div class="text-info">Cadastrados hoje</div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-person-plus"></i></div>
+                <div class="stat-content">
+                    <span class="stat-label">Novos Clientes</span>
+                    <h3 class="stat-value">{{ novos_clientes_hoje|default:"0" }}</h3>
+                    <span class="stat-trend text-info">Cadastrados hoje</span>
+                </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="metric-card">
-                <div class="metric-label">Equipe da Loja</div>
-                <div class="metric-value">{{ total_funcionarios|default:"0" }}</div>
-                <div class="text-info">Funcionários ativos</div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-person-vcard"></i></div>
+                <div class="stat-content">
+                    <span class="stat-label">Funcionários da Loja</span>
+                    <h3 class="stat-value">{{ total_funcionarios|default:"0" }}</h3>
+                    <span class="stat-trend text-info">Em atividade</span>
+                </div>
             </div>
         </div>
     </div>
@@ -93,7 +105,7 @@
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="metric-card h-100">
-                <h5 class="mb-4 dashboard-section-title">Atividade Recente</h5>
+                <h5 class="mb-4 dashboard-section-title"><i class="bi bi-clock-history me-2"></i>Atividade Recente</h5>
                 <div class="table-responsive">
                     <table class="table nexus-table mb-0">
                         <thead>
@@ -125,7 +137,7 @@
 
         <div class="col-lg-4">
             <div class="metric-card h-100">
-                <h5 class="mb-4 dashboard-section-title">Configuração Rápida</h5>
+                <h5 class="mb-4 dashboard-section-title"><i class="bi bi-gear-fill me-2"></i>Configuração Rápida</h5>
                 <p class="nexus-config-subtitle">Gerencie as preferências da sua Loja de forma simplificada.</p>
                 <div class="d-grid gap-2">
                     <a href="{% url 'editar_loja' %}" class="btn btn-outline-info">Editar Perfil da Loja</a>
@@ -178,6 +190,13 @@
     html.light-mode .stat-card.low-stock {
         background: #fffbef !important;
         border-color: #f59e0b !important;
+        border-left: 4px solid #f59e0b !important;
+    }
+
+    html.light-mode .stat-card.low-stock:hover {
+        background: #fffbef !important; /* Preserva a cor de alerta no hover */
+        border-color: #f59e0b !important;
+        box-shadow: 0 12px 25px rgba(0, 107, 117, 0.2) !important; /* Brilho turquesa coeso com o botão */
     }
 
     html.light-mode .stat-card.low-stock .stat-trend {
@@ -213,7 +232,7 @@
         background: rgba(15, 23, 42, 0.6);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
-        border-left: 4px solid var(--nexus-blue, #2563eb);
+        border-left: 4px solid var(--nexus-turquesa-base, #00a8b5);
         border-radius: 16px;
         padding: 24px;
         display: flex;
@@ -230,7 +249,7 @@
         background: rgba(15, 23, 42, 0.6);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
-        border-left: 4px solid var(--nexus-blue, #2563eb);
+        border-left: 4px solid var(--nexus-turquesa-base, #00a8b5);
         border-radius: 16px;
         padding: 1.5rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -243,15 +262,15 @@
     .stat-card:hover,
     .metric-card:hover {
         transform: translateY(-5px);
-        border-color: rgba(37, 99, 235, 0.4);
+        border-color: var(--nexus-turquesa-ativo);
         box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5),
                     0 0 15px rgba(0, 242, 254, 0.1);
     }
 
     /* Elementos Internos Base - Dark */
     .stat-icon {
-        background: rgba(37, 99, 235, 0.1);
-        color: var(--nexus-blue, #2563eb);
+        background: rgba(0, 168, 181, 0.1);
+        color: var(--nexus-turquesa-base, #00a8b5);
         width: 48px;
         height: 48px;
         border-radius: 12px;
@@ -259,7 +278,7 @@
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
-        filter: drop-shadow(0 0 5px rgba(37, 99, 235, 0.3));
+        filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.2));
     }
 
     .stat-label,
@@ -323,7 +342,7 @@
     html.light-mode .metric-card {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-left: 4px solid #2563EB !important; /* Destaque lateral para manter o DNA Nexus */
+        border-left: 4px solid var(--nexus-turquesa-base, #006b75) !important; /* Destaque lateral para manter o DNA Nexus */
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
         backdrop-filter: none !important;
     }
@@ -332,9 +351,9 @@
     html.light-mode .stat-card:hover,
     html.light-mode .metric-card:hover {
         transform: translateY(-5px) !important;
-        border-color: #2563EB !important;
-        background: #C4D4F5 !important;
-        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.18) !important;
+        border-color: var(--nexus-turquesa-base, #006b75) !important;
+        background: rgba(0, 107, 117, 0.05) !important;
+        box-shadow: 0 12px 25px rgba(0, 107, 117, 0.2) !important;
     }
 
     /* Ajuste de Contraste para os Títulos dos Cards */
@@ -440,12 +459,14 @@
         background: #fff5f5 !important; /* Tom avermelhado sutil para alerta */
         border: 1px solid #fecaca !important;
         border-left: 4px solid #ef4444 !important;
+        box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.08) !important;
     }
 
     html.light-mode .stat-card.warning:hover,
     html.light-mode .metric-card.warning:hover {
+        background: #fff5f5 !important;
         border-color: #ef4444 !important;
-        box-shadow: 0 12px 25px rgba(239, 68, 68, 0.1) !important;
+        box-shadow: 0 12px 25px rgba(239, 68, 68, 0.2) !important;
     }
 
     html.light-mode .stat-card.warning .stat-icon {
@@ -467,14 +488,14 @@
 
     /* Botão Principal (Destaque) */
     html.light-mode .metric-card .btn-outline-info {
-        background: #2563EB !important;
+        background: var(--nexus-turquesa-base, #006b75) !important;
         color: #ffffff !important;
         font-weight: 600 !important;
         border: none !important;
         border-radius: 10px !important;
         padding: 10px 20px !important;
         width: 100% !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+        box-shadow: 0 4px 12px rgba(0, 107, 117, 0.2) !important;
         transition: all 0.2s ease-in-out !important;
         display: flex !important;
         align-items: center !important;
@@ -486,8 +507,8 @@
     /* Botão Secundário (Outline) */
     html.light-mode .metric-card .btn-outline-light {
         background: transparent !important;
-        color: #2563EB !important;
-        border: 1px solid #2563EB !important;
+        color: var(--nexus-turquesa-base, #006b75) !important;
+        border: 1px solid var(--nexus-turquesa-base, #006b75) !important;
         font-weight: 600 !important;
         border-radius: 10px !important;
         padding: 10px 20px !important;
@@ -500,12 +521,12 @@
     }
 
     html.light-mode .metric-card .btn-outline-info:hover {
-        background: #1d4ed8 !important;
+        background: var(--nexus-turquesa-ativo, #00525a) !important;
         transform: translateY(-2px) !important;
     }
 
     html.light-mode .metric-card .btn-outline-light:hover {
-        background: rgba(37, 99, 235, 0.05) !important;
+        background: rgba(0, 107, 117, 0.05) !important;
         transform: translateY(-2px) !important;
     }
 
