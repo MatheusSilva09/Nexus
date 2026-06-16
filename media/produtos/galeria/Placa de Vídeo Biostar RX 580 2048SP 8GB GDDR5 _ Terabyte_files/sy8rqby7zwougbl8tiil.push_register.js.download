@@ -1,0 +1,9 @@
+if (typeof (window._edrone_push) !== 'undefined' && window._edrone_push.register_action === true) {
+  document.body.style.background = window._edrone_push.background
+  let logo = document.getElementById('image-logo');
+  logo.src = window._edrone_push.logo;
+  if (JSON.parse(window._edrone_push.brand_remove)) {
+    let elem = document.getElementById("edrone--utm");
+    elem.parentNode.removeChild(elem);
+  }
+}

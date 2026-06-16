@@ -1,0 +1,130 @@
+// add to cart
+function detectAddToCartButtons(callback) {
+  const buttons = document.querySelectorAll(
+    'button, input[type="submit"], a, i'
+  );
+  const addToCartButtons = [];
+  const dataParameters = [
+    "data-product-id",
+    "data-product_id",
+    "data-id",
+    "product_id",
+    "data-product-sku",
+    "value",
+  ];
+
+  const addToCartPhrases = [
+    "add to cart",
+    "add to basket",
+    "dodaj do koszyka",
+    "dodaj do koszyka",
+    "comprar",
+    "do koszyka",
+    "add to bag",
+    "Buy now",
+    "Comprar Agora",
+  ];
+
+  buttons.forEach((button) => {
+    const buttonText = button.innerText.toLowerCase();
+    const buttonValue = button.value ? button.value.toLowerCase() : "";
+    const buttonTitle = button.title ? button.title.toLowerCase() : "";
+    if (
+      addToCartPhrases.some(
+        (phrase) =>
+          buttonText.includes(phrase.toLocaleLowerCase()) ||
+          buttonValue.includes(phrase.toLocaleLowerCase()) ||
+          buttonTitle.includes(phrase.toLocaleLowerCase())
+      )
+    ) {
+      const productId =
+        findProductId(button, dataParameters) ||
+        findProductIdFromHiddenInput(button);
+      addToCartButtons.push({ button, productId });
+
+      button.addEventListener("click", (event) => {
+        callback(event, button, productId);
+      });
+    }
+  });
+
+  return addToCartButtons;
+}
+
+function findProductId(button, dataParameters) {
+  let currentElement = button;
+  for (let i = 0; i <= 10; i++) {
+    for (const parameter of dataParameters) {
+      const value = currentElement.getAttribute(parameter);
+      if (value) return value;
+    }
+    currentElement = currentElement.parentElement;
+    if (!currentElement) break;
+  }
+
+  return findProductIdFromHiddenInput(button);
+}
+
+function findProductIdFromHiddenInput(button) {
+  const hiddenInputNames = [
+    "product_id",
+    "product",
+    "data-product-ids",
+    "id",
+    "prod-codigo",
+    "id_product",
+    "item_id",
+    // Add more hidden input names here if needed
+  ];
+
+  const closestElements = [
+    "div",
+    "fieldset",
+    "form",
+    "section",
+    "article",
+    "main",
+    "body",
+    "p",
+  ];
+
+  // Find the closest ancestor container
+  let hiddenInputs = [];
+
+  for (let i = 0; i <= 7; i++) {
+    const ancestor = button.closest(closestElements.toString());
+    if (!ancestor) return null;
+    hiddenInputs = Array.from(
+      ancestor.querySelectorAll('input[type="hidden"]')
+    );
+    if (hiddenInputs.length) break;
+    closestElements.shift();
+  }
+
+  const hiddenInput = hiddenInputs.find((input) => {
+    return (
+      hiddenInputNames.includes(input.name) ||
+      hiddenInputNames.includes(input.id)
+    );
+  });
+  return hiddenInput ? hiddenInput.value : null;
+}
+
+// Your callback function
+function onAddToCartButtonClick(event, button, productId) {
+  _edrone.product_titles = "";
+  _edrone.product_urls = "";
+  _edrone.product_category_ids = "";
+  _edrone.product_category_names = "";
+  _edrone.product_skus = "";
+  _edrone.product_images = "";
+
+  _edrone.action_type = "form_interaction";
+  if (productId !== null) {
+    _edrone.product_ids = productId;
+  }
+  _edrone.init();
+}
+
+// Usage
+detectAddToCartButtons(onAddToCartButtonClick);

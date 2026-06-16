@@ -1,0 +1,114 @@
+setTimeout(function(){
+  zoom();
+},100)
+$('.AreaFotoProd').on('click',function(){
+  zoom();
+})
+setTimeout(function() {
+  $('#customviewBalao').fadeOut('fast');
+}, 7000);
+
+function zoom(){
+  $('.fotorama__html div').each(function(){
+    var originalImagePath = $(this).find('img').attr('src');
+    $(this).zoom({
+      url: originalImagePath,
+      magnify: 1
+    });
+  });
+}
+
+$(document).ready(function(){
+    $("#formProdutoModal").live("submit",function(e){
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "/ProdutoAvaliacao.obj",
+            dataType:'json',
+            data:$("#formProdutoModal").serialize(),
+            success:function(data){
+                if(!data.success){
+                    swal("Oops!",data.mensagem,'error');
+                    return false;
+                }
+
+                swal("OK!",data.mensagem,'success');
+                $('#ModalEnvProdEmail').modal('hide');
+            },
+            error:function(error){
+                swal("Ops!", "Ocorreu um erro na requisição.\n\nO Sistema parece estar indisponível temporariamente\nTente novamente!", "error");
+            }
+        });
+    });
+
+    $("#frmparceiroshare").live("submit",function(e){
+      e.preventDefault();
+      $.ajax({
+          type: "POST",
+          url: URLSITE+"Parceiro/ParceiroShare.obj",
+          dataType:'json',
+          data:$("#frmparceiroshare").serialize(),
+          success:function(data){
+              if(data.erro){
+                  swal("Oops!",data.erro,'error');
+                  return false;
+              }
+
+              swal("OK!",data.mensagem,'success');
+              $('#ModalLinkParceiro').modal('hide');
+          },
+          error:function(error){
+              swal("Ops!", "Ocorreu um erro na requisição.\n\nO Sistema parece estar indisponível temporariamente\nTente novamente!", "error");
+          }
+      });
+  });
+
+ 
+
+});
+
+
+function shareButton(link){
+
+
+
+if (navigator.share) {
+   
+        try {
+              $.ajax({
+                type: "POST",
+                url: URLSITE+"Parceiro/ParceiroShare.obj",
+                dataType:'json',
+                data:$("#frmparceiroshare").serialize(),
+                success:function(data){
+                    
+      
+                }
+            });
+
+            navigator.share({
+                title: link,
+                text: link,
+                url: link,
+            });
+            console.log('Conteúdo compartilhado com sucesso');
+        } catch (error) {
+            console.error('Erro ao compartilhar:', error);
+        }
+   
+} else {
+    
+      var dummy = document.createElement('input'),
+      text = link;
+
+      document.body.appendChild(dummy);
+      dummy.value = text;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+      swal("Link Copiado!",'Link copiado para área de transferência!','success');
+
+
+}
+
+}

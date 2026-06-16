@@ -1,0 +1,379 @@
+// edrone_subscription.js — loaded on ALL platforms via edrone_2_0.js
+// Contains: EdroneSubscribeCapture + legacy form_interaction detection
+(function() {
+if (window.EdroneSubscribeCapture) return;
+
+const NEWSLETTER_KEYWORDS = [
+    'newsletter', 'subscribe', 'zapisz', 'marketing', 'zgoda marketingowa',
+    'opt-in', 'optin', 'receber ofertas', 'receber novidades',
+    'mailing', 'e-mail marketing', 'otrzymywanie informacji',
+    'zgoda na przesylanie', 'informacje handlowe', 'oferty'
+];
+
+const SMS_KEYWORDS = [
+    'sms', 'telefon', 'phone', 'wiadomosci tekstowe', 'mensagens'
+];
+
+const GENDER_MAP = {
+    '1': 'M', '2': 'F',
+    'm': 'M', 'f': 'F',
+    'male': 'M', 'female': 'F',
+    'masculino': 'M', 'feminino': 'F',
+    'mezczyzna': 'M', 'kobieta': 'F'
+};
+
+function stripDiacritics(str) {
+    try {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    } catch (e) {
+        return str;
+    }
+}
+
+function cssEscape(str) {
+    if (typeof CSS !== 'undefined' && CSS.escape) return CSS.escape(str);
+    return String(str).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+}
+
+class EdroneSubscribeCapture {
+    #rules = [];
+    #options = {};
+    #submitHandler = null;
+    #clickHandler = null;
+
+    constructor(options = {}) {
+        this.#options = {
+            deduplicationMs: options.deduplicationMs || 30000,
+            onSubscribe: options.onSubscribe || null
+        };
+        this.#rules = (options.rules || []).map(r => this.#normalizeRule(r));
+    }
+
+    init() {
+        const submitRules = this.#rules.filter(r => r.trigger === 'submit');
+        const clickRules = this.#rules.filter(r => r.trigger === 'click');
+
+        if (submitRules.length) {
+            this.#submitHandler = (e) => this.#handleSubmit(e);
+            document.body.addEventListener('submit', this.#submitHandler, true);
+        }
+        if (clickRules.length) {
+            this.#clickHandler = (e) => this.#handleClick(e);
+            document.body.addEventListener('click', this.#clickHandler, true);
+        }
+    }
+
+    destroy() {
+        if (this.#submitHandler) {
+            document.body.removeEventListener('submit', this.#submitHandler, true);
+            this.#submitHandler = null;
+        }
+        if (this.#clickHandler) {
+            document.body.removeEventListener('click', this.#clickHandler, true);
+            this.#clickHandler = null;
+        }
+    }
+
+    addRule(rule) {
+        const normalized = this.#normalizeRule(rule);
+        this.#rules.push(normalized);
+        if (normalized.trigger === 'submit' && !this.#submitHandler) {
+            this.#submitHandler = (e) => this.#handleSubmit(e);
+            document.body.addEventListener('submit', this.#submitHandler, true);
+        }
+        if (normalized.trigger === 'click' && !this.#clickHandler) {
+            this.#clickHandler = (e) => this.#handleClick(e);
+            document.body.addEventListener('click', this.#clickHandler, true);
+        }
+    }
+
+    #normalizeRule(rule) {
+        return {
+            tag: rule.tag || 'Subscribe',
+            trigger: rule.trigger || 'submit',
+            match: rule.match || null,
+            matchButton: rule.matchButton || null,
+            scope: rule.scope || null,
+            fields: rule.fields || { email: 'input[type="email"], input[name*="email"]' },
+            requireCheckbox: rule.requireCheckbox || null,
+            requireSmsCheckbox: rule.requireSmsCheckbox || null
+        };
+    }
+
+    #elementMatchesSelector(el, selectorOrFn) {
+        if (!el || !selectorOrFn) return false;
+        if (typeof selectorOrFn === 'function') {
+            try { return selectorOrFn(el); } catch (e) { return false; }
+        }
+        if (typeof selectorOrFn === 'string') {
+            const selectors = selectorOrFn.split(',').map(s => s.trim());
+            return selectors.some(sel => {
+                try { return el.matches(sel) || el.closest(sel) !== null; } catch (e) { return false; }
+            });
+        }
+        return false;
+    }
+
+    #extractField(container, selector) {
+        if (!selector) return '';
+        const selectors = selector.split(',').map(s => s.trim());
+        for (const sel of selectors) {
+            try {
+                const el = container.querySelector(sel);
+                if (!el) continue;
+                if (el.tagName === 'SELECT') {
+                    const selectedOption = el.selectedOptions && el.selectedOptions[0];
+                    const val = (selectedOption ? selectedOption.textContent : el.value || '').trim();
+                    if (val) return val;
+                    continue;
+                }
+                if (el.tagName === 'OPTION') {
+                    const val = (el.textContent || el.value || '').trim();
+                    if (val) return val;
+                    continue;
+                }
+                const val = (el.value || el.textContent || '').trim();
+                if (val) return val;
+            } catch (e) {
+                continue;
+            }
+        }
+        return '';
+    }
+
+    #isDuplicate(email, tag) {
+        try {
+            const key = `edrone_subscribe_${tag}`;
+            const lastSentAt = parseInt(localStorage.getItem(`${key}_sent_at`) || '0', 10);
+            const lastEmail = localStorage.getItem(`${key}_last_email`) || '';
+            return (email === lastEmail && Date.now() - lastSentAt < this.#options.deduplicationMs);
+        } catch (e) { return false; }
+    }
+
+    #markSent(email, tag) {
+        try {
+            const key = `edrone_subscribe_${tag}`;
+            localStorage.setItem(`${key}_sent_at`, String(Date.now()));
+            localStorage.setItem(`${key}_last_email`, email);
+        } catch (e) { /* localStorage unavailable */ }
+    }
+
+    #isCheckboxChecked(container, selectorOrMode, keywords) {
+        if (!selectorOrMode) return false;
+        if (selectorOrMode === 'auto') {
+            return this.#autoDetectCheckbox(container, keywords);
+        }
+        if (typeof selectorOrMode === 'function') {
+            try { return selectorOrMode(container); } catch (e) { return false; }
+        }
+        const selectors = selectorOrMode.split(',').map(s => s.trim());
+        for (const sel of selectors) {
+            try {
+                const cb = container.querySelector(sel) || document.querySelector(sel);
+                if (cb && cb.checked) return true;
+            } catch (e) { continue; }
+        }
+        return false;
+    }
+
+    #autoDetectCheckbox(container, keywords) {
+        const checkboxes = (container || document).querySelectorAll('input[type="checkbox"]');
+        for (const cb of checkboxes) {
+            if (!cb.checked) continue;
+            const labelText = this.#getCheckboxLabelText(cb, container);
+            if (labelText && keywords.some(kw => labelText.includes(kw))) return true;
+        }
+        return false;
+    }
+
+    #getCheckboxLabelText(checkbox, container) {
+        let text = '';
+        const scope = container || document;
+        if (checkbox.id) {
+            const escapedId = cssEscape(checkbox.id);
+            const label = scope.querySelector(`label[for="${escapedId}"]`)
+                || document.querySelector(`label[for="${escapedId}"]`);
+            if (label) text = label.textContent;
+        }
+        if (!text) {
+            const parent = checkbox.closest('label, .checkbox, .form-group, .el-checkbox');
+            if (parent) text = parent.textContent;
+        }
+        return stripDiacritics(text.toLowerCase().trim());
+    }
+
+    #extractData(container, rule) {
+        const email = this.#extractField(container, rule.fields.email);
+        if (!email || !email.includes('@')) return null;
+        if (this.#isDuplicate(email, rule.tag)) return null;
+
+        const data = { email, tag: rule.tag };
+        for (const [key, selector] of Object.entries(rule.fields)) {
+            if (key === 'email') continue;
+            const value = this.#extractField(container, selector);
+            if (!value) continue;
+
+            if (key === 'full_name') {
+                const parts = value.trim().split(/\s+/);
+                data.first_name = parts[0] || '';
+                if (parts.length > 1) data.last_name = parts.slice(1).join(' ');
+                continue;
+            }
+            if (key === 'phone') {
+                data.phone = value.replace(/[^\d+]/g, '');
+                continue;
+            }
+            if (key === 'gender') {
+                const normalized = stripDiacritics(value.toLowerCase());
+                data.gender = GENDER_MAP[normalized] || value;
+                continue;
+            }
+            if (key === 'birth_date') {
+                const ddmmyyyy = value.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+                data.birth_date = ddmmyyyy
+                    ? `${ddmmyyyy[3]}-${ddmmyyyy[2].padStart(2, '0')}-${ddmmyyyy[1].padStart(2, '0')}`
+                    : value;
+                continue;
+            }
+            data[key] = value;
+        }
+
+        if (this.#isCheckboxChecked(container, rule.requireSmsCheckbox, SMS_KEYWORDS)) {
+            data.sms_subscriber_status = '1';
+        }
+
+        return data;
+    }
+
+    #dispatch(data) {
+        this.#markSent(data.email, data.tag);
+        if (this.#options.onSubscribe) {
+            this.#options.onSubscribe(data);
+        }
+    }
+
+    #handleFormMatch(container, rule) {
+        if (rule.requireCheckbox && !this.#isCheckboxChecked(container, rule.requireCheckbox, NEWSLETTER_KEYWORDS)) return false;
+        const data = this.#extractData(container, rule);
+        if (!data) return false;
+        this.#dispatch(data);
+        return true;
+    }
+
+    #handleSubmit(event) {
+        const form = event.target.closest ? event.target.closest('form') : event.target;
+        if (!form || form.tagName !== 'FORM') return;
+
+        for (const rule of this.#rules) {
+            if (rule.trigger !== 'submit') continue;
+            if (rule.match && !this.#elementMatchesSelector(form, rule.match)) continue;
+            if (this.#handleFormMatch(form, rule)) return;
+        }
+    }
+
+    #handleClick(event) {
+        const clicked = event.target.closest('button, [type="submit"], input[type="submit"], a.btn');
+        if (!clicked) return;
+
+        for (const rule of this.#rules) {
+            if (rule.trigger !== 'click') continue;
+            if (rule.matchButton && !this.#elementMatchesSelector(clicked, rule.matchButton)) continue;
+
+            let container = document.body;
+            if (rule.scope) {
+                try {
+                    container = clicked.closest(rule.scope) || document.querySelector(rule.scope) || document.body;
+                } catch (e) { /* fallback to body */ }
+            }
+
+            if (this.#handleFormMatch(container, rule)) return;
+        }
+    }
+}
+
+window.EdroneSubscribeCapture = EdroneSubscribeCapture;
+
+// ============================================================
+// Legacy form_interaction detection
+// ============================================================
+function detectNewsletterForms(callback) {
+  const keywords = ["newsletter", "subscriber"];
+  const emailInputs = [
+    ...document.querySelectorAll('input[type="email"]'),
+    ...findTextInputWithKeywords(keywords),
+  ];
+  const newsletterForms = [];
+
+  emailInputs.forEach((emailInput) => {
+    const form = emailInput.closest("form, div, section, article, main, body");
+    if (!form) return;
+
+    const checkboxes = Array.from(
+      form.querySelectorAll('input[type="checkbox"]')
+    );
+    const checkboxTexts = checkboxes.map((checkbox) => {
+      const label = form.querySelector(`label[for="${checkbox.id}"]`);
+      return label ? label.textContent : null;
+    });
+
+    newsletterForms.push({ emailInput, checkboxes, checkboxTexts });
+
+    const submitHandler = (event) => {
+      if (!emailInput.value || !form.checkValidity()) return;
+      callback(
+        emailInput.value,
+        checkboxTexts.filter((text) => text !== null)
+      );
+    };
+
+    form.addEventListener("submit", submitHandler);
+  });
+
+  return newsletterForms;
+}
+
+function findTextInputWithKeywords(keywords) {
+  const textInputs = document.querySelectorAll('input[type="text"]');
+  const matchingTextInputs = [];
+
+  textInputs.forEach((textInput) => {
+    try {
+      const attributes = Array.from(textInput.attributes);
+
+      const hasMatchingAttribute = attributes.some((attribute) =>
+          keywords.some((keyword) =>
+              attribute.value.toLowerCase().includes(keyword.toLowerCase())
+          )
+      );
+
+      if (hasMatchingAttribute) {
+        if (textInput.value.includes("@")) {
+          matchingTextInputs.push(textInput);
+        }
+      }
+    } catch (e) {
+      console.error('[≡edrone] Text input detection failed:', textInput, e);
+    }
+  });
+
+  return matchingTextInputs;
+}
+
+// Your callback function
+function onNewsletterFormSubmit(email, checkboxTexts) {
+  _edrone.product_titles = "";
+  _edrone.product_urls = "";
+  _edrone.product_category_ids = "";
+  _edrone.product_category_names = "";
+  _edrone.products_skus = "";
+  _edrone.product_images = "";
+  _edrone.product_ids = "";
+
+  _edrone.action_type = "form_interaction";
+  _edrone.email = email;
+
+  _edrone.init();
+}
+
+detectNewsletterForms(onNewsletterFormSubmit);
+})();

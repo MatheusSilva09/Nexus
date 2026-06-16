@@ -1,0 +1,50 @@
+!(function () {
+  let _edrone_preview_mode = {
+    options: {
+      html:
+        '<div id="edrone-preview-mode" ><div class="edrone-flag"><a tabIndex=\'-1\' rel="noreferrer nofollow" href="https://edrone.me/?utm_source=' +
+        window.location.hostname +
+        '&utm_medium=preview_mode" target="_blank"><img alt="" src="https://d3vhsxl1pwzf0p.cloudfront.net/logo-black-yellow.png"></a></div><div class="edrone-info-box">Your store is in <b>preview mode</b> right now, that\'s why you see edrone logo. No one else can see that except you.<button tabIndex=\'-1\' id="closePreviewMode" onclick="sessionStorage.removeItem(\'edrone_version\');sessionStorage.removeItem(\'edrone_local\');sessionStorage.removeItem(\'widget_type\');location.href = document.location.origin + document.location.pathname;">Close Preview Mode</button></div></div>',
+      css: "#closePreviewMode {display: block; background: #ffff8c; padding: 4px 8px; margin: 16px auto 0; cursor: pointer; border: 1px solid black;} #edrone-preview-mode { width: 350px; position: fixed; top: 10%; z-index: 200000; left: -230px; box-sizing: border-box; margin: 0; padding: 0; transition: all 0.3s linear; -webkit-transition: all 0.3s linear; -moz-transition: all 0.3s linear; -o-transition: all 0.3s linear; -ms-transition: all 0.3s linear; } #edrone-preview-mode:hover { left: 0; transition: all 0.3s linear; -webkit-transition: all 0.3s linear; -moz-transition: all 0.3s linear; -o-transition: all 0.3s linear; -ms-transition: all 0.3s linear; } .edrone-flag { float: right; width: 120px; cursor: pointer; box-sizing: border-box; } .edrone-flag img { border: none; max-width: 100%; height: auto; } .edrone-info-box { width: 230px; float: left; background-color: #f3f3f3; padding: 25px; box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12); font-weight: 500; box-sizing: border-box; }",
+    },
+    create_element: function (htmlStr) {
+      let frag = document.createDocumentFragment(),
+        temp = document.createElement("div");
+      temp.innerHTML = htmlStr;
+      while (temp.firstChild) {
+        frag.appendChild(temp.firstChild);
+      }
+      return frag;
+    },
+    is_preview_mode: function () {
+      return (
+        sessionStorage.getItem("edrone_version") !== null &&
+        sessionStorage.getItem("edrone_preview_off") === null
+      );
+    },
+    register_actions: function () {
+      let head = document.head || document.getElementsByTagName("head")[0],
+        style = document.createElement("style");
+      style.type = "text/css";
+      if (style.styleSheet) {
+        style.styleSheet.cssText = _edrone_preview_mode.options.css;
+      } else {
+        style.appendChild(
+          document.createTextNode(_edrone_preview_mode.options.css)
+        );
+      }
+      head.appendChild(style);
+      if (document.body) {
+        document.body.insertBefore(
+          _edrone_preview_mode.create_element(
+            _edrone_preview_mode.options.html
+          ),
+          document.body.childNodes[0]
+        );
+      }
+    },
+  };
+  if (_edrone_preview_mode.is_preview_mode()) {
+    _edrone_preview_mode.register_actions();
+  }
+})();
