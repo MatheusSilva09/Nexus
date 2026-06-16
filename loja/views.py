@@ -265,16 +265,29 @@ def loja_logout_view(request):
 # 9. VIEW DO HISTÓRICO DE PEDIDOS DO CLIENTE
 @login_required(login_url='loja_login')
 def loja_meus_pedidos_view(request):
-    # Obtém o cliente do usuário logado
-    try:
-        cliente = Cliente.objects.get(usuario=request.user)
+    # CORREÇÃO BLINDADA: Usa .filter().first() em vez de .get() para evitar o MultipleObjectsReturned
+    cliente = Cliente.objects.filter(usuario=request.user).first()
+    
+    if cliente:
         # Busca todos os pedidos dele ordenados pelo id mais recente
         pedidos = Pedido.objects.filter(cliente=cliente).order_by('-id')
-    except Cliente.DoesNotExist:
+    else:
         pedidos = []
         
-    carrinho = request.session.get('carrinho', {})
-    total_itens = sum(carrinho.values())
+    # Captura o carrinho tentando pegar tanto pela chave 'cart' quanto 'carrinho'
+    carrinho = request.session.get('cart', request.session.get('carrinho', {}))
+    
+    # BLINDAGEM DO TOTAL DE ITENS (Mantida com segurança)
+    if isinstance(carrinho, dict):
+        total_itens = sum(
+            int(item.get('quantidade', item.get('quantity', 0))) 
+            for item in carrinho.values() 
+            if isinstance(item, dict)
+        )
+    elif isinstance(carrinho, int):
+        total_itens = carrinho
+    else:
+        total_itens = 0
         
     context = {
         'titulo_aba': 'NEXUS Store | Gestão Modular Inteligente',
@@ -291,8 +304,22 @@ def detalhe_produto_loja_view(request, produto_id):
     # Busca todas as imagens extras cadastradas na galeria deste produto (ProdutoImagem)
     galeria = produto.imagens.all() 
     
-    carrinho = request.session.get('carrinho', {})
-    total_itens = sum(carrinho.values())
+    # Captura o carrinho tentando pegar tanto pela chave 'carrinho' quanto 'cart'
+    carrinho = request.session.get('cart', request.session.get('carrinho', {}))
+    
+    # BLINDAGEM DO TOTAL DE ITENS:
+    if isinstance(carrinho, dict):
+        # Percorre os valores do carrinho extraindo o campo numérico de quantidade com segurança
+        total_itens = sum(
+            int(item.get('quantidade', item.get('quantity', 0))) 
+            for item in carrinho.values() 
+            if isinstance(item, dict)
+        )
+    elif isinstance(carrinho, int):
+        # Fallback de emergência caso a sessão tenha persistido apenas como número
+        total_itens = carrinho
+    else:
+        total_itens = 0
     
     context = {
         'produto': produto,
